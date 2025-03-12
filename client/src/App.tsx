@@ -5,11 +5,13 @@ import { Toaster } from "@/components/ui/toaster";
 import { AnalysisProvider } from "./context/AnalysisContext";
 import NotFound from "@/pages/not-found";
 import CephalometricAnalysis from "@/pages/CephalometricAnalysis";
+import Home from "@/pages/Home";
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={CephalometricAnalysis} />
+      <Route path="/" component={Home} />
+      <Route path="/cephalometric" component={CephalometricAnalysis} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { 
   BarChartBig, 
   HelpCircle, 
-  Edit3
+  Edit3,
+  Info
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 

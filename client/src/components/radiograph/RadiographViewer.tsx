@@ -5,9 +5,9 @@ import { useLayerControls } from "@/hooks/useLayerControls";
 import { 
   ZoomIn, 
   ZoomOut, 
-  RefreshCw, 
-  Layers
+  RefreshCw
 } from "lucide-react";
+import FloatingControlPanel from "./FloatingControlPanel";
 
 interface RadiographViewerProps {
   highContrastMode: boolean;
@@ -17,17 +17,20 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({ highContrastMode })
   const { 
     layerOpacity, 
     imageControls, 
-    showLayerControls, 
-    setShowLayerControls, 
     updateLayerOpacity, 
     updateImageControl, 
-    resetImageControls 
+    resetLayerOpacity,
+    resetOnlyImageControls,
+    resetAllControls
   } = useLayerControls();
 
   // Image transformation state - simplified
   const [scale, setScale] = useState(1.0);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [rotation, setRotation] = useState(0);
+  
+  // Only Invalid toggle state
+  const [onlyInvalidMode, setOnlyInvalidMode] = useState(false);
   
   // Simplified handlers
   const handleZoomIn = () => setScale(prev => Math.min(prev + 0.1, 2));
@@ -37,6 +40,18 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({ highContrastMode })
     setPosition({ x: 0, y: 0 });
     setRotation(0);
   };
+  
+  const handleEditLandmarks = () => {
+    console.log("Edit landmarks clicked");
+    // Implement landmark editing functionality
+  };
+  
+  // Handle Only Invalid toggle change
+  const handleOnlyInvalidModeChange = (enabled: boolean) => {
+    setOnlyInvalidMode(enabled);
+    console.log("Only Invalid mode:", enabled);
+    // Here we would filter to show only invalid measurements
+  };
 
   // Keyboard event listeners - simplified
   useEffect(() => {
@@ -44,12 +59,11 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({ highContrastMode })
       if (e.key === '+') handleZoomIn();
       else if (e.key === '-') handleZoomOut();
       else if (e.key === '0') handleResetView();
-      else if (e.key.toLowerCase() === 'l') setShowLayerControls(prev => !prev);
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [setShowLayerControls]);
+  }, []);
 
   return (
     <div 
@@ -65,11 +79,12 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({ highContrastMode })
       >
         {/* Base radiograph */}
         <img 
-          src="https://images.unsplash.com/photo-1654627567074-cc3b14c1e408?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=1000&q=80" 
+          src="/images/cephalometric.png" 
           alt="Cephalometric radiograph" 
-          className="max-w-full max-h-full object-contain"
+          className="max-h-[80vh] w-auto object-contain"
           style={{
-            filter: `brightness(${100 + imageControls.brightness}%) contrast(${100 + imageControls.contrast}%)`
+            filter: `brightness(${100 + imageControls.brightness}%) contrast(${100 + imageControls.contrast}%)`,
+            ...(highContrastMode && { filter: `brightness(120%) contrast(140%) grayscale(20%)` })
           }}
         />
         
@@ -115,8 +130,8 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({ highContrastMode })
         )}
       </div>
       
-      {/* Minimal toolbar with tooltips */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-sm rounded-full shadow-md px-2 py-1 flex space-x-1">
+      {/* Zoom controls toolbar */}
+      <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-full shadow-md px-2 py-1 flex space-x-1">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -172,115 +187,19 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({ highContrastMode })
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-        
-        <div className="w-[1px] h-6 my-1 bg-slate-200"></div>
-        
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={() => setShowLayerControls(!showLayerControls)}
-                className={`h-8 w-8 rounded-full ${showLayerControls ? 'bg-primary-50 text-primary-600' : 'text-slate-600'}`}
-              >
-                <Layers className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Layer Controls</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
       </div>
       
-      {/* Layer controls - simplified to a floating panel */}
-      {showLayerControls && (
-        <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg border border-slate-200 p-3 space-y-3 w-64">
-          <div className="flex justify-between items-center">
-            <h3 className="text-sm font-medium">Display Options</h3>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-7 w-7 p-0"
-              onClick={() => setShowLayerControls(false)}
-            >
-              ×
-            </Button>
-          </div>
-          
-          <div className="space-y-3">
-            <div>
-              <label className="text-xs font-medium mb-1 block text-slate-600">Brightness</label>
-              <input 
-                type="range" 
-                min="-50" 
-                max="50" 
-                value={imageControls.brightness} 
-                onChange={(e) => updateImageControl('brightness', parseInt(e.target.value))}
-                className="w-full"
-              />
-            </div>
-            
-            <div>
-              <label className="text-xs font-medium mb-1 block text-slate-600">Contrast</label>
-              <input 
-                type="range" 
-                min="-50" 
-                max="50" 
-                value={imageControls.contrast} 
-                onChange={(e) => updateImageControl('contrast', parseInt(e.target.value))}
-                className="w-full"
-              />
-            </div>
-            
-            <div>
-              <label className="text-xs font-medium mb-1 block text-slate-600">Tracing</label>
-              <input 
-                type="range" 
-                min="0" 
-                max="100" 
-                value={layerOpacity.tracing} 
-                onChange={(e) => updateLayerOpacity('tracing', parseInt(e.target.value))}
-                className="w-full"
-              />
-            </div>
-            
-            <div>
-              <label className="text-xs font-medium mb-1 block text-slate-600">Landmarks</label>
-              <input 
-                type="range" 
-                min="0" 
-                max="100" 
-                value={layerOpacity.landmarks} 
-                onChange={(e) => updateLayerOpacity('landmarks', parseInt(e.target.value))}
-                className="w-full"
-              />
-            </div>
-            
-            <div>
-              <label className="text-xs font-medium mb-1 block text-slate-600">Measurements</label>
-              <input 
-                type="range" 
-                min="0" 
-                max="100" 
-                value={layerOpacity.measurements} 
-                onChange={(e) => updateLayerOpacity('measurements', parseInt(e.target.value))}
-                className="w-full"
-              />
-            </div>
-            
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="w-full mt-2" 
-              onClick={resetImageControls}
-            >
-              Reset All
-            </Button>
-          </div>
-        </div>
-      )}
+      {/* Floating Bottom Control Panel */}
+      <FloatingControlPanel
+        layerOpacity={layerOpacity}
+        imageControls={imageControls}
+        onLayerOpacityChange={updateLayerOpacity}
+        onImageControlChange={updateImageControl}
+        onResetLayers={resetLayerOpacity}
+        onResetImageControls={resetOnlyImageControls}
+        onlyInvalidMode={onlyInvalidMode}
+        onOnlyInvalidModeChange={handleOnlyInvalidModeChange}
+      />
     </div>
   );
 };
