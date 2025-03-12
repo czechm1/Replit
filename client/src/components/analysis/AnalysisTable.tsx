@@ -23,7 +23,7 @@ interface AnalysisTableProps {
 
 const AnalysisTable: React.FC<AnalysisTableProps> = ({ measurements, analysisName }) => {
   const [showExtendedColumns, setShowExtendedColumns] = useState(false);
-
+  
   // Helper function to determine if a value is within range
   const isInRange = (measurement: AnalysisMeasurement): boolean => {
     return measurement.inRange;
@@ -33,24 +33,28 @@ const AnalysisTable: React.FC<AnalysisTableProps> = ({ measurements, analysisNam
     <div className="w-full">
       <div className="flex justify-between items-center mb-3">
         <h3 className="font-medium text-slate-800">{analysisName} Analysis</h3>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={() => setShowExtendedColumns(!showExtendedColumns)}
-          className="text-xs"
-        >
-          {showExtendedColumns ? (
-            <>
-              <ChevronUp className="h-3 w-3 mr-1" />
-              Collapse Columns
-            </>
-          ) : (
-            <>
-              <ChevronDown className="h-3 w-3 mr-1" />
-              Show All Columns
-            </>
-          )}
-        </Button>
+        <div className="flex gap-2">
+          {/* Filter button removed as it's managed by parent component */}
+          
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setShowExtendedColumns(!showExtendedColumns)}
+            className="text-xs"
+          >
+            {showExtendedColumns ? (
+              <>
+                <ChevronUp className="h-3 w-3 mr-1" />
+                Collapse Columns
+              </>
+            ) : (
+              <>
+                <ChevronDown className="h-3 w-3 mr-1" />
+                Expand Columns
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       <div className="border rounded-md overflow-hidden">

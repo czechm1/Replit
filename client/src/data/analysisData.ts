@@ -5,7 +5,7 @@ export interface CephalometricMeasurement {
   mean: number;
   sd: number;
   result: number;
-  severity?: string | null;
+  severity: string;
   polygonalChart?: boolean;
   meaning: string;
   inRange: boolean;

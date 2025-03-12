@@ -1,0 +1,28 @@
+.resizable-panel {
+  position: relative;
+}
+
+.resize-handle {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: transparent;
+  cursor: col-resize;
+  transition: background 0.2s;
+}
+
+.resize-handle:hover, 
+.resize-handle.active {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.collapsed-panel {
+  width: 60px;
+}
+
+.expanded-panel {
+  min-width: 320px;
+  max-width: 600px;
+}

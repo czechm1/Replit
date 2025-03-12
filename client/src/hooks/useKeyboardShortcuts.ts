@@ -38,10 +38,13 @@ export function useKeyboardShortcuts({
 
     // Handle shortcuts
     switch (e.key) {
-      // Navigation
+      // Navigation and Save functionality 
       case "s":
       case "S":
-        if (!e.ctrlKey && !e.altKey && !e.metaKey) {
+        if (e.ctrlKey && !e.altKey && !e.metaKey && onSaveAnalysis) {
+          shouldPreventDefault();
+          onSaveAnalysis();
+        } else if (!e.ctrlKey && !e.altKey && !e.metaKey) {
           shouldPreventDefault();
           onToggleSidebar();
         }
@@ -97,12 +100,7 @@ export function useKeyboardShortcuts({
         break;
 
       // Save and print
-      case "s":
-        if (e.ctrlKey && !e.altKey && !e.metaKey && onSaveAnalysis) {
-          shouldPreventDefault();
-          onSaveAnalysis();
-        }
-        break;
+      // Special case for Ctrl+S is handled in the first 's' case with additional conditions
       case "p":
         if (e.ctrlKey && !e.altKey && !e.metaKey && onPrint) {
           shouldPreventDefault();
