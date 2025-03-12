@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { WebSocketMessage, Landmark, LandmarksCollection } from '@shared/schema';
+import { Landmark, LandmarksCollection } from '@shared/schema';
 import { useToast } from './use-toast';
+import { apiRequest } from '@/lib/queryClient';
 
 export interface CollaborativeUser {
   id: string;
@@ -21,9 +22,8 @@ export function useCollaborativeAnnotation({
   const [isConnected, setIsConnected] = useState(false);
   const [collaborativeUsers, setCollaborativeUsers] = useState<CollaborativeUser[]>([]);
   const [collection, setCollection] = useState<LandmarksCollection | null>(null);
-  const socketRef = useRef<WebSocket | null>(null);
-  const reconnectTimeoutRef = useRef<number | null>(null);
-  const reconnectAttemptsRef = useRef(0);
+  const pollingIntervalRef = useRef<number | null>(null);
+  const collectionPollingIntervalRef = useRef<number | null>(null);
   const { toast } = useToast();
 
   // Handle remote landmark updates
@@ -66,218 +66,190 @@ export function useCollaborativeAnnotation({
     });
   }, []);
 
-  // Function to create and set up WebSocket connection
-  const setupWebSocket = useCallback(() => {
-    if (!collectionId || !userId || !username) return null;
+  // Setup polling for active users
+  const setupPolling = useCallback(() => {
+    if (!collectionId || !userId || !username) return;
 
-    // Clear any existing reconnection timeouts
-    if (reconnectTimeoutRef.current !== null) {
-      window.clearTimeout(reconnectTimeoutRef.current);
-      reconnectTimeoutRef.current = null;
-    }
-
-    // Create WebSocket connection
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/ws`;
-    console.log(`Connecting to WebSocket (attempt ${reconnectAttemptsRef.current + 1}):`, wsUrl);
-    
-    try {
-      const socket = new WebSocket(wsUrl);
-      
-      socket.onopen = () => {
+    // Join the collection
+    const joinCollection = async () => {
+      try {
+        await apiRequest(`/api/join-collection/${collectionId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ userId, username })
+        });
+        
         setIsConnected(true);
-        reconnectAttemptsRef.current = 0; // Reset reconnect attempts on successful connection
-        console.log('WebSocket connection established');
-        
-        // Join the collection
-        const joinMessage: WebSocketMessage = {
-          type: 'join_collection',
-          collectionId,
-          userId,
-          username
-        };
-        
-        socket.send(JSON.stringify(joinMessage));
-      };
-
-      socket.onclose = (event) => {
+        console.log('Joined collection via HTTP');
+      } catch (error) {
+        console.error('Error joining collection:', error);
         setIsConnected(false);
-        console.log('WebSocket connection closed:', event.code, event.reason);
+        toast({
+          title: 'Connection Error',
+          description: 'Failed to connect to collaboration server.',
+          variant: 'destructive'
+        });
+      }
+    };
+
+    // Initial join
+    joinCollection();
+
+    // Poll for active users
+    const pollActiveUsers = async () => {
+      if (!collectionId) return;
+
+      try {
+        const response = await apiRequest(`/api/active-users/${collectionId}`);
+        const data = await response.json();
         
-        // Attempt to reconnect unless this was a normal closure or component unmounting
-        if (event.code !== 1000 && reconnectAttemptsRef.current < 5) {
-          const delay = Math.min(1000 * (2 ** reconnectAttemptsRef.current), 30000); // Exponential backoff with 30s max
-          console.log(`Attempting to reconnect in ${delay}ms...`);
-          
-          reconnectTimeoutRef.current = window.setTimeout(() => {
-            reconnectAttemptsRef.current += 1;
-            socketRef.current = setupWebSocket();
-          }, delay);
-        } else if (reconnectAttemptsRef.current >= 5) {
-          toast({
-            title: 'Connection Failed',
-            description: 'Unable to connect to the collaboration server after multiple attempts. Please refresh the page to try again.',
-            variant: 'destructive',
-            duration: 10000
-          });
+        if (data.users) {
+          setCollaborativeUsers(data.users);
         }
-      };
+      } catch (error) {
+        console.error('Error polling active users:', error);
+      }
+    };
 
-      socket.onerror = (error) => {
-        console.error('WebSocket error:', error);
-        // Only show error toast on first error to avoid spam
-        if (reconnectAttemptsRef.current === 0) {
-          toast({
-            title: 'Connection Error',
-            description: 'Failed to connect to collaboration server. Attempting to reconnect...',
-            variant: 'destructive'
-          });
+    // Poll for collection data
+    const pollCollectionData = async () => {
+      if (!collectionId) return;
+
+      try {
+        const response = await apiRequest(`/api/landmarks-collections/${collectionId}`);
+        const data = await response.json();
+        
+        if (data) {
+          setCollection(data);
         }
-      };
+      } catch (error) {
+        console.error('Error polling collection data:', error);
+      }
+    };
 
-      socket.onmessage = (event) => {
-        try {
-          console.log('WebSocket message received:', event.data.substring(0, 200) + (event.data.length > 200 ? '...' : ''));
-          const message: WebSocketMessage = JSON.parse(event.data);
-          
-          switch (message.type) {
-            case 'users_in_collection':
-              setCollaborativeUsers(message.users);
-              break;
-              
-            case 'collection_data':
-              setCollection(message.collection);
-              break;
-              
-            case 'update_landmark':
-              if (message.userId !== userId) {
-                handleRemoteLandmarkUpdate(message.landmark);
-                toast({
-                  title: 'Landmark Updated',
-                  description: `${message.username} updated landmark ${message.landmark.name}`,
-                  duration: 3000
-                });
-              }
-              break;
-              
-            case 'add_landmark':
-              if (message.userId !== userId) {
-                handleRemoteLandmarkAdd(message.landmark);
-                toast({
-                  title: 'Landmark Added',
-                  description: `${message.username} added landmark ${message.landmark.name}`,
-                  duration: 3000
-                });
-              }
-              break;
-              
-            case 'remove_landmark':
-              if (message.userId !== userId) {
-                handleRemoteLandmarkRemove(message.landmarkId);
-                toast({
-                  title: 'Landmark Removed',
-                  description: `${message.username} removed a landmark`,
-                  duration: 3000
-                });
-              }
-              break;
-              
-            case 'error':
-              toast({
-                title: 'Server Error',
-                description: message.message,
-                variant: 'destructive'
-              });
-              break;
-          }
-        } catch (error) {
-          console.error('Error processing message:', error);
-        }
-      };
+    // Initial polls
+    pollActiveUsers();
+    pollCollectionData();
 
-      return socket;
-    } catch (err) {
-      console.error('Failed to create WebSocket:', err);
-      return null;
-    }
-  }, [collectionId, userId, username, toast, handleRemoteLandmarkUpdate, handleRemoteLandmarkAdd, handleRemoteLandmarkRemove]);
+    // Setup polling intervals
+    pollingIntervalRef.current = window.setInterval(pollActiveUsers, 5000); // Poll every 5 seconds
+    collectionPollingIntervalRef.current = window.setInterval(pollCollectionData, 5000); // Poll every 5 seconds
 
-  // Connect to WebSocket server on component mount
+    // Heartbeat to keep user active
+    const heartbeatInterval = window.setInterval(() => {
+      joinCollection(); // Re-join to update last active timestamp
+    }, 60000); // Every minute
+
+    return () => {
+      if (pollingIntervalRef.current) window.clearInterval(pollingIntervalRef.current);
+      if (collectionPollingIntervalRef.current) window.clearInterval(collectionPollingIntervalRef.current);
+      window.clearInterval(heartbeatInterval);
+    };
+  }, [collectionId, userId, username, toast]);
+
+  // Setup polling on component mount
   useEffect(() => {
-    // Initialize WebSocket connection
-    socketRef.current = setupWebSocket();
+    const cleanup = setupPolling();
 
     // Clean up on unmount
     return () => {
-      // Clear any reconnection attempts
-      if (reconnectTimeoutRef.current !== null) {
-        window.clearTimeout(reconnectTimeoutRef.current);
-        reconnectTimeoutRef.current = null;
+      if (cleanup) cleanup();
+      
+      // Leave the collection
+      if (collectionId && userId) {
+        apiRequest(`/api/leave-collection/${collectionId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ userId })
+        }).catch(err => {
+          console.error('Error leaving collection:', err);
+        });
       }
-
-      // Close WebSocket if it's open
-      if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-        try {
-          const leaveMessage: WebSocketMessage = {
-            type: 'leave_collection',
-            collectionId,
-            userId
-          };
-          
-          socketRef.current.send(JSON.stringify(leaveMessage));
-        } catch (err) {
-          console.error('Error sending leave message:', err);
-        }
-        
-        socketRef.current.close(1000, 'Component unmounting');
-      }
+      
+      // Clear any polling intervals
+      if (pollingIntervalRef.current) window.clearInterval(pollingIntervalRef.current);
+      if (collectionPollingIntervalRef.current) window.clearInterval(collectionPollingIntervalRef.current);
     };
-  }, [collectionId, userId, username, setupWebSocket]);
+  }, [collectionId, userId, username, setupPolling]);
 
-  // Send landmark update
-  const updateLandmark = useCallback((landmark: Landmark) => {
-    if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) return;
+  // Update landmark
+  const updateLandmark = useCallback(async (landmark: Landmark) => {
+    if (!collectionId || !userId || !username || !isConnected) return;
     
-    const message: WebSocketMessage = {
-      type: 'update_landmark',
-      collectionId,
-      userId,
-      username,
-      landmark
-    };
-    
-    socketRef.current.send(JSON.stringify(message));
-  }, [collectionId, userId, username]);
+    try {
+      await apiRequest(`/api/landmarks-collections/${collectionId}/landmarks/${landmark.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ landmark, userId, username })
+      });
+      
+      // Update local state
+      handleRemoteLandmarkUpdate(landmark);
+    } catch (error) {
+      console.error('Error updating landmark:', error);
+      toast({
+        title: 'Update Failed',
+        description: 'Failed to update landmark.',
+        variant: 'destructive'
+      });
+    }
+  }, [collectionId, userId, username, isConnected, handleRemoteLandmarkUpdate, toast]);
 
   // Add landmark
-  const addLandmark = useCallback((landmark: Landmark) => {
-    if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) return;
+  const addLandmark = useCallback(async (landmark: Landmark) => {
+    if (!collectionId || !userId || !username || !isConnected) return;
     
-    const message: WebSocketMessage = {
-      type: 'add_landmark',
-      collectionId,
-      userId,
-      username,
-      landmark
-    };
-    
-    socketRef.current.send(JSON.stringify(message));
-  }, [collectionId, userId, username]);
+    try {
+      await apiRequest(`/api/landmarks-collections/${collectionId}/landmarks`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ landmark, userId, username })
+      });
+      
+      // Update local state
+      handleRemoteLandmarkAdd(landmark);
+    } catch (error) {
+      console.error('Error adding landmark:', error);
+      toast({
+        title: 'Add Failed',
+        description: 'Failed to add landmark.',
+        variant: 'destructive'
+      });
+    }
+  }, [collectionId, userId, username, isConnected, handleRemoteLandmarkAdd, toast]);
 
   // Remove landmark
-  const removeLandmark = useCallback((landmarkId: string) => {
-    if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) return;
+  const removeLandmark = useCallback(async (landmarkId: string) => {
+    if (!collectionId || !userId || !username || !isConnected) return;
     
-    const message: WebSocketMessage = {
-      type: 'remove_landmark',
-      collectionId,
-      userId,
-      username,
-      landmarkId
-    };
-    
-    socketRef.current.send(JSON.stringify(message));
-  }, [collectionId, userId, username]);
+    try {
+      await apiRequest(`/api/landmarks-collections/${collectionId}/landmarks/${landmarkId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ userId, username })
+      });
+      
+      // Update local state
+      handleRemoteLandmarkRemove(landmarkId);
+    } catch (error) {
+      console.error('Error removing landmark:', error);
+      toast({
+        title: 'Remove Failed',
+        description: 'Failed to remove landmark.',
+        variant: 'destructive'
+      });
+    }
+  }, [collectionId, userId, username, isConnected, handleRemoteLandmarkRemove, toast]);
 
   return {
     isConnected,

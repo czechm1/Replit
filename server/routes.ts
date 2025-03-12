@@ -1,18 +1,13 @@
-import express, { type Express } from "express";
+import express, { type Express, Request, Response } from "express";
 import path from "path";
 import fs from "fs";
 import { createServer, type Server } from "http";
-import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { z } from "zod";
 import { 
-  LandmarksCollection, 
-  WebSocketMessage, 
-  WebSocketMessageSchema 
+  LandmarksCollection,
+  Landmark
 } from "@shared/schema";
-
-// Global WebSocket server reference
-let wss: WebSocketServer | null = null;
 
 // Define analysis data schemas
 const AnalysisSchema = z.object({
@@ -28,58 +23,19 @@ type Analysis = z.infer<typeof AnalysisSchema>;
 // Create in-memory storage for analyses
 const analyses: Analysis[] = [];
 
-// WebSocket connection tracking
-type CollaborationClient = {
-  ws: WebSocket;
+// Tracking active users (simplified without WebSockets)
+type ActiveUser = {
   userId: string;
   username: string;
+  lastActive: Date;
 };
 
-// Track active collections and their connected clients
-type CollaborativeCollections = {
-  [collectionId: string]: CollaborationClient[];
+// Track active collections and their users
+type ActiveCollections = {
+  [collectionId: string]: ActiveUser[];
 };
 
-const collaborativeCollections: CollaborativeCollections = {};
-
-// Broadcast a message to all clients in a collection except the sender
-function broadcastToCollection(
-  collectionId: string, 
-  message: WebSocketMessage, 
-  excludeClient?: WebSocket
-) {
-  const clients = collaborativeCollections[collectionId];
-  if (!clients) return;
-
-  clients.forEach(client => {
-    if (client.ws !== excludeClient && client.ws.readyState === WebSocket.OPEN) {
-      client.ws.send(JSON.stringify(message));
-    }
-  });
-}
-
-// Broadcast the list of users in a collection to all connected clients
-function broadcastUsers(collectionId: string) {
-  const clients = collaborativeCollections[collectionId];
-  if (!clients) return;
-
-  const users = clients.map(client => ({
-    id: client.userId,
-    username: client.username
-  }));
-
-  const message: WebSocketMessage = {
-    type: "users_in_collection",
-    collectionId,
-    users
-  };
-
-  clients.forEach(client => {
-    if (client.ws.readyState === WebSocket.OPEN) {
-      client.ws.send(JSON.stringify(message));
-    }
-  });
-}
+const activeCollections: ActiveCollections = {};
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Static files are already being served in server/index.ts
@@ -206,32 +162,259 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ 
       status: 'ok', 
       timestamp: new Date().toISOString(),
-      websocket: {
-        path: '/ws',
-        ready: true,
-        clientCount: wss ? wss.clients.size : 0
-      }
+      collaborationMode: 'http-poll'
     });
   });
   
-  // WebSocket specific health check endpoint
-  app.get('/api/websocket-health', (req, res) => {
-    const activeCollections = Object.entries(collaborativeCollections).map(([id, clients]) => ({
-      id,
-      userCount: clients.length,
-      users: clients.map(c => ({ 
-        id: c.userId, 
-        username: c.username,
-        readyState: c.ws.readyState
-      }))
-    }));
+  // Active users endpoint (replaces WebSocket functionality)
+  app.get('/api/active-users/:collectionId', (req, res) => {
+    const { collectionId } = req.params;
+    const users = activeCollections[collectionId] || [];
+    
+    // Clean up stale users (inactive for more than 5 minutes)
+    const now = new Date();
+    const filteredUsers = users.filter(user => {
+      const timeDiff = now.getTime() - user.lastActive.getTime();
+      return timeDiff < 5 * 60 * 1000; // 5 minutes
+    });
+    
+    activeCollections[collectionId] = filteredUsers;
     
     res.json({
-      status: wss ? 'active' : 'inactive',
-      path: '/ws',
-      clientCount: wss ? wss.clients.size : 0,
-      activeCollections
+      collectionId,
+      userCount: filteredUsers.length,
+      users: filteredUsers.map(u => ({ 
+        id: u.userId, 
+        username: u.username
+      }))
     });
+  });
+  
+  // Join collection endpoint
+  app.post('/api/join-collection/:collectionId', (req, res) => {
+    const { collectionId } = req.params;
+    const { userId, username } = req.body;
+    
+    if (!userId || !username) {
+      return res.status(400).json({ message: 'Missing required fields: userId and username' });
+    }
+    
+    // Initialize collection if it doesn't exist
+    if (!activeCollections[collectionId]) {
+      activeCollections[collectionId] = [];
+    }
+    
+    // Update or add user to the collection
+    const existingUserIndex = activeCollections[collectionId].findIndex(u => u.userId === userId);
+    if (existingUserIndex >= 0) {
+      activeCollections[collectionId][existingUserIndex].lastActive = new Date();
+    } else {
+      activeCollections[collectionId].push({
+        userId,
+        username,
+        lastActive: new Date()
+      });
+    }
+    
+    res.json({
+      message: 'Joined collection successfully',
+      userCount: activeCollections[collectionId].length
+    });
+  });
+  
+  // Leave collection endpoint
+  app.post('/api/leave-collection/:collectionId', (req, res) => {
+    const { collectionId } = req.params;
+    const { userId } = req.body;
+    
+    if (!userId) {
+      return res.status(400).json({ message: 'Missing required field: userId' });
+    }
+    
+    if (activeCollections[collectionId]) {
+      activeCollections[collectionId] = activeCollections[collectionId].filter(u => u.userId !== userId);
+      
+      // Clean up empty collections
+      if (activeCollections[collectionId].length === 0) {
+        delete activeCollections[collectionId];
+      }
+    }
+    
+    res.json({ message: 'Left collection successfully' });
+  });
+  
+  // Add landmark endpoint (replacing WebSocket)
+  app.post('/api/landmarks-collections/:collectionId/landmarks', async (req, res) => {
+    const { collectionId } = req.params;
+    const { landmark, userId, username } = req.body;
+    
+    if (!landmark || !userId || !username) {
+      return res.status(400).json({ 
+        message: 'Missing required fields: landmark, userId, username' 
+      });
+    }
+    
+    try {
+      // Update or add user active status
+      if (!activeCollections[collectionId]) {
+        activeCollections[collectionId] = [];
+      }
+      
+      const existingUserIndex = activeCollections[collectionId].findIndex(u => u.userId === userId);
+      if (existingUserIndex >= 0) {
+        activeCollections[collectionId][existingUserIndex].lastActive = new Date();
+      } else {
+        activeCollections[collectionId].push({
+          userId,
+          username,
+          lastActive: new Date()
+        });
+      }
+      
+      // Add the landmark to the collection
+      const collection = await storage.getLandmarksCollection(collectionId);
+      if (!collection) {
+        return res.status(404).json({ message: 'Collection not found' });
+      }
+      
+      const updatedLandmarks = [...collection.landmarks, landmark];
+      const updatedCollection = await storage.updateLandmarksCollection(
+        collectionId,
+        {
+          landmarks: updatedLandmarks,
+          lastModifiedBy: username
+        }
+      );
+      
+      res.status(201).json({
+        message: 'Landmark added successfully',
+        landmark,
+        collection: updatedCollection
+      });
+    } catch (error) {
+      console.error('Error adding landmark:', error);
+      res.status(500).json({ 
+        message: 'Error adding landmark', 
+        error: error instanceof Error ? error.message : String(error) 
+      });
+    }
+  });
+  
+  // Update landmark endpoint (replacing WebSocket)
+  app.put('/api/landmarks-collections/:collectionId/landmarks/:landmarkId', async (req, res) => {
+    const { collectionId, landmarkId } = req.params;
+    const { landmark, userId, username } = req.body;
+    
+    if (!landmark || !userId || !username) {
+      return res.status(400).json({ 
+        message: 'Missing required fields: landmark, userId, username' 
+      });
+    }
+    
+    try {
+      // Update user active status
+      if (!activeCollections[collectionId]) {
+        activeCollections[collectionId] = [];
+      }
+      
+      const existingUserIndex = activeCollections[collectionId].findIndex(u => u.userId === userId);
+      if (existingUserIndex >= 0) {
+        activeCollections[collectionId][existingUserIndex].lastActive = new Date();
+      } else {
+        activeCollections[collectionId].push({
+          userId,
+          username,
+          lastActive: new Date()
+        });
+      }
+      
+      // Update the landmark
+      const collection = await storage.getLandmarksCollection(collectionId);
+      if (!collection) {
+        return res.status(404).json({ message: 'Collection not found' });
+      }
+      
+      const updatedLandmarks = collection.landmarks.map(l => 
+        l.id === landmarkId ? landmark : l
+      );
+      
+      const updatedCollection = await storage.updateLandmarksCollection(
+        collectionId,
+        {
+          landmarks: updatedLandmarks,
+          lastModifiedBy: username
+        }
+      );
+      
+      res.json({
+        message: 'Landmark updated successfully',
+        landmark,
+        collection: updatedCollection
+      });
+    } catch (error) {
+      console.error('Error updating landmark:', error);
+      res.status(500).json({ 
+        message: 'Error updating landmark', 
+        error: error instanceof Error ? error.message : String(error) 
+      });
+    }
+  });
+  
+  // Delete landmark endpoint (replacing WebSocket)
+  app.delete('/api/landmarks-collections/:collectionId/landmarks/:landmarkId', async (req, res) => {
+    const { collectionId, landmarkId } = req.params;
+    const { userId, username } = req.body;
+    
+    if (!userId || !username) {
+      return res.status(400).json({ 
+        message: 'Missing required fields: userId, username' 
+      });
+    }
+    
+    try {
+      // Update user active status
+      if (!activeCollections[collectionId]) {
+        activeCollections[collectionId] = [];
+      }
+      
+      const existingUserIndex = activeCollections[collectionId].findIndex(u => u.userId === userId);
+      if (existingUserIndex >= 0) {
+        activeCollections[collectionId][existingUserIndex].lastActive = new Date();
+      } else {
+        activeCollections[collectionId].push({
+          userId,
+          username,
+          lastActive: new Date()
+        });
+      }
+      
+      // Delete the landmark
+      const collection = await storage.getLandmarksCollection(collectionId);
+      if (!collection) {
+        return res.status(404).json({ message: 'Collection not found' });
+      }
+      
+      const updatedLandmarks = collection.landmarks.filter(l => l.id !== landmarkId);
+      
+      const updatedCollection = await storage.updateLandmarksCollection(
+        collectionId,
+        {
+          landmarks: updatedLandmarks,
+          lastModifiedBy: username
+        }
+      );
+      
+      res.json({
+        message: 'Landmark deleted successfully',
+        collection: updatedCollection
+      });
+    } catch (error) {
+      console.error('Error deleting landmark:', error);
+      res.status(500).json({ 
+        message: 'Error deleting landmark', 
+        error: error instanceof Error ? error.message : String(error) 
+      });
+    }
   });
   
   // Debug endpoint to check image paths
@@ -281,208 +464,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // Create HTTP server
+  // Create and return HTTP server (without WebSocket)
   const httpServer = createServer(app);
+  console.log('Starting server without WebSockets - using HTTP polling instead');
   
-  // Create WebSocket server with detailed logging
-  console.log('Setting up WebSocket server on path: /ws');
-  wss = new WebSocketServer({ 
-    server: httpServer, 
-    path: '/ws',
-    clientTracking: true 
-  });
-  
-  // Log WebSocket server events
-  wss.on('listening', () => {
-    console.log('WebSocket server is listening');
-  });
-  
-  wss.on('error', (error) => {
-    console.error('WebSocket server error:', error);
-  });
-  
-  wss.on('connection', (ws, req) => {
-    console.log(`WebSocket connection established from ${req.socket.remoteAddress}`);
-    
-    ws.on('message', async (message) => {
-      try {
-        const data = JSON.parse(message.toString());
-        
-        // Validate message against schema
-        const validatedMessage = WebSocketMessageSchema.parse(data);
-        
-        switch (validatedMessage.type) {
-          case 'join_collection': {
-            const { collectionId, userId, username } = validatedMessage;
-            
-            // Initialize collection client list if it doesn't exist
-            if (!collaborativeCollections[collectionId]) {
-              collaborativeCollections[collectionId] = [];
-            }
-            
-            // Add client to collection
-            collaborativeCollections[collectionId].push({
-              ws,
-              userId,
-              username
-            });
-            
-            // Send the current collection data to the new client
-            const collection = await storage.getLandmarksCollection(collectionId);
-            
-            if (collection) {
-              const collectionDataMessage: WebSocketMessage = {
-                type: 'collection_data',
-                collection
-              };
-              
-              ws.send(JSON.stringify(collectionDataMessage));
-            }
-            
-            // Broadcast updated user list to all clients in the collection
-            broadcastUsers(collectionId);
-            
-            console.log(`User ${username} (${userId}) joined collection ${collectionId}`);
-            break;
-          }
-          
-          case 'leave_collection': {
-            const { collectionId, userId } = validatedMessage;
-            
-            // Remove client from collection
-            if (collaborativeCollections[collectionId]) {
-              collaborativeCollections[collectionId] = collaborativeCollections[collectionId]
-                .filter(client => client.userId !== userId);
-                
-              // Clean up empty collections
-              if (collaborativeCollections[collectionId].length === 0) {
-                delete collaborativeCollections[collectionId];
-              } else {
-                // Broadcast updated user list
-                broadcastUsers(collectionId);
-              }
-            }
-            
-            console.log(`User ${userId} left collection ${collectionId}`);
-            break;
-          }
-          
-          case 'update_landmark': {
-            const { collectionId, userId, username, landmark } = validatedMessage;
-            
-            // Update the landmark in storage
-            const collection = await storage.getLandmarksCollection(collectionId);
-            
-            if (collection) {
-              // Find and update the landmark
-              const updatedLandmarks = collection.landmarks.map(l => 
-                l.id === landmark.id ? landmark : l
-              );
-              
-              // Update the collection
-              const updatedCollection = await storage.updateLandmarksCollection(
-                collectionId, 
-                { 
-                  landmarks: updatedLandmarks,
-                  lastModifiedBy: username
-                }
-              );
-              
-              // Broadcast the update to all other clients
-              broadcastToCollection(collectionId, validatedMessage, ws);
-              
-              console.log(`User ${username} updated landmark ${landmark.id} in collection ${collectionId}`);
-            }
-            break;
-          }
-          
-          case 'add_landmark': {
-            const { collectionId, userId, username, landmark } = validatedMessage;
-            
-            // Add the landmark to storage
-            const collection = await storage.getLandmarksCollection(collectionId);
-            
-            if (collection) {
-              // Add the new landmark
-              const updatedLandmarks = [...collection.landmarks, landmark];
-              
-              // Update the collection
-              const updatedCollection = await storage.updateLandmarksCollection(
-                collectionId, 
-                { 
-                  landmarks: updatedLandmarks,
-                  lastModifiedBy: username
-                }
-              );
-              
-              // Broadcast the update to all other clients
-              broadcastToCollection(collectionId, validatedMessage, ws);
-              
-              console.log(`User ${username} added landmark ${landmark.id} to collection ${collectionId}`);
-            }
-            break;
-          }
-          
-          case 'remove_landmark': {
-            const { collectionId, userId, username, landmarkId } = validatedMessage;
-            
-            // Remove the landmark from storage
-            const collection = await storage.getLandmarksCollection(collectionId);
-            
-            if (collection) {
-              // Remove the landmark
-              const updatedLandmarks = collection.landmarks.filter(l => l.id !== landmarkId);
-              
-              // Update the collection
-              const updatedCollection = await storage.updateLandmarksCollection(
-                collectionId, 
-                { 
-                  landmarks: updatedLandmarks,
-                  lastModifiedBy: username
-                }
-              );
-              
-              // Broadcast the update to all other clients
-              broadcastToCollection(collectionId, validatedMessage, ws);
-              
-              console.log(`User ${username} removed landmark ${landmarkId} from collection ${collectionId}`);
-            }
-            break;
-          }
-        }
-      } catch (error) {
-        console.error('Error processing WebSocket message:', error);
-        
-        // Send error message back to client
-        ws.send(JSON.stringify({
-          type: 'error',
-          message: error instanceof Error ? error.message : 'Invalid message format'
-        }));
-      }
-    });
-    
-    ws.on('close', () => {
-      // Remove client from all collections
-      Object.entries(collaborativeCollections).forEach(([collectionId, clients]) => {
-        const client = clients.find(client => client.ws === ws);
-        
-        if (client) {
-          console.log(`User ${client.username} disconnected from collection ${collectionId}`);
-          
-          // Remove client from collection
-          collaborativeCollections[collectionId] = clients.filter(c => c.ws !== ws);
-          
-          // Clean up empty collections
-          if (collaborativeCollections[collectionId].length === 0) {
-            delete collaborativeCollections[collectionId];
-          } else {
-            // Broadcast updated user list
-            broadcastUsers(collectionId);
-          }
-        }
-      });
-    });
-  });
-
   return httpServer;
 }
