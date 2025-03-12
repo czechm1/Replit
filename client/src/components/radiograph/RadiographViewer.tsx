@@ -2,15 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useLayerControls } from "@/hooks/useLayerControls";
-import { 
-  ZoomIn, 
-  ZoomOut, 
-  RefreshCw,
-  Edit2
-} from "lucide-react";
+import { Edit2 } from "lucide-react";
 import FloatingControlPanel from "./FloatingControlPanel";
-import { CollaborativeLandmarkEditor } from "./CollaborativeLandmarkEditor";
-import { nanoid } from "nanoid";
+import { LandmarkEditor } from "./LandmarkEditor";
 
 interface RadiographViewerProps {
   highContrastMode: boolean;
@@ -43,20 +37,6 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
   
   // Edit landmarks mode
   const [isEditMode, setIsEditMode] = useState(false);
-  
-  // User information for collaboration
-  // In a real app, this would come from authentication
-  const [userId] = useState(() => sessionStorage.getItem("userId") || nanoid());
-  const [username] = useState(() => sessionStorage.getItem("username") || `User-${userId.slice(0, 4)}`);
-  
-  // Store user ID and username in session storage for persistence
-  useEffect(() => {
-    sessionStorage.setItem("userId", userId);
-    sessionStorage.setItem("username", username);
-  }, [userId, username]);
-  
-  // Collection ID for collaborative editing
-  const collectionId = `${patientId}-${imageId}`;
   
   // Image dimensions for landmark positioning
   const [imageDimensions, setImageDimensions] = useState({ width: 800, height: 1000 });
@@ -119,28 +99,25 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
   }, []);
 
   return (
-    <div 
-      className="relative w-full h-full overflow-hidden bg-slate-900 flex justify-center items-center"
-      style={{
-        backgroundImage: "url('/images/cephalometric.png')",
-        backgroundPosition: "center",
-        backgroundSize: "contain",
-        backgroundRepeat: "no-repeat",
-        filter: `brightness(${100 + imageControls.brightness}%) contrast(${100 + imageControls.contrast}%)
-                ${highContrastMode ? 'brightness(120%) contrast(140%) grayscale(20%)' : ''}`
-      }}
-    >
+    <div className="relative w-full h-full overflow-hidden bg-slate-900 flex justify-center items-center">
       {/* Radiograph with layers */}
       <div 
         ref={imageContainerRef}
         className="relative w-full h-full"
         style={{ 
           transform: `scale(${scale}) translate(${position.x}px, ${position.y}px) rotate(${rotation}deg)`,
-          transition: 'transform 0.2s ease-out'
+          transition: 'transform 0.2s ease-out',
+          // Move background image inside the container so it scales with everything else
+          backgroundImage: "url('/images/cephalometric.png')",
+          backgroundPosition: "center",
+          backgroundSize: "contain",
+          backgroundRepeat: "no-repeat",
+          filter: `brightness(${100 + imageControls.brightness}%) contrast(${100 + imageControls.contrast}%)
+                  ${highContrastMode ? 'brightness(120%) contrast(140%) grayscale(20%)' : ''}`
         }}
       >
         {/* Tracing layer - simplified */}
-        {!isEditMode && layerOpacity.tracing > 0 && (
+        {layerOpacity.tracing > 0 && (
           <svg 
             className="absolute top-0 left-0 w-full h-full" 
             viewBox="0 0 800 1000" 
@@ -151,8 +128,8 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
           </svg>
         )}
         
-        {/* Landmarks layer is now handled by CollaborativeLandmarkEditor in edit mode */}
-        {!isEditMode && layerOpacity.landmarks > 0 && (
+        {/* Landmarks layer */}
+        {layerOpacity.landmarks > 0 && (
           <svg 
             className="absolute top-0 left-0 w-full h-full" 
             viewBox="0 0 800 1000" 
@@ -171,7 +148,7 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
         )}
         
         {/* Measurements layer - simplified */}
-        {!isEditMode && layerOpacity.measurements > 0 && (
+        {layerOpacity.measurements > 0 && (
           <svg 
             className="absolute top-0 left-0 w-full h-full" 
             viewBox="0 0 800 1000" 
@@ -183,114 +160,34 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
           </svg>
         )}
 
-        {/* Collaborative Landmark Editor */}
-        {isEditMode ? (
-          <CollaborativeLandmarkEditor
-            collectionId={collectionId}
-            userId={userId}
-            username={username}
-            isEditMode={isEditMode}
-            onToggleEditMode={toggleEditMode}
-            imageDimensions={imageDimensions}
-          />
-        ) : null}
-      </div>
-      
-      {/* Zoom controls toolbar */}
-      <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-full shadow-md px-2 py-1 flex space-x-1">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={handleZoomOut}
-                className="h-8 w-8 rounded-full text-slate-600"
-              >
-                <ZoomOut className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Zoom Out</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-        
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={handleZoomIn}
-                className="h-8 w-8 rounded-full text-slate-600"
-              >
-                <ZoomIn className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Zoom In</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-        
-        <div className="w-[1px] h-6 my-1 bg-slate-200"></div>
-        
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={handleResetView}
-                className="h-8 w-8 rounded-full text-slate-600"
-              >
-                <RefreshCw className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Reset View</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
-      
-      {/* Edit landmarks button (only shown when not in edit mode) */}
-      {!isEditMode && (
-        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full shadow-md">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  onClick={toggleEditMode}
-                  className="h-10 w-10 rounded-full text-primary"
-                >
-                  <Edit2 className="h-5 w-5" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="left">
-                <p>Edit Landmarks</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      )}
-      
-      {/* Floating Bottom Control Panel (only shown when not in edit mode) */}
-      {!isEditMode && (
-        <FloatingControlPanel
-          layerOpacity={layerOpacity}
-          imageControls={imageControls}
-          onLayerOpacityChange={updateLayerOpacity}
-          onImageControlChange={updateImageControl}
-          onResetLayers={resetLayerOpacity}
-          onResetImageControls={resetOnlyImageControls}
-          onlyInvalidMode={onlyInvalidMode}
-          onOnlyInvalidModeChange={handleOnlyInvalidModeChange}
+        {/* Landmark Editor component */}
+        <LandmarkEditor 
+          collectionId={`${patientId}-${imageId}`}
+          userId="local-user"
+          username="Local User"
+          isEditMode={isEditMode}
+          onToggleEditMode={toggleEditMode}
+          imageDimensions={imageDimensions}
         />
-      )}
+      </div>
+      
+      {/* Unified Floating Control Panel */}
+      <FloatingControlPanel
+        layerOpacity={layerOpacity}
+        imageControls={imageControls}
+        onLayerOpacityChange={updateLayerOpacity}
+        onImageControlChange={updateImageControl}
+        onResetLayers={resetLayerOpacity}
+        onResetImageControls={resetOnlyImageControls}
+        onlyInvalidMode={onlyInvalidMode}
+        onOnlyInvalidModeChange={handleOnlyInvalidModeChange}
+        onZoomIn={handleZoomIn}
+        onZoomOut={handleZoomOut}
+        onResetView={handleResetView}
+        isEditMode={isEditMode}
+        onToggleEditMode={toggleEditMode}
+      />
+      
     </div>
   );
 };

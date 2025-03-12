@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Sliders, Layers, ChevronUp, ChevronDown } from "lucide-react";
+import { Sliders, Layers, ZoomIn, ZoomOut, RefreshCw, Edit2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import ImageSettingsControl from "./ImageSettingsControl";
 import ObjectVisibilityControl from "./ObjectVisibilityControl";
@@ -15,6 +15,13 @@ interface FloatingControlPanelProps {
   onResetImageControls: () => void;
   onlyInvalidMode?: boolean;
   onOnlyInvalidModeChange?: (enabled: boolean) => void;
+  // Zoom controls props
+  onZoomIn: () => void;
+  onZoomOut: () => void;
+  onResetView: () => void;
+  // Edit mode controls
+  isEditMode: boolean;
+  onToggleEditMode: () => void;
 }
 
 const FloatingControlPanel: React.FC<FloatingControlPanelProps> = ({
@@ -25,21 +32,23 @@ const FloatingControlPanel: React.FC<FloatingControlPanelProps> = ({
   onResetLayers,
   onResetImageControls,
   onlyInvalidMode = false,
-  onOnlyInvalidModeChange
+  onOnlyInvalidModeChange,
+  onZoomIn,
+  onZoomOut,
+  onResetView,
+  isEditMode,
+  onToggleEditMode
 }) => {
   const [activeControl, setActiveControl] = useState<'none' | 'image' | 'layers'>('none');
-  const [expanded, setExpanded] = useState(false);
   
   const toggleImageSettings = () => {
     setActiveControl(prev => prev === 'image' ? 'none' : 'image');
+    if (activeControl === 'layers') setActiveControl('image');
   };
   
   const toggleObjectVisibility = () => {
     setActiveControl(prev => prev === 'layers' ? 'none' : 'layers');
-  };
-  
-  const toggleExpanded = () => {
-    setExpanded(prev => !prev);
+    if (activeControl === 'image') setActiveControl('layers');
   };
   
   const closeControls = () => {
@@ -48,18 +57,100 @@ const FloatingControlPanel: React.FC<FloatingControlPanelProps> = ({
   
   return (
     <>
-      {/* Floating bottom control panel */}
-      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-sm rounded-full shadow-md border border-slate-200 p-1 flex space-x-1">
+      {/* Unified bottom control panel */}
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-sm rounded-full shadow-md border border-slate-200 p-1 flex items-center space-x-1">
+        {/* Zoom Out */}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={onZoomOut}
+                className="h-9 w-9 rounded-full text-slate-600"
+              >
+                <ZoomOut className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Zoom Out</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        
+        {/* Zoom In */}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={onZoomIn}
+                className="h-9 w-9 rounded-full text-slate-600"
+              >
+                <ZoomIn className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Zoom In</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        
+        {/* Reset View */}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={onResetView}
+                className="h-9 w-9 rounded-full text-slate-600"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Reset View</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        
+        <div className="w-[1px] h-6 mx-1 bg-slate-200"></div>
+        
+        {/* Edit Landmarks Button */}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant={isEditMode ? "default" : "ghost"}
+                size="sm" 
+                className="h-9 w-9 rounded-full"
+                onClick={onToggleEditMode}
+              >
+                <Edit2 className="h-4 w-4" />
+                <span className="sr-only">Edit Landmarks</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{isEditMode ? "Exit Edit Mode" : "Edit Landmarks"}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        
+        <div className="w-[1px] h-6 mx-1 bg-slate-200"></div>
+        
+        {/* Image Settings */}
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button 
                 variant={activeControl === 'image' ? 'default' : 'ghost'} 
                 size="sm" 
-                className="h-10 w-10 rounded-full"
+                className="h-9 w-9 rounded-full"
                 onClick={toggleImageSettings}
               >
-                <Sliders className="h-5 w-5" />
+                <Sliders className="h-4 w-4" />
                 <span className="sr-only">Image Settings</span>
               </Button>
             </TooltipTrigger>
@@ -69,16 +160,17 @@ const FloatingControlPanel: React.FC<FloatingControlPanelProps> = ({
           </Tooltip>
         </TooltipProvider>
         
+        {/* Layer Visibility */}
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button 
                 variant={activeControl === 'layers' ? 'default' : 'ghost'} 
                 size="sm" 
-                className="h-10 w-10 rounded-full"
+                className="h-9 w-9 rounded-full"
                 onClick={toggleObjectVisibility}
               >
-                <Layers className="h-5 w-5" />
+                <Layers className="h-4 w-4" />
                 <span className="sr-only">Object Visibility</span>
               </Button>
             </TooltipTrigger>
@@ -89,33 +181,9 @@ const FloatingControlPanel: React.FC<FloatingControlPanelProps> = ({
         </TooltipProvider>
       </div>
       
-      {/* Expand/Collapse button positioned lower */}
-      <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="secondary" 
-                size="sm" 
-                className="h-8 rounded-full px-3 shadow-md"
-                onClick={toggleExpanded}
-              >
-                {expanded ? 
-                  <><ChevronDown className="h-4 w-4 mr-1" /> Collapse</> : 
-                  <><ChevronUp className="h-4 w-4 mr-1" /> Expand</>
-                }
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{expanded ? 'Collapse Analysis Panel' : 'Expand Analysis Panel'}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
-      
-      {/* Conditional rendering of control panels */}
+      {/* Control panels - now positioned above the toolbar */}
       {activeControl === 'image' && (
-        <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2">
+        <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2">
           <ImageSettingsControl
             imageControls={imageControls}
             onImageControlChange={onImageControlChange}
@@ -126,7 +194,7 @@ const FloatingControlPanel: React.FC<FloatingControlPanelProps> = ({
       )}
       
       {activeControl === 'layers' && (
-        <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2">
+        <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2">
           <ObjectVisibilityControl
             layerOpacity={layerOpacity}
             onLayerOpacityChange={onLayerOpacityChange}

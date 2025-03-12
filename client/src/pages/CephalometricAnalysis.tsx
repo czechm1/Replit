@@ -10,11 +10,11 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { 
   HelpCircle, 
-  Users,
-  PanelRight
+  PanelRight,
+  PanelLeftClose,
+  X
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Badge } from "@/components/ui/badge";
 
 const CephalometricAnalysis: React.FC = () => {
   const [location] = useLocation();
@@ -37,14 +37,7 @@ const CephalometricAnalysis: React.FC = () => {
       setPatientId(pathParts[1]);
       setImageId(pathParts[2]);
     }
-    
-    // Let users know about the collaborative feature
-    toast({
-      title: "Collaborative Mode Available",
-      description: "You can now edit landmarks together with other users in real-time!",
-      duration: 5000
-    });
-  }, [location, toast]);
+  }, [location]);
   
   // Patient and analysis data - would come from context or props in a real app
   const patientName = "John Smith";
@@ -68,10 +61,6 @@ const CephalometricAnalysis: React.FC = () => {
       <header className="p-3 border-b border-slate-200 flex justify-between items-center">
         <div className="flex items-center space-x-2">
           <span className="font-bold text-xl text-primary-700">CephaloScan</span>
-          <Badge variant="outline" className="ml-2 bg-blue-50">
-            <Users className="h-3 w-3 mr-1 text-blue-500" />
-            Collaborative Mode
-          </Badge>
         </div>
         
         <div className="flex items-center space-x-2">
@@ -127,7 +116,10 @@ const CephalometricAnalysis: React.FC = () => {
                 className="h-10 w-10 rounded-full shadow-md"
                 onClick={() => setShowPanel(prev => !prev)}
               >
-                <PanelRight className="h-5 w-5" />
+                {showPanel ? 
+                  <X className="h-5 w-5" /> : 
+                  <PanelRight className="h-5 w-5" />
+                }
               </Button>
             </TooltipTrigger>
             <TooltipContent side="left">

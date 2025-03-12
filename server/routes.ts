@@ -23,20 +23,6 @@ type Analysis = z.infer<typeof AnalysisSchema>;
 // Create in-memory storage for analyses
 const analyses: Analysis[] = [];
 
-// Tracking active users (simplified without WebSockets)
-type ActiveUser = {
-  userId: string;
-  username: string;
-  lastActive: Date;
-};
-
-// Track active collections and their users
-type ActiveCollections = {
-  [collectionId: string]: ActiveUser[];
-};
-
-const activeCollections: ActiveCollections = {};
-
 export async function registerRoutes(app: Express): Promise<Server> {
   // Static files are already being served in server/index.ts
   // Get all analyses for a patient
@@ -162,7 +148,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ 
       status: 'ok', 
       timestamp: new Date().toISOString(),
-      collaborationMode: 'http-poll'
+      mode: 'single-user'
     });
   });
   
@@ -171,111 +157,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.send('ok');
   });
   
-  // Active users endpoint (replaces WebSocket functionality)
-  app.get('/api/active-users/:collectionId', (req, res) => {
-    const { collectionId } = req.params;
-    const users = activeCollections[collectionId] || [];
-    
-    // Clean up stale users (inactive for more than 5 minutes)
-    const now = new Date();
-    const filteredUsers = users.filter(user => {
-      const timeDiff = now.getTime() - user.lastActive.getTime();
-      return timeDiff < 5 * 60 * 1000; // 5 minutes
-    });
-    
-    activeCollections[collectionId] = filteredUsers;
-    
-    res.json({
-      collectionId,
-      userCount: filteredUsers.length,
-      users: filteredUsers.map(u => ({ 
-        id: u.userId, 
-        username: u.username
-      }))
-    });
-  });
-  
-  // Join collection endpoint
-  app.post('/api/join-collection/:collectionId', (req, res) => {
-    const { collectionId } = req.params;
-    const { userId, username } = req.body;
-    
-    if (!userId || !username) {
-      return res.status(400).json({ message: 'Missing required fields: userId and username' });
-    }
-    
-    // Initialize collection if it doesn't exist
-    if (!activeCollections[collectionId]) {
-      activeCollections[collectionId] = [];
-    }
-    
-    // Update or add user to the collection
-    const existingUserIndex = activeCollections[collectionId].findIndex(u => u.userId === userId);
-    if (existingUserIndex >= 0) {
-      activeCollections[collectionId][existingUserIndex].lastActive = new Date();
-    } else {
-      activeCollections[collectionId].push({
-        userId,
-        username,
-        lastActive: new Date()
-      });
-    }
-    
-    res.json({
-      message: 'Joined collection successfully',
-      userCount: activeCollections[collectionId].length
-    });
-  });
-  
-  // Leave collection endpoint
-  app.post('/api/leave-collection/:collectionId', (req, res) => {
-    const { collectionId } = req.params;
-    const { userId } = req.body;
-    
-    if (!userId) {
-      return res.status(400).json({ message: 'Missing required field: userId' });
-    }
-    
-    if (activeCollections[collectionId]) {
-      activeCollections[collectionId] = activeCollections[collectionId].filter(u => u.userId !== userId);
-      
-      // Clean up empty collections
-      if (activeCollections[collectionId].length === 0) {
-        delete activeCollections[collectionId];
-      }
-    }
-    
-    res.json({ message: 'Left collection successfully' });
-  });
-  
-  // Add landmark endpoint (replacing WebSocket)
+  // Simple CRUD operations for landmarks - no collaboration tracking
   app.post('/api/landmarks-collections/:collectionId/landmarks', async (req, res) => {
     const { collectionId } = req.params;
-    const { landmark, userId, username } = req.body;
+    const { landmark, username } = req.body;
     
-    if (!landmark || !userId || !username) {
+    if (!landmark) {
       return res.status(400).json({ 
-        message: 'Missing required fields: landmark, userId, username' 
+        message: 'Missing required field: landmark' 
       });
     }
     
-    try {
-      // Update or add user active status
-      if (!activeCollections[collectionId]) {
-        activeCollections[collectionId] = [];
-      }
-      
-      const existingUserIndex = activeCollections[collectionId].findIndex(u => u.userId === userId);
-      if (existingUserIndex >= 0) {
-        activeCollections[collectionId][existingUserIndex].lastActive = new Date();
-      } else {
-        activeCollections[collectionId].push({
-          userId,
-          username,
-          lastActive: new Date()
-        });
-      }
-      
+    try {      
       // Add the landmark to the collection
       const collection = await storage.getLandmarksCollection(collectionId);
       if (!collection) {
@@ -287,7 +180,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         collectionId,
         {
           landmarks: updatedLandmarks,
-          lastModifiedBy: username
+          lastModifiedBy: username || 'unknown'
         }
       );
       
@@ -305,34 +198,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Update landmark endpoint (replacing WebSocket)
+  // Update landmark endpoint - simplified
   app.put('/api/landmarks-collections/:collectionId/landmarks/:landmarkId', async (req, res) => {
     const { collectionId, landmarkId } = req.params;
-    const { landmark, userId, username } = req.body;
+    const { landmark, username } = req.body;
     
-    if (!landmark || !userId || !username) {
+    if (!landmark) {
       return res.status(400).json({ 
-        message: 'Missing required fields: landmark, userId, username' 
+        message: 'Missing required field: landmark' 
       });
     }
     
     try {
-      // Update user active status
-      if (!activeCollections[collectionId]) {
-        activeCollections[collectionId] = [];
-      }
-      
-      const existingUserIndex = activeCollections[collectionId].findIndex(u => u.userId === userId);
-      if (existingUserIndex >= 0) {
-        activeCollections[collectionId][existingUserIndex].lastActive = new Date();
-      } else {
-        activeCollections[collectionId].push({
-          userId,
-          username,
-          lastActive: new Date()
-        });
-      }
-      
       // Update the landmark
       const collection = await storage.getLandmarksCollection(collectionId);
       if (!collection) {
@@ -347,7 +224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         collectionId,
         {
           landmarks: updatedLandmarks,
-          lastModifiedBy: username
+          lastModifiedBy: username || 'unknown'
         }
       );
       
@@ -365,34 +242,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Delete landmark endpoint (replacing WebSocket)
+  // Delete landmark endpoint - simplified
   app.delete('/api/landmarks-collections/:collectionId/landmarks/:landmarkId', async (req, res) => {
     const { collectionId, landmarkId } = req.params;
-    const { userId, username } = req.body;
-    
-    if (!userId || !username) {
-      return res.status(400).json({ 
-        message: 'Missing required fields: userId, username' 
-      });
-    }
+    const { username } = req.body;
     
     try {
-      // Update user active status
-      if (!activeCollections[collectionId]) {
-        activeCollections[collectionId] = [];
-      }
-      
-      const existingUserIndex = activeCollections[collectionId].findIndex(u => u.userId === userId);
-      if (existingUserIndex >= 0) {
-        activeCollections[collectionId][existingUserIndex].lastActive = new Date();
-      } else {
-        activeCollections[collectionId].push({
-          userId,
-          username,
-          lastActive: new Date()
-        });
-      }
-      
       // Delete the landmark
       const collection = await storage.getLandmarksCollection(collectionId);
       if (!collection) {
@@ -405,7 +260,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         collectionId,
         {
           landmarks: updatedLandmarks,
-          lastModifiedBy: username
+          lastModifiedBy: username || 'unknown'
         }
       );
       
@@ -471,7 +326,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Create and return HTTP server (without WebSocket)
   const httpServer = createServer(app);
-  console.log('Starting server without WebSockets - using HTTP polling instead');
+  console.log('Starting server in single-user mode');
   
   return httpServer;
 }
