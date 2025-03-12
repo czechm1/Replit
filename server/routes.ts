@@ -166,6 +166,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
   
+  // Root level health check
+  app.get('/healthz', (req, res) => {
+    res.send('ok');
+  });
+  
   // Active users endpoint (replaces WebSocket functionality)
   app.get('/api/active-users/:collectionId', (req, res) => {
     const { collectionId } = req.params;

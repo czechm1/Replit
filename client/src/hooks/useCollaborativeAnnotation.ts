@@ -73,13 +73,11 @@ export function useCollaborativeAnnotation({
     // Join the collection
     const joinCollection = async () => {
       try {
-        await apiRequest(`/api/join-collection/${collectionId}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ userId, username })
-        });
+        await apiRequest(
+          'POST', 
+          `/api/join-collection/${collectionId}`,
+          { userId, username }
+        );
         
         setIsConnected(true);
         console.log('Joined collection via HTTP');
@@ -102,7 +100,7 @@ export function useCollaborativeAnnotation({
       if (!collectionId) return;
 
       try {
-        const response = await apiRequest(`/api/active-users/${collectionId}`);
+        const response = await apiRequest('GET', `/api/active-users/${collectionId}`);
         const data = await response.json();
         
         if (data.users) {
@@ -118,7 +116,7 @@ export function useCollaborativeAnnotation({
       if (!collectionId) return;
 
       try {
-        const response = await apiRequest(`/api/landmarks-collections/${collectionId}`);
+        const response = await apiRequest('GET', `/api/landmarks-collections/${collectionId}`);
         const data = await response.json();
         
         if (data) {
@@ -159,13 +157,11 @@ export function useCollaborativeAnnotation({
       
       // Leave the collection
       if (collectionId && userId) {
-        apiRequest(`/api/leave-collection/${collectionId}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ userId })
-        }).catch(err => {
+        apiRequest(
+          'POST',
+          `/api/leave-collection/${collectionId}`,
+          { userId }
+        ).catch(err => {
           console.error('Error leaving collection:', err);
         });
       }
@@ -181,13 +177,11 @@ export function useCollaborativeAnnotation({
     if (!collectionId || !userId || !username || !isConnected) return;
     
     try {
-      await apiRequest(`/api/landmarks-collections/${collectionId}/landmarks/${landmark.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ landmark, userId, username })
-      });
+      await apiRequest(
+        'PUT',
+        `/api/landmarks-collections/${collectionId}/landmarks/${landmark.id}`,
+        { landmark, userId, username }
+      );
       
       // Update local state
       handleRemoteLandmarkUpdate(landmark);
@@ -206,13 +200,11 @@ export function useCollaborativeAnnotation({
     if (!collectionId || !userId || !username || !isConnected) return;
     
     try {
-      await apiRequest(`/api/landmarks-collections/${collectionId}/landmarks`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ landmark, userId, username })
-      });
+      await apiRequest(
+        'POST',
+        `/api/landmarks-collections/${collectionId}/landmarks`,
+        { landmark, userId, username }
+      );
       
       // Update local state
       handleRemoteLandmarkAdd(landmark);
@@ -231,13 +223,11 @@ export function useCollaborativeAnnotation({
     if (!collectionId || !userId || !username || !isConnected) return;
     
     try {
-      await apiRequest(`/api/landmarks-collections/${collectionId}/landmarks/${landmarkId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ userId, username })
-      });
+      await apiRequest(
+        'DELETE',
+        `/api/landmarks-collections/${collectionId}/landmarks/${landmarkId}`,
+        { userId, username }
+      );
       
       // Update local state
       handleRemoteLandmarkRemove(landmarkId);

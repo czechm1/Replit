@@ -8,17 +8,38 @@ async function throwIfResNotOk(res: Response) {
 }
 
 export async function apiRequest(
-  method: string,
-  url: string,
+  methodOrUrl: string,
+  urlOrOptions?: string | RequestInit,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const res = await fetch(url, {
-    method,
-    headers: data ? { "Content-Type": "application/json" } : {},
-    body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
-  });
+  // Handle both function signatures:
+  // 1. apiRequest(url: string) - GET request
+  // 2. apiRequest(method: string, url: string, data?: unknown) - any method with optional data
+  
+  let method: string = 'GET';
+  let url: string;
+  let options: RequestInit = {};
+  
+  if (typeof urlOrOptions === 'string') {
+    // Using new signature: apiRequest(method, url, data)
+    method = methodOrUrl;
+    url = urlOrOptions;
+    options = {
+      method,
+      headers: data ? { "Content-Type": "application/json" } : {},
+      body: data ? JSON.stringify(data) : undefined,
+      credentials: "include",
+    };
+  } else {
+    // Using old signature: apiRequest(url, options?)
+    url = methodOrUrl;
+    if (urlOrOptions) {
+      options = urlOrOptions;
+    }
+    options.credentials = "include";
+  }
 
+  const res = await fetch(url, options);
   await throwIfResNotOk(res);
   return res;
 }
