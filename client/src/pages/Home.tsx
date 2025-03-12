@@ -32,7 +32,7 @@ const Home: React.FC = () => {
           </div>
           <div className="bg-white p-4 rounded-xl shadow-md">
             <img 
-              src="https://images.unsplash.com/photo-1654627567074-cc3b14c1e408?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600&q=80" 
+              src="/images/cephalometric.png" 
               alt="Cephalometric radiograph example" 
               className="rounded-lg w-full h-auto"
             />

@@ -1,4 +1,6 @@
-import type { Express } from "express";
+import express, { type Express } from "express";
+import path from "path";
+import fs from "fs";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
@@ -18,6 +20,7 @@ type Analysis = z.infer<typeof AnalysisSchema>;
 const analyses: Analysis[] = [];
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Static files are already being served in server/index.ts
   // Get all analyses for a patient
   app.get('/api/patients/:patientId/analyses', (req, res) => {
     const { patientId } = req.params;
@@ -79,6 +82,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     ];
     
     res.json(templates);
+  });
+  
+  // Debug endpoint to check if the server is running
+  app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+  
+  // Debug endpoint to check image paths
+  app.get('/api/debug/image-paths', (req, res) => {
+    const publicPath = path.join(process.cwd(), 'public');
+    const imagesPath = path.join(publicPath, 'images');
+    
+    // Check if directories exist
+    const publicExists = fs.existsSync(publicPath);
+    const imagesExists = fs.existsSync(imagesPath);
+    
+    // List files in directories if they exist
+    const publicFiles: string[] = [];
+    const imageFiles: string[] = [];
+    
+    if (publicExists) {
+      try {
+        const files = fs.readdirSync(publicPath);
+        files.forEach(file => publicFiles.push(file));
+      } catch (error) {
+        publicFiles.push(`Error reading directory: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    }
+    
+    if (imagesExists) {
+      try {
+        const files = fs.readdirSync(imagesPath);
+        files.forEach(file => imageFiles.push(file));
+      } catch (error) {
+        imageFiles.push(`Error reading directory: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    }
+    
+    res.json({
+      paths: {
+        publicPath,
+        imagesPath,
+      },
+      exists: {
+        publicExists,
+        imagesExists,
+      },
+      files: {
+        publicFiles,
+        imageFiles,
+      }
+    });
   });
 
   // Create HTTP server

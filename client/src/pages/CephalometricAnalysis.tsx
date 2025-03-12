@@ -9,8 +9,9 @@ import { Button } from "@/components/ui/button";
 import { 
   BarChartBig, 
   HelpCircle, 
-  Edit3,
-  Info
+  Info,
+  ChevronUp,
+  ChevronDown
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -24,13 +25,16 @@ const CephalometricAnalysis: React.FC = () => {
   const patientName = "John Smith";
   const analysisType = "Ricketts";
   
-  // We're no longer managing modals here as they're now handled in the ExportOptions component
+  // Toggle high contrast mode for improved visibility
+  const toggleHighContrast = () => {
+    setHighContrastMode(prev => !prev);
+  };
   
   // Setup keyboard shortcuts
   useKeyboardShortcuts({
     onToggleSidebar: () => setShowPanel(prev => !prev),
     onShowHelp: () => setShowKeyboardShortcuts(true),
-    onToggleHighContrast: () => {}, // Keep for keyboard shortcut handling but no longer used
+    onToggleHighContrast: toggleHighContrast,
     // Print shortcut is not implemented at this level anymore
   });
 
@@ -54,14 +58,7 @@ const CephalometricAnalysis: React.FC = () => {
             <span className="text-sm">Help</span>
           </Button>
           
-          <Button 
-            size="sm" 
-            variant={showPanel ? "default" : "outline"}
-            onClick={() => setShowPanel(prev => !prev)}
-          >
-            <BarChartBig className="h-4 w-4 mr-1" />
-            <span className="text-sm">Analyze</span>
-          </Button>
+          {/* Moved the Expand/Collapse button to be at the bottom of the screen */}
         </div>
       </header>
       
@@ -72,24 +69,9 @@ const CephalometricAnalysis: React.FC = () => {
       <div className="flex-grow flex overflow-hidden">
         {/* Radiograph View - takes most of the space */}
         <div className="flex-grow bg-slate-50 relative">
-          <RadiographViewer highContrastMode={false} />
+          <RadiographViewer highContrastMode={highContrastMode} />
           
-          {/* Edit landmarks button in top-right corner */}
-          <div className="absolute top-4 right-4">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button size="sm" variant="secondary" className="shadow-md">
-                    <Edit3 className="h-4 w-4 mr-1" />
-                    <span className="text-sm">Edit Landmarks</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Edit landmarks position</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
+          {/* Removed the Edit landmarks button as requested */}
         </div>
         
         {/* Controls panel - conditionally rendered */}
@@ -101,6 +83,30 @@ const CephalometricAnalysis: React.FC = () => {
         )}
       </div>
       
+      {/* Expand/Collapse button positioned at bottom of screen */}
+      <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 z-10">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="secondary" 
+                size="sm" 
+                className="h-8 rounded-full px-3 shadow-md"
+                onClick={() => setShowPanel(prev => !prev)}
+              >
+                {showPanel ? 
+                  <><ChevronDown className="h-4 w-4 mr-1" /> Collapse</> : 
+                  <><ChevronUp className="h-4 w-4 mr-1" /> Expand</>
+                }
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{showPanel ? 'Collapse Analysis Panel' : 'Expand Analysis Panel'}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+
       {/* Modals */}
       <KeyboardShortcutsModal
         isOpen={showKeyboardShortcuts}

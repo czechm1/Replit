@@ -1,10 +1,15 @@
 import express, { type Request, Response, NextFunction } from "express";
+import path from "path";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Setup static file serving
+app.use('/images', express.static(path.join(process.cwd(), 'public/images')));
+app.use('/public', express.static(path.join(process.cwd(), 'public')));
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -45,6 +50,35 @@ app.use((req, res, next) => {
 
     res.status(status).json({ message });
     throw err;
+  });
+  
+  // Debug route to view all registered routes
+  app.get('/api/debug/routes', (_req, res) => {
+    const routes: {method: string, path: string}[] = [];
+    
+    app._router.stack.forEach((middleware: any) => {
+      if (middleware.route) {
+        // Routes registered directly on the app
+        const path = middleware.route.path;
+        const methods = Object.keys(middleware.route.methods);
+        methods.forEach(method => {
+          routes.push({ method: method.toUpperCase(), path });
+        });
+      } else if (middleware.name === 'router') {
+        // Router middleware
+        middleware.handle.stack.forEach((handler: any) => {
+          if (handler.route) {
+            const path = handler.route.path;
+            const methods = Object.keys(handler.route.methods);
+            methods.forEach(method => {
+              routes.push({ method: method.toUpperCase(), path });
+            });
+          }
+        });
+      }
+    });
+    
+    res.json({ routes });
   });
 
   // importantly only setup vite in development and after
