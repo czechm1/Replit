@@ -103,7 +103,7 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button size="sm" variant="default">
+          <Button size="sm" variant="default" data-tutorial="export_options">
             <FileText className="h-4 w-4 mr-1" />
             <span className="text-sm mr-1">Report</span>
             <ChevronDown className="h-3 w-3" />
