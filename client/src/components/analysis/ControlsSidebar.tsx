@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useTutorial } from "@/context/TutorialContext";
 import { 
   Brain, 
   BarChart3, 
@@ -28,6 +29,7 @@ const ControlsSidebar: React.FC<ControlsSidebarProps> = ({
 }) => {
   const { analysisView, setAnalysisView } = useAnalysisView();
   const [expanded, setExpanded] = useState(true);
+  const { trackInteraction } = useTutorial();
   
   // Essential analytics data - only the most critical values
   const criticalFindings = [
@@ -50,6 +52,11 @@ const ControlsSidebar: React.FC<ControlsSidebarProps> = ({
   // Clinical summary for quick assessment
   const clinicalSummary = "Class II skeletal pattern with retrognathic mandible and compensated dentition";
   
+  const handleViewChange = (view: string) => {
+    setAnalysisView(view);
+    trackInteraction('view-switcher');
+  };
+  
   return (
     <motion.div 
       className="bg-white border-l border-slate-200 flex flex-col overflow-hidden shadow-md"
@@ -64,6 +71,7 @@ const ControlsSidebar: React.FC<ControlsSidebarProps> = ({
           size="icon" 
           className="h-6 w-6 rounded-full shadow-md p-0"
           onClick={() => setExpanded(!expanded)}
+          id="toggle-panel-btn"
         >
           {expanded ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
         </Button>
@@ -76,7 +84,7 @@ const ControlsSidebar: React.FC<ControlsSidebarProps> = ({
             variant="ghost" 
             size="icon"
             className={`h-8 w-8 rounded-full ${analysisView === 'line' ? 'bg-primary-100 text-primary-600' : 'text-slate-400'}`}
-            onClick={() => setAnalysisView('line')}
+            onClick={() => handleViewChange('line')}
           >
             <Layers className="h-4 w-4" />
           </Button>
@@ -85,7 +93,7 @@ const ControlsSidebar: React.FC<ControlsSidebarProps> = ({
             variant="ghost" 
             size="icon"
             className={`h-8 w-8 rounded-full ${analysisView === 'chart' ? 'bg-primary-100 text-primary-600' : 'text-slate-400'}`}
-            onClick={() => setAnalysisView('chart')}
+            onClick={() => handleViewChange('chart')}
           >
             <BarChart3 className="h-4 w-4" />
           </Button>
@@ -110,7 +118,10 @@ const ControlsSidebar: React.FC<ControlsSidebarProps> = ({
               </motion.div>
               
               <div className="flex items-center gap-2">
-                <Badge variant="outline" size="sm" className="h-5 text-[10px] bg-slate-50 border-slate-200 px-1.5">
+                <Badge 
+                  variant="outline" 
+                  className="h-5 text-[10px] bg-slate-50 border-slate-200 px-1.5"
+                >
                   Ricketts
                 </Badge>
                 <div className="text-xs font-mono text-slate-500">25y/M</div>
@@ -118,7 +129,10 @@ const ControlsSidebar: React.FC<ControlsSidebarProps> = ({
             </div>
             
             {/* Clinical summary - one-line key insight */}
-            <div className="bg-amber-50 border border-amber-100 rounded-md p-2 mb-1.5 flex items-start gap-1.5">
+            <div 
+              id="ai-insights-banner"
+              className="bg-amber-50 border border-amber-100 rounded-md p-2 mb-1.5 flex items-start gap-1.5"
+            >
               <Brain className="h-3.5 w-3.5 text-amber-500 mt-0.5 flex-shrink-0" />
               <div className="text-xs text-amber-800">
                 {clinicalSummary}
@@ -127,13 +141,13 @@ const ControlsSidebar: React.FC<ControlsSidebarProps> = ({
           </div>
           
           {/* Ultra-minimal tab switcher */}
-          <div className="flex px-1 pt-2 border-b border-slate-200">
+          <div id="view-switcher" className="flex px-1 pt-2 border-b border-slate-200">
             {['line', 'chart', 'profilogram'].map((view) => (
               <Button 
                 key={view}
                 variant="ghost"
                 size="sm"
-                onClick={() => setAnalysisView(view)}
+                onClick={() => handleViewChange(view)}
                 className={`h-8 flex-1 rounded-none border-b-2 transition-colors ${
                   analysisView === view 
                     ? 'border-primary-600 text-primary-600' 
@@ -157,7 +171,7 @@ const ControlsSidebar: React.FC<ControlsSidebarProps> = ({
                     <div className="text-xs font-medium text-slate-500">CRITICAL FINDINGS</div>
                   </div>
                   
-                  <div className="space-y-1.5">
+                  <div id="critical-findings-section" className="space-y-1.5">
                     {criticalFindings.map((metric) => (
                       <div 
                         key={metric.name}
