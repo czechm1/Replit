@@ -8,6 +8,7 @@ import {
   LandmarksCollection,
   Landmark
 } from "@shared/schema";
+import { registerDebugRoutes } from "./debug_utils";
 
 // Define analysis data schemas
 const AnalysisSchema = z.object({
@@ -24,6 +25,9 @@ type Analysis = z.infer<typeof AnalysisSchema>;
 const analyses: Analysis[] = [];
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Register debug routes
+  registerDebugRoutes(app);
+  
   // Static files are already being served in server/index.ts
   // Get all analyses for a patient
   app.get('/api/patients/:patientId/analyses', (req, res) => {
