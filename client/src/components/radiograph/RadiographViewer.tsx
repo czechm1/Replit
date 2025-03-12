@@ -120,10 +120,7 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({ highContrastMode })
       </div>
       
       {/* Minimal toolbar */}
-      <div 
-        id="radiograph-controls"
-        className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-sm rounded-full shadow-md px-2 py-1 flex space-x-1"
-      >
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-sm rounded-full shadow-md px-2 py-1 flex space-x-1">
         <Button 
           variant="ghost" 
           size="icon"

@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import PatientInfoBar from "@/components/layout/PatientInfoBar";
 import RadiographViewer from "@/components/radiograph/RadiographViewer";
 import ControlsSidebar from "@/components/analysis/ControlsSidebar";
 import KeyboardShortcutsModal from "@/components/modals/KeyboardShortcutsModal";
-import TutorialButton from "@/components/tutorial/TutorialButton";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
-import { useTutorial } from "@/context/TutorialContext";
 import { 
   Tabs, 
   TabsList, 
@@ -20,7 +18,6 @@ const CephalometricAnalysis: React.FC = () => {
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
   const [highContrastMode, setHighContrastMode] = useState(false);
   const [analysisMode, setAnalysisMode] = useState("analysis");
-  const { trackInteraction } = useTutorial();
 
   // Setup keyboard shortcuts
   useKeyboardShortcuts({
@@ -29,44 +26,13 @@ const CephalometricAnalysis: React.FC = () => {
     onShowHelp: () => setShowKeyboardShortcuts(true),
   });
 
-  // Track component interactions for the tutorial
-  const handlePanelToggle = () => {
-    trackInteraction('toggle-panel-btn');
-    setShowPanel(prev => !prev);
-  };
-
-  const handleViewChange = (value: string) => {
-    trackInteraction('view-switcher');
-    setAnalysisMode(value);
-  };
-
-  const handleContrastToggle = () => {
-    trackInteraction('radiograph-controls');
-    setHighContrastMode(prev => !prev);
-  };
-
-  // When the component mounts, show any view-triggered tutorials
-  useEffect(() => {
-    // Wait for DOM to be fully loaded
-    const timer = setTimeout(() => {
-      trackInteraction('welcome');
-    }, 1000);
-    
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
     <div className="h-screen flex flex-col bg-white">
       {/* Simplified header with core actions */}
       <header className="p-3 border-b border-slate-200 flex justify-between items-center">
         <div className="flex items-center space-x-2">
           <span className="font-bold text-xl text-primary-700">CephaloScan</span>
-          <Tabs 
-            value={analysisMode} 
-            onValueChange={handleViewChange} 
-            className="ml-6"
-            id="view-switcher"
-          >
+          <Tabs value={analysisMode} onValueChange={setAnalysisMode} className="ml-6">
             <TabsList>
               <TabsTrigger value="digitization">Digitize</TabsTrigger>
               <TabsTrigger value="analysis">Analyze</TabsTrigger>
@@ -76,39 +42,19 @@ const CephalometricAnalysis: React.FC = () => {
         </div>
         
         <div className="flex items-center space-x-2">
-          <Button 
-            size="sm" 
-            variant="ghost" 
-            onClick={handleContrastToggle}
-            id="radiograph-controls"
-          >
+          <Button size="sm" variant="ghost" onClick={() => setHighContrastMode(prev => !prev)}>
             <Eye className="h-4 w-4 mr-1" />
             <span className="text-sm">Contrast</span>
           </Button>
-          
-          {/* Replace the old help button with the TutorialButton */}
-          <TutorialButton />
-          
-          <Button 
-            size="sm" 
-            variant="ghost" 
-            onClick={() => setShowKeyboardShortcuts(true)}
-          >
+          <Button size="sm" variant="ghost" onClick={() => setShowKeyboardShortcuts(true)}>
             <HelpCircle className="h-4 w-4 mr-1" />
-            <span className="text-sm">Shortcuts</span>
+            <span className="text-sm">Help</span>
           </Button>
-          
           <Button size="sm" variant="outline">
             <Save className="h-4 w-4 mr-1" />
             <span className="text-sm">Save</span>
           </Button>
-          
-          <Button 
-            id="toggle-panel-btn"
-            size="sm" 
-            variant="ghost" 
-            onClick={handlePanelToggle}
-          >
+          <Button size="sm" variant="ghost" onClick={() => setShowPanel(prev => !prev)}>
             <Settings className="h-4 w-4" />
           </Button>
         </div>
@@ -128,7 +74,7 @@ const CephalometricAnalysis: React.FC = () => {
         {showPanel && (
           <ControlsSidebar 
             showDrawerPanel={showPanel} 
-            onToggleDrawerPanel={handlePanelToggle} 
+            onToggleDrawerPanel={() => setShowPanel(prev => !prev)} 
           />
         )}
       </div>
