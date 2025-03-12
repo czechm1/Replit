@@ -184,16 +184,13 @@ const ControlsSidebar: React.FC<ControlsSidebarProps> = ({
               onCheckedChange={setShowOnlyInvalid}
               className="h-4 w-8 data-[state=checked]:bg-primary-600"
             />
-            <Badge variant="outline" className="ml-1 text-xs bg-amber-50 text-amber-700">
-              {invalidCount} Issues
-            </Badge>
           </div>
         </div>
       </div>
       
       {/* Analysis Table */}
       <div className="flex-grow overflow-auto">
-        <div className="p-3 space-y-4">
+        <div className="p-3 pb-6 space-y-4">
           <AnalysisTable 
             measurements={showOnlyInvalid 
               ? rickettsAnalysisData.filter(m => !m.inRange)
@@ -202,16 +199,7 @@ const ControlsSidebar: React.FC<ControlsSidebarProps> = ({
             analysisName={analysisSelected}
           />
           
-          <div className="flex justify-between pt-2">
-            <Button variant="outline" size="sm" className="h-7 text-xs gap-1">
-              <Save className="h-3 w-3" />
-              Save
-            </Button>
-            <Button variant="default" size="sm" className="h-7 text-xs gap-1">
-              <FileText className="h-3.5 w-3.5 mr-1" />
-              Generate Report
-            </Button>
-          </div>
+
         </div>
       </div>
     </div>

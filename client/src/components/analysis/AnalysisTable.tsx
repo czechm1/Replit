@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, HelpCircle } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 // Define the structure of a measurement in the table
 interface AnalysisMeasurement {
@@ -34,8 +34,6 @@ const AnalysisTable: React.FC<AnalysisTableProps> = ({ measurements, analysisNam
       <div className="flex justify-between items-center mb-3">
         <h3 className="font-medium text-slate-800">{analysisName} Analysis</h3>
         <div className="flex gap-2">
-          {/* Filter button removed as it's managed by parent component */}
-          
           <Button 
             variant="outline" 
             size="sm" 
@@ -67,7 +65,6 @@ const AnalysisTable: React.FC<AnalysisTableProps> = ({ measurements, analysisNam
               <th className="text-center p-2 font-medium text-slate-700">Result</th>
               {showExtendedColumns && (
                 <>
-                  <th className="text-center p-2 font-medium text-slate-700">Severity</th>
                   <th className="text-center p-2 font-medium text-slate-700">Chart</th>
                   <th className="text-center p-2 font-medium text-slate-700">Meaning</th>
                 </>
@@ -81,34 +78,40 @@ const AnalysisTable: React.FC<AnalysisTableProps> = ({ measurements, analysisNam
                 <td className="p-2 text-center text-slate-600">{measurement.mean}</td>
                 <td className="p-2 text-center text-slate-600">{measurement.sd}</td>
                 <td className={`p-2 text-center font-medium ${isInRange(measurement) ? 'text-green-600' : 'text-red-600'}`}>
-                  {measurement.result}
+                  {!showExtendedColumns ? (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <span className="cursor-help">{measurement.result}</span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="max-w-xs text-xs">{measurement.meaning}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  ) : (
+                    measurement.result
+                  )}
                 </td>
                 {showExtendedColumns && (
                   <>
-                    <td className="p-2 text-center text-slate-600">{measurement.severity}</td>
                     <td className="p-2 text-center">
                       {measurement.polygonalChart && (
-                        <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
-                          <div 
-                            className={`h-full ${isInRange(measurement) ? 'bg-green-500' : 'bg-red-500'} rounded-full`} 
-                            style={{ width: '60%' }}
-                          ></div>
+                        <div className="flex items-center">
+                          <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full ${isInRange(measurement) ? 'bg-green-500' : 'bg-red-500'} rounded-full`} 
+                              style={{ width: `${isInRange(measurement) ? '100%' : '60%'}` }}
+                            ></div>
+                          </div>
+                          <span className="ml-2 text-xs font-medium text-slate-500">
+                            {measurement.severity}
+                          </span>
                         </div>
                       )}
                     </td>
-                    <td className="p-2 text-center">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                              <HelpCircle className="h-4 w-4 text-slate-400" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p className="max-w-xs text-xs">{measurement.meaning}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                    <td className="p-2 text-left">
+                      <p className="text-xs text-slate-600">{measurement.meaning}</p>
                     </td>
                   </>
                 )}
