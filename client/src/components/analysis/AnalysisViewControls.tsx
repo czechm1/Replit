@@ -8,7 +8,20 @@ import {
   RadioGroupItem 
 } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
-import { ChevronUp, ChevronDown, Plus, Minus, RotateCw, RotateCcw } from "lucide-react";
+import { 
+  Plus, 
+  Minus, 
+  RotateCw, 
+  RotateCcw, 
+  AlignVerticalJustifyCenter,
+  BarChart3,
+  LineChart, 
+  Activity,
+  MoreVertical,
+  Save,
+  Circle
+} from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface AnalysisViewControlsProps {
   analysisView: string;
@@ -30,11 +43,15 @@ const AnalysisViewControls: React.FC<AnalysisViewControlsProps> = ({
   const [selectedDate, setSelectedDate] = useState("2025-01-30");
 
   return (
-    <div className="px-4 py-3 border-b border-slate-200">
-      <div className="mb-3">
-        <h3 className="font-medium text-slate-800 mb-2">View Mode</h3>
-        <div className="flex items-center mb-3">
-          <span className="text-sm text-slate-600 mr-3">Align to FH plane</span>
+    <div className="space-y-3">
+      <div className="space-y-3">
+        <h3 className="text-sm font-medium text-slate-600">VIEW MODE</h3>
+        
+        <div className="flex items-center gap-3 mb-2">
+          <AlignVerticalJustifyCenter className="h-4 w-4 text-slate-500" />
+          <Label htmlFor="align-fh" className="text-sm text-slate-600 cursor-pointer flex-grow">
+            Align to FH plane
+          </Label>
           <Switch 
             id="align-fh" 
             checked={alignToFH} 
@@ -42,48 +59,29 @@ const AnalysisViewControls: React.FC<AnalysisViewControlsProps> = ({
           />
         </div>
         
-        <div className="flex text-sm font-medium">
-          <Button
-            variant="ghost"
-            onClick={() => onViewChange('line')}
-            className={`flex-1 px-4 py-2 border transition-colors rounded-l-md ${
-              analysisView === 'line' 
-                ? 'bg-primary-100 text-primary-700 border-primary-300' 
-                : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-            }`}
-          >
-            Line analysis
-          </Button>
-          <Button
-            variant="ghost"
-            onClick={() => onViewChange('profilogram')}
-            className={`flex-1 px-4 py-2 border-t border-b border-r transition-colors ${
-              analysisView === 'profilogram' 
-                ? 'bg-primary-100 text-primary-700 border-primary-300' 
-                : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-            }`}
-          >
-            Profilogram
-          </Button>
-          <Button
-            variant="ghost"
-            onClick={() => onViewChange('chart')}
-            className={`flex-1 px-4 py-2 border transition-colors rounded-r-md ${
-              analysisView === 'chart' 
-                ? 'bg-primary-100 text-primary-700 border-primary-300' 
-                : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-            }`}
-          >
-            Chart
-          </Button>
-        </div>
+        <Tabs defaultValue={analysisView} onValueChange={onViewChange} className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-2">
+            <TabsTrigger value="line" className="text-xs">
+              <LineChart className="h-3.5 w-3.5 mr-1" />
+              Line Analysis
+            </TabsTrigger>
+            <TabsTrigger value="profilogram" className="text-xs">
+              <Activity className="h-3.5 w-3.5 mr-1" />
+              Profilogram
+            </TabsTrigger>
+            <TabsTrigger value="chart" className="text-xs">
+              <BarChart3 className="h-3.5 w-3.5 mr-1" />
+              Chart
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
       
       {/* Line Analysis or Profilogram Options */}
       {(analysisView === 'line' || analysisView === 'profilogram') && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <Label htmlFor="cephalography" className="text-sm text-slate-600 font-medium">
+            <Label htmlFor="cephalography" className="text-sm text-slate-600">
               Cephalography
             </Label>
             <Switch 
@@ -94,153 +92,137 @@ const AnalysisViewControls: React.FC<AnalysisViewControlsProps> = ({
           </div>
           
           {analysisView === 'profilogram' && (
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <Label className="text-sm text-slate-600 font-medium">Origin</Label>
-                </div>
+                <Label className="text-sm text-slate-600">Origin</Label>
                 <RadioGroup 
                   defaultValue="sella" 
                   className="flex items-center space-x-2"
                   value={selectedOrigin}
                   onValueChange={setSelectedOrigin}
+                  orientation="horizontal"
                 >
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-1">
                     <RadioGroupItem value="sella" id="origin-sella" />
-                    <Label htmlFor="origin-sella" className="text-sm text-slate-600">Sella</Label>
+                    <Label htmlFor="origin-sella" className="text-xs text-slate-600">Sella</Label>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-1">
                     <RadioGroupItem value="nasion" id="origin-nasion" />
-                    <Label htmlFor="origin-nasion" className="text-sm text-slate-600">Nasion</Label>
+                    <Label htmlFor="origin-nasion" className="text-xs text-slate-600">Nasion</Label>
                   </div>
                 </RadioGroup>
               </div>
               
               <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <Label className="text-sm text-slate-600 font-medium">Plane</Label>
-                </div>
+                <Label className="text-sm text-slate-600">Plane</Label>
                 <RadioGroup 
                   defaultValue="sn" 
                   className="flex items-center space-x-2"
                   value={selectedPlane}
                   onValueChange={setSelectedPlane}
+                  orientation="horizontal"
                 >
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-1">
                     <RadioGroupItem value="sn" id="plane-sn" />
-                    <Label htmlFor="plane-sn" className="text-sm text-slate-600">SN</Label>
+                    <Label htmlFor="plane-sn" className="text-xs text-slate-600">SN</Label>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-1">
                     <RadioGroupItem value="fh" id="plane-fh" />
-                    <Label htmlFor="plane-fh" className="text-sm text-slate-600">FH</Label>
+                    <Label htmlFor="plane-fh" className="text-xs text-slate-600">FH</Label>
                   </div>
                 </RadioGroup>
               </div>
               
-              <div>
-                <Label className="block text-sm text-slate-600 font-medium mb-1">Template Size</Label>
-                <div className="flex items-center space-x-3">
-                  <Slider
-                    value={[templateSize]}
-                    onValueChange={(value) => setTemplateSize(value[0])}
-                    min={0}
-                    max={100}
-                    step={1}
-                    className="flex-grow"
-                  />
-                  <div className="flex space-x-1">
-                    <Button variant="outline" size="icon" className="p-1.5 rounded-full border border-slate-300 text-slate-500 hover:bg-slate-100">
-                      <Plus className="h-4 w-4" />
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <Label className="text-sm text-slate-600">Template Size</Label>
+                  <span className="text-xs text-slate-500">{templateSize}%</span>
+                </div>
+                <Slider
+                  value={[templateSize]}
+                  onValueChange={(value) => setTemplateSize(value[0])}
+                  min={0}
+                  max={100}
+                  step={1}
+                  className="my-1"
+                />
+                <div className="flex justify-between gap-2 mt-2">
+                  <div className="flex items-center gap-1 bg-slate-100 rounded-full px-1">
+                    <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full text-slate-500">
+                      <Minus className="h-3 w-3" />
                     </Button>
-                    <div className="p-1.5 rounded-full bg-slate-100 text-slate-700 text-sm">
-                      MOVE
-                    </div>
-                    <Button variant="outline" size="icon" className="p-1.5 rounded-full border border-slate-300 text-slate-500 hover:bg-slate-100">
-                      <Minus className="h-4 w-4" />
+                    <span className="text-xs font-medium text-slate-700">MOVE</span>
+                    <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full text-slate-500">
+                      <Plus className="h-3 w-3" />
                     </Button>
                   </div>
-                </div>
-                <div className="mt-2 flex">
-                  <div className="flex-grow"></div>
-                  <div className="flex items-center space-x-1">
-                    <Button variant="outline" size="icon" className="p-1.5 rounded-full border border-slate-300 text-slate-500 hover:bg-slate-100">
-                      <RotateCw className="h-4 w-4" />
+                  <div className="flex items-center gap-1 bg-slate-100 rounded-full px-1">
+                    <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full text-slate-500">
+                      <RotateCcw className="h-3 w-3" />
                     </Button>
-                    <div className="p-1.5 rounded-full bg-slate-100 text-slate-700 text-sm">
-                      ROTATE
-                    </div>
-                    <Button variant="outline" size="icon" className="p-1.5 rounded-full border border-slate-300 text-slate-500 hover:bg-slate-100">
-                      <RotateCcw className="h-4 w-4" />
+                    <span className="text-xs font-medium text-slate-700">ROTATE</span>
+                    <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full text-slate-500">
+                      <RotateCw className="h-3 w-3" />
                     </Button>
                   </div>
                 </div>
               </div>
               
               <Button 
-                variant="default" 
-                className="w-full mt-2 px-4 py-2 bg-secondary-100 text-secondary-700 hover:bg-secondary-200 text-sm font-medium rounded-md transition-colors flex items-center justify-center"
+                variant="secondary" 
+                size="sm"
+                className="w-full mt-2 flex items-center justify-center"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z" />
-                </svg>
+                <Save className="h-3.5 w-3.5 mr-2" />
                 Save Template
               </Button>
             </div>
           )}
           
           {analysisView === 'line' && (
-            <div className="space-y-3">
+            <div className="space-y-3 mt-2">
               <div className="flex justify-between items-center">
-                <Label htmlFor="tracing-line" className="text-sm text-slate-600 font-medium">Tracing Line</Label>
-                <div className="flex items-center space-x-2">
+                <Label htmlFor="tracing-line" className="text-sm text-slate-600">Tracing Line</Label>
+                <div className="flex items-center gap-2">
                   <Switch 
                     id="tracing-line" 
                     checked={tracingLine} 
                     onCheckedChange={setTracingLine} 
                   />
-                  <div className="flex items-center space-x-1">
-                    <div className="w-5 h-5 rounded-full bg-primary-600 flex items-center justify-center">
-                      <div className="w-3 h-3 rounded-full bg-white"></div>
-                    </div>
-                    <div className="text-sm text-slate-600">Color</div>
-                    <Badge variant="feature" className="px-1.5 py-0.5 text-xs font-medium rounded-sm">NEW</Badge>
-                  </div>
+                  <Badge className="flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer px-2">
+                    <Circle className="h-3 w-3 fill-primary-500 text-primary-500" />
+                    <span className="text-xs">Color</span>
+                  </Badge>
                 </div>
               </div>
               
               <div className="flex justify-between items-center">
-                <Label htmlFor="analysis-line" className="text-sm text-slate-600 font-medium">Analysis Line</Label>
-                <div className="flex items-center space-x-2">
+                <Label htmlFor="analysis-line" className="text-sm text-slate-600">Analysis Line</Label>
+                <div className="flex items-center gap-2">
                   <Switch 
                     id="analysis-line" 
                     checked={analysisLine} 
                     onCheckedChange={setAnalysisLine} 
                   />
-                  <div className="flex items-center space-x-1">
-                    <div className="w-5 h-5 rounded-full bg-accent-500 flex items-center justify-center">
-                      <div className="w-3 h-3 rounded-full bg-white"></div>
-                    </div>
-                    <div className="text-sm text-slate-600">Color</div>
-                    <Badge variant="feature" className="px-1.5 py-0.5 text-xs font-medium rounded-sm">NEW</Badge>
-                  </div>
+                  <Badge className="flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer px-2">
+                    <Circle className="h-3 w-3 fill-accent-500 text-accent-500" />
+                    <span className="text-xs">Color</span>
+                  </Badge>
                 </div>
               </div>
               
               <div className="flex justify-between items-center">
-                <Label htmlFor="measurements" className="text-sm text-slate-600 font-medium">Measurements</Label>
-                <div className="flex items-center space-x-2">
+                <Label htmlFor="measurements" className="text-sm text-slate-600">Measurements</Label>
+                <div className="flex items-center gap-2">
                   <Switch 
                     id="measurements" 
                     checked={measurements} 
                     onCheckedChange={setMeasurements} 
                   />
-                  <div className="flex items-center space-x-1">
-                    <div className="w-5 h-5 rounded-full bg-secondary-500 flex items-center justify-center">
-                      <div className="w-3 h-3 rounded-full bg-white"></div>
-                    </div>
-                    <div className="text-sm text-slate-600">Color</div>
-                    <Badge variant="feature" className="px-1.5 py-0.5 text-xs font-medium rounded-sm">NEW</Badge>
-                  </div>
+                  <Badge className="flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer px-2">
+                    <Circle className="h-3 w-3 fill-secondary-500 text-secondary-500" />
+                    <span className="text-xs">Color</span>
+                  </Badge>
                 </div>
               </div>
             </div>
@@ -250,21 +232,25 @@ const AnalysisViewControls: React.FC<AnalysisViewControlsProps> = ({
       
       {/* Chart View Options */}
       {analysisView === 'chart' && (
-        <div className="space-y-3">
+        <div className="space-y-3 mt-2">
           <div className="flex items-center justify-between">
             <div className="flex space-x-2">
-              <Button variant="outline" className="px-3 py-1 text-xs font-medium bg-primary-100 text-primary-700 rounded">SELECT</Button>
-              <Button variant="outline" className="px-3 py-1 text-xs font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 rounded transition-colors">RECORD</Button>
-              <Badge variant="feature" className="px-1.5 py-0.5 text-xs font-medium rounded-sm self-center">NEW</Badge>
+              <Button variant="outline" size="sm" className="text-xs font-medium bg-primary-50 text-primary-600 border-primary-200">
+                SELECT
+              </Button>
+              <Button variant="outline" size="sm" className="text-xs font-medium bg-slate-50 text-slate-600 border-slate-200">
+                RECORD
+              </Button>
+              <Badge variant="outline" className="self-center text-xs bg-secondary-50 text-secondary-600 border-secondary-200">
+                NEW
+              </Badge>
             </div>
-            <Button variant="ghost" size="sm" className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
-              </svg>
+            <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400">
+              <MoreVertical className="h-4 w-4" />
             </Button>
           </div>
           
-          <div className="flex items-center space-x-2 bg-slate-50 p-2 rounded-md">
+          <div className="bg-slate-50 p-2 rounded-md">
             <RadioGroup 
               defaultValue="2025-01-30" 
               value={selectedDate}
