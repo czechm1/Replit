@@ -37,6 +37,8 @@ export const LandmarksCollectionSchema = z.object({
   landmarks: z.array(LandmarkSchema),
   createdAt: z.string().datetime().optional(),
   updatedAt: z.string().datetime().optional(),
+  createdBy: z.string().optional(), // User who created the collection
+  lastModifiedBy: z.string().optional(), // User who last modified the collection
 });
 
 export type LandmarksCollection = z.infer<typeof LandmarksCollectionSchema>;
@@ -75,3 +77,72 @@ export const AnalysisTemplateSchema = z.object({
 });
 
 export type AnalysisTemplate = z.infer<typeof AnalysisTemplateSchema>;
+
+// WebSocket message types for real-time collaboration
+export const WebSocketMessageSchema = z.discriminatedUnion("type", [
+  // Client connecting to a specific collection
+  z.object({
+    type: z.literal("join_collection"),
+    collectionId: z.string(),
+    userId: z.string(),
+    username: z.string(),
+  }),
+  
+  // Client leaving a collection
+  z.object({
+    type: z.literal("leave_collection"),
+    collectionId: z.string(),
+    userId: z.string(),
+  }),
+  
+  // Client updating a landmark position
+  z.object({
+    type: z.literal("update_landmark"),
+    collectionId: z.string(),
+    userId: z.string(),
+    username: z.string(),
+    landmark: LandmarkSchema,
+  }),
+  
+  // Client adding a new landmark
+  z.object({
+    type: z.literal("add_landmark"),
+    collectionId: z.string(),
+    userId: z.string(),
+    username: z.string(),
+    landmark: LandmarkSchema,
+  }),
+  
+  // Client removing a landmark
+  z.object({
+    type: z.literal("remove_landmark"),
+    collectionId: z.string(),
+    userId: z.string(),
+    username: z.string(),
+    landmarkId: z.string(),
+  }),
+  
+  // Server broadcasting current users in a collection
+  z.object({
+    type: z.literal("users_in_collection"),
+    collectionId: z.string(),
+    users: z.array(z.object({
+      id: z.string(),
+      username: z.string(),
+    })),
+  }),
+  
+  // Server broadcasting collection data
+  z.object({
+    type: z.literal("collection_data"),
+    collection: LandmarksCollectionSchema,
+  }),
+  
+  // Server broadcasting an error message
+  z.object({
+    type: z.literal("error"),
+    message: z.string(),
+  })
+]);
+
+export type WebSocketMessage = z.infer<typeof WebSocketMessageSchema>;

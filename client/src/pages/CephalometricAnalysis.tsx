@@ -1,25 +1,50 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import PatientInfoBar from "@/components/layout/PatientInfoBar";
 import RadiographViewer from "@/components/radiograph/RadiographViewer";
 import ControlsSidebar from "@/components/analysis/ControlsSidebar";
 import KeyboardShortcutsModal from "@/components/modals/KeyboardShortcutsModal";
 import ExportOptions from "@/components/export/ExportOptions";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { 
-  BarChartBig, 
   HelpCircle, 
-  Info,
-  ChevronUp,
-  ChevronDown
+  Users,
+  PanelRight
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 
 const CephalometricAnalysis: React.FC = () => {
-  // Core state - simplified to only what's necessary
+  const [location] = useLocation();
+  const { toast } = useToast();
+  
+  // Core state
   const [showPanel, setShowPanel] = useState(true);
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
   const [highContrastMode, setHighContrastMode] = useState(false);
+  
+  // Extract patient ID and image ID from URL if available
+  // Format could be like: /analysis/patient-123/image-456
+  const [patientId, setPatientId] = useState<string>("demo-patient-1");
+  const [imageId, setImageId] = useState<string>("demo-image-1");
+  
+  useEffect(() => {
+    // Parse path to extract patient and image IDs
+    const pathParts = location.split('/').filter(Boolean);
+    if (pathParts.length >= 3 && pathParts[0] === 'analysis') {
+      setPatientId(pathParts[1]);
+      setImageId(pathParts[2]);
+    }
+    
+    // Let users know about the collaborative feature
+    toast({
+      title: "Collaborative Mode Available",
+      description: "You can now edit landmarks together with other users in real-time!",
+      duration: 5000
+    });
+  }, [location, toast]);
   
   // Patient and analysis data - would come from context or props in a real app
   const patientName = "John Smith";
@@ -35,19 +60,22 @@ const CephalometricAnalysis: React.FC = () => {
     onToggleSidebar: () => setShowPanel(prev => !prev),
     onShowHelp: () => setShowKeyboardShortcuts(true),
     onToggleHighContrast: toggleHighContrast,
-    // Print shortcut is not implemented at this level anymore
   });
 
   return (
     <div className="h-screen flex flex-col bg-white">
-      {/* Simplified header with core actions */}
+      {/* Header with core actions */}
       <header className="p-3 border-b border-slate-200 flex justify-between items-center">
         <div className="flex items-center space-x-2">
           <span className="font-bold text-xl text-primary-700">CephaloScan</span>
+          <Badge variant="outline" className="ml-2 bg-blue-50">
+            <Users className="h-3 w-3 mr-1 text-blue-500" />
+            Collaborative Mode
+          </Badge>
         </div>
         
         <div className="flex items-center space-x-2">
-          {/* Replace the basic report button with our dropdown menu */}
+          {/* Export options dropdown */}
           <ExportOptions 
             patientId={patientName} 
             analysisType={analysisType} 
@@ -57,24 +85,29 @@ const CephalometricAnalysis: React.FC = () => {
             <HelpCircle className="h-4 w-4 mr-1" />
             <span className="text-sm">Help</span>
           </Button>
-          
-          {/* Moved the Expand/Collapse button to be at the bottom of the screen */}
         </div>
       </header>
       
-      {/* Patient info - simplified */}
-      <PatientInfoBar />
+      {/* Patient info bar */}
+      <PatientInfoBar 
+        patientId={patientId}
+        gender="Male"
+        age="32"
+        examDate={new Date().toLocaleDateString()}
+      />
       
-      {/* Main content area - simplified layout */}
+      {/* Main content area */}
       <div className="flex-grow flex overflow-hidden">
-        {/* Radiograph View - takes most of the space */}
+        {/* Radiograph View */}
         <div className="flex-grow bg-slate-50 relative">
-          <RadiographViewer highContrastMode={highContrastMode} />
-          
-          {/* Removed the Edit landmarks button as requested */}
+          <RadiographViewer 
+            highContrastMode={highContrastMode}
+            patientId={patientId}
+            imageId={imageId}
+          />
         </div>
         
-        {/* Controls panel - conditionally rendered */}
+        {/* Controls panel */}
         {showPanel && (
           <ControlsSidebar 
             showDrawerPanel={showPanel} 
@@ -83,25 +116,22 @@ const CephalometricAnalysis: React.FC = () => {
         )}
       </div>
       
-      {/* Expand/Collapse button positioned at bottom of screen */}
-      <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 z-10">
+      {/* Sidebar toggle icon positioned at right edge */}
+      <div className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button 
                 variant="secondary" 
-                size="sm" 
-                className="h-8 rounded-full px-3 shadow-md"
+                size="icon" 
+                className="h-10 w-10 rounded-full shadow-md"
                 onClick={() => setShowPanel(prev => !prev)}
               >
-                {showPanel ? 
-                  <><ChevronDown className="h-4 w-4 mr-1" /> Collapse</> : 
-                  <><ChevronUp className="h-4 w-4 mr-1" /> Expand</>
-                }
+                <PanelRight className="h-5 w-5" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>
-              <p>{showPanel ? 'Collapse Analysis Panel' : 'Expand Analysis Panel'}</p>
+            <TooltipContent side="left">
+              <p>{showPanel ? 'Collapse Sidebar' : 'Expand Sidebar'}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

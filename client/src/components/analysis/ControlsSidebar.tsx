@@ -6,8 +6,11 @@ import {
   StethoscopeIcon,
   Eye,
   ChevronRight,
-  ChevronDown
+  ChevronDown,
+  PanelRight,
+  PanelLeft
 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import AnalysisTable from "./AnalysisTable";
 import { Switch } from "@/components/ui/switch";
 import { rickettsAnalysisData } from "@/data/analysisData";
@@ -96,104 +99,127 @@ const ControlsSidebar: React.FC<ControlsSidebarProps> = ({
   ];
   
   return (
-    <div 
-      ref={sidebarRef}
-      className="resizable-panel bg-white border-l border-slate-200 flex flex-col overflow-hidden shadow-md"
-      style={{ width: `${width}px` }}
-    >
-      {/* Resize handle */}
-      <div 
-        ref={resizeHandleRef}
-        className={`resize-handle ${isResizing ? 'active' : ''}`}
-      ></div>
-      
-      {/* Header */}
-      <div className="p-3 border-b border-slate-200 flex justify-between items-center">
-        <div className="flex items-center">
-          <div className="w-2 h-2 rounded-full bg-emerald-500 mr-2"></div>
-          <h3 className="font-medium text-slate-800">Analysis Results</h3>
-        </div>
-      </div>
-      
-      {/* AI Assessment Panel - Collapsible */}
-      <div 
-        className="border-b border-slate-200 cursor-pointer transition-colors hover:bg-slate-50"
-        onClick={() => setAiInsightsCollapsed(!aiInsightsCollapsed)}
-      >
-        <div className="p-3 flex items-center justify-between">
-          <div className="flex items-center">
-            <Brain className="h-4 w-4 text-amber-600 mr-2" />
-            <h4 className="text-sm font-medium text-amber-800">AI Clinical Assessment</h4>
-          </div>
-          <div>
-            {aiInsightsCollapsed ? (
-              <ChevronRight className="h-4 w-4 text-slate-400" />
-            ) : (
-              <ChevronDown className="h-4 w-4 text-slate-400" />
-            )}
-          </div>
-        </div>
-      </div>
-      
-      {/* AI Assessment Content */}
-      {!aiInsightsCollapsed && (
-        <div className="p-3 bg-gradient-to-r from-amber-50 to-amber-100/30 border-b border-amber-200">
-          <div className="space-y-2">
-            {aiInsights.map((insight, index) => (
-              <div 
-                key={insight.id}
-                className="p-2 rounded-md border bg-white border-amber-200 shadow-sm"
+    <div className="relative">
+      {/* Sidebar toggle button */}
+      <div className="absolute left-0 top-1/2 transform -translate-x-full -translate-y-1/2 z-10">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={onToggleDrawerPanel}
+                className="h-8 w-8 rounded-l-md rounded-r-none border-r-0 border-slate-200 bg-white shadow-md text-slate-600"
               >
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-full bg-amber-100">
-                    {insight.icon}
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium">{insight.title}</div>
-                    <p className="text-xs text-slate-600 mt-0.5">{insight.description}</p>
+                {showDrawerPanel ? <PanelRight className="h-4 w-4" /> : <PanelLeft className="h-4 w-4" />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="left">
+              <p>{showDrawerPanel ? "Hide" : "Show"} Panel</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+      
+      <div 
+        ref={sidebarRef}
+        className="resizable-panel bg-white border-l border-slate-200 flex flex-col overflow-hidden shadow-md"
+        style={{ width: `${width}px` }}
+      >
+        {/* Resize handle */}
+        <div 
+          ref={resizeHandleRef}
+          className={`resize-handle ${isResizing ? 'active' : ''}`}
+        ></div>
+        
+        {/* Header */}
+        <div className="p-3 border-b border-slate-200 flex justify-between items-center">
+          <div className="flex items-center">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 mr-2"></div>
+            <h3 className="font-medium text-slate-800">Analysis Results</h3>
+          </div>
+        </div>
+        
+        {/* AI Assessment Panel - Collapsible */}
+        <div 
+          className="border-b border-slate-200 cursor-pointer transition-colors hover:bg-slate-50"
+          onClick={() => setAiInsightsCollapsed(!aiInsightsCollapsed)}
+        >
+          <div className="p-3 flex items-center justify-between">
+            <div className="flex items-center">
+              <Brain className="h-4 w-4 text-amber-600 mr-2" />
+              <h4 className="text-sm font-medium text-amber-800">AI Clinical Assessment</h4>
+            </div>
+            <div>
+              {aiInsightsCollapsed ? (
+                <ChevronRight className="h-4 w-4 text-slate-400" />
+              ) : (
+                <ChevronDown className="h-4 w-4 text-slate-400" />
+              )}
+            </div>
+          </div>
+        </div>
+        
+        {/* AI Assessment Content */}
+        {!aiInsightsCollapsed && (
+          <div className="p-3 bg-gradient-to-r from-amber-50 to-amber-100/30 border-b border-amber-200">
+            <div className="space-y-2">
+              {aiInsights.map((insight, index) => (
+                <div 
+                  key={insight.id}
+                  className="p-2 rounded-md border bg-white border-amber-200 shadow-sm"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-full bg-amber-100">
+                      {insight.icon}
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium">{insight.title}</div>
+                      <p className="text-xs text-slate-600 mt-0.5">{insight.description}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Analysis controls */}
+        <div className="p-3 border-b border-slate-200">
+          <div className="flex justify-between items-center mb-3">
+            <select 
+              className="text-xs p-1 border border-slate-200 rounded bg-slate-50"
+              value={analysisSelected}
+              onChange={(e) => setAnalysisSelected(e.target.value)}
+            >
+              <option value="Ricketts">Ricketts Analysis</option>
+              <option value="Steiner">Steiner Analysis</option>
+              <option value="McNamara">McNamara Analysis</option>
+              <option value="Downs">Downs Analysis</option>
+            </select>
+            
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-500">Only Invalid</span>
+              <Switch 
+                checked={showOnlyInvalid}
+                onCheckedChange={setShowOnlyInvalid}
+                className="h-4 w-8 data-[state=checked]:bg-primary-600"
+              />
+            </div>
           </div>
         </div>
-      )}
-      
-      {/* Analysis controls */}
-      <div className="p-3 border-b border-slate-200">
-        <div className="flex justify-between items-center mb-3">
-          <select 
-            className="text-xs p-1 border border-slate-200 rounded bg-slate-50"
-            value={analysisSelected}
-            onChange={(e) => setAnalysisSelected(e.target.value)}
-          >
-            <option value="Ricketts">Ricketts Analysis</option>
-            <option value="Steiner">Steiner Analysis</option>
-            <option value="McNamara">McNamara Analysis</option>
-            <option value="Downs">Downs Analysis</option>
-          </select>
-          
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-500">Only Invalid</span>
-            <Switch 
-              checked={showOnlyInvalid}
-              onCheckedChange={setShowOnlyInvalid}
-              className="h-4 w-8 data-[state=checked]:bg-primary-600"
+        
+        {/* Analysis Table */}
+        <div className="flex-grow overflow-auto">
+          <div className="p-3 pb-6 space-y-4">
+            <AnalysisTable 
+              measurements={showOnlyInvalid 
+                ? rickettsAnalysisData.filter(m => !m.inRange)
+                : rickettsAnalysisData
+              } 
+              analysisName={analysisSelected}
             />
           </div>
-        </div>
-      </div>
-      
-      {/* Analysis Table */}
-      <div className="flex-grow overflow-auto">
-        <div className="p-3 pb-6 space-y-4">
-          <AnalysisTable 
-            measurements={showOnlyInvalid 
-              ? rickettsAnalysisData.filter(m => !m.inRange)
-              : rickettsAnalysisData
-            } 
-            analysisName={analysisSelected}
-          />
         </div>
       </div>
     </div>

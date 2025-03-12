@@ -48,6 +48,17 @@ const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ isOpen,
       ]
     },
     {
+      title: "Collaborative Editing",
+      shortcuts: [
+        { key: "Ctrl+E", description: "Toggle Edit Mode" },
+        { key: "Esc", description: "Exit Edit Mode" },
+        { key: "Click", description: "Select Landmark" },
+        { key: "Del", description: "Delete Selected Landmark" },
+        { key: "A", description: "Add New Landmark" },
+        { key: "Drag", description: "Move Selected Landmark" }
+      ]
+    },
+    {
       title: "Analysis Tools",
       shortcuts: [
         { key: "1", description: "Line Analysis" },
@@ -83,17 +94,40 @@ const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ isOpen,
               <span className="sr-only">Close</span>
             </Button>
           </DialogTitle>
+          <DialogDescription className="text-sm text-blue-600 mt-2">
+            New! Real-time collaborative annotation is now available.
+          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4 py-2">
           {shortcutCategories.map((category, idx) => (
             <div key={idx}>
-              <h3 className="font-medium text-slate-800 mb-2">{category.title}</h3>
+              <h3 className={`font-medium mb-2 ${
+                category.title === "Collaborative Editing" 
+                  ? "text-blue-600" 
+                  : "text-slate-800"
+              }`}>
+                {category.title}
+                {category.title === "Collaborative Editing" && (
+                  <span className="ml-2 px-1.5 py-0.5 text-xs bg-blue-100 text-blue-700 rounded">New</span>
+                )}
+              </h3>
               <div className="grid grid-cols-2 gap-2">
                 {category.shortcuts.map((shortcut, index) => (
-                  <div key={index} className="flex items-center justify-between p-2 bg-slate-50 rounded">
+                  <div 
+                    key={index} 
+                    className={`flex items-center justify-between p-2 rounded ${
+                      category.title === "Collaborative Editing" 
+                        ? "bg-blue-50" 
+                        : "bg-slate-50"
+                    }`}
+                  >
                     <span className="text-sm text-slate-600">{shortcut.description}</span>
-                    <span className="px-2 py-1 bg-slate-200 text-slate-700 rounded text-xs font-medium">
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+                      category.title === "Collaborative Editing" 
+                        ? "bg-blue-200 text-blue-700" 
+                        : "bg-slate-200 text-slate-700"
+                    }`}>
                       {shortcut.key}
                     </span>
                   </div>
@@ -103,7 +137,11 @@ const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ isOpen,
           ))}
         </div>
         
-        <DialogFooter className="border-t border-slate-200 pt-4 flex justify-center">
+        <DialogFooter className="border-t border-slate-200 pt-4 flex flex-col">
+          <p className="text-xs text-slate-500 mb-3 text-center">
+            Multiple users can now collaborate on the same image in real-time.
+            Try opening this page in multiple browsers to see it in action!
+          </p>
           <Button 
             variant="default" 
             className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded transition-colors"
