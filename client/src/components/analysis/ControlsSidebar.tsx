@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { 
   Select, 
@@ -13,19 +13,18 @@ import ProfilogramView from "./ProfilogramView";
 import LineAnalysisView from "./LineAnalysisView";
 import { Badge } from "@/components/ui/badge";
 import { 
-  ChevronLeft, 
-  FileImage, 
-  FileSpreadsheet, 
+  X, 
   Save, 
   BarChart3, 
-  FileText 
+  LayoutTemplate, 
+  Maximize2, 
+  ChevronLeft, 
+  ChevronRight, 
+  Download
 } from "lucide-react";
 import { useAnalysisView } from "@/hooks/useAnalysisView";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface ControlsSidebarProps {
   showDrawerPanel: boolean;
@@ -37,152 +36,102 @@ const ControlsSidebar: React.FC<ControlsSidebarProps> = ({
   onToggleDrawerPanel 
 }) => {
   const { analysisView, setAnalysisView } = useAnalysisView();
+  const [panelTab, setPanelTab] = useState("controls");
 
   return (
-    <div className="bg-white border-l border-slate-200 w-80 lg:w-96 flex flex-col overflow-hidden">
-      {/* Sidebar Header */}
-      <div className="px-4 py-3 border-b border-slate-200 flex justify-between items-center bg-slate-50">
-        <h2 className="font-semibold text-slate-800">Analysis Controls</h2>
+    <div className="bg-white border-l border-slate-200 w-72 flex flex-col overflow-hidden shadow-md">
+      {/* Simplified header with tabs */}
+      <div className="flex justify-between items-center border-b border-slate-200 bg-slate-50">
+        <Tabs value={panelTab} onValueChange={setPanelTab} className="w-full">
+          <TabsList className="w-full justify-start border-b-0 rounded-none gap-1 px-2 py-2">
+            <TabsTrigger value="controls" className="text-xs py-1 px-2">
+              <LayoutTemplate className="h-3.5 w-3.5 mr-1" />
+              Controls
+            </TabsTrigger>
+            <TabsTrigger value="results" className="text-xs py-1 px-2">
+              <BarChart3 className="h-3.5 w-3.5 mr-1" />
+              Results
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
         <Button 
           variant="ghost" 
           size="sm" 
-          className="text-slate-400 hover:text-slate-600"
+          className="mr-1 h-7 w-7 p-0"
           onClick={onToggleDrawerPanel}
         >
-          <ChevronLeft className="h-5 w-5" />
-          <span className="sr-only">Toggle panel</span>
+          <X className="h-4 w-4" />
         </Button>
       </div>
       
-      <ScrollArea className="flex-grow">
-        <div className="p-4 space-y-6">
-          {/* Analysis Selection */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium text-slate-600">ANALYSIS TYPE</h3>
-            <Select defaultValue="tweed">
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select analysis" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="tweed">Tweed</SelectItem>
-                <SelectItem value="steiner">Steiner</SelectItem>
-                <SelectItem value="ricketts">Ricketts</SelectItem>
-                <SelectItem value="downs">Downs</SelectItem>
-                <SelectItem value="mcnamara">McNamara</SelectItem>
-                <SelectItem value="jarabak">Jarabak</SelectItem>
-              </SelectContent>
-            </Select>
-            
-            <Button 
-              variant="secondary" 
-              className="w-full mt-2"
-            >
-              <FileText className="h-4 w-4 mr-2" />
-              Case Presentation
-              <Badge variant="outline" className="ml-2 px-1.5 py-0.5 text-xs bg-white/20 rounded">BETA</Badge>
-            </Button>
-          </div>
-          
-          <Separator />
-          
-          {/* Analysis View Controls */}
-          <AnalysisViewControls 
-            analysisView={analysisView} 
-            onViewChange={setAnalysisView} 
-          />
-          
-          <Separator />
-          
-          {/* Report Options */}
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-sm font-medium text-slate-600">REPORT OPTIONS</h3>
-              <div className="flex items-center gap-2">
-                <Label htmlFor="print-ceph" className="text-xs text-slate-500">Print Ceph</Label>
-                <Switch id="print-ceph" />
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-3">
-              <Select defaultValue="simple">
-                <SelectTrigger>
-                  <SelectValue placeholder="Report type" />
+      <div className="flex-grow overflow-auto">
+        {panelTab === "controls" && (
+          <div className="p-3 space-y-5">
+            {/* Analysis Selection - simplified */}
+            <div>
+              <label className="text-xs font-medium text-slate-500 block mb-1.5">ANALYSIS TYPE</label>
+              <Select defaultValue="ricketts">
+                <SelectTrigger className="w-full h-8 text-sm">
+                  <SelectValue placeholder="Select analysis" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="simple">Simple Report</SelectItem>
-                  <SelectItem value="detailed">Detailed Report</SelectItem>
-                  <SelectItem value="custom">Custom Report</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              <Select defaultValue="full">
-                <SelectTrigger>
-                  <SelectValue placeholder="Format" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="full">Full Report</SelectItem>
-                  <SelectItem value="summary">Summary</SelectItem>
-                  <SelectItem value="comparison">Comparison</SelectItem>
+                  <SelectItem value="ricketts">Ricketts</SelectItem>
+                  <SelectItem value="steiner">Steiner</SelectItem>
+                  <SelectItem value="downs">Downs</SelectItem>
+                  <SelectItem value="mcnamara">McNamara</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
-            <div className="grid grid-cols-2 gap-3">
-              <Button variant="outline" size="sm" className="flex gap-2 justify-center">
-                <FileImage className="h-3.5 w-3.5" />
-                <span>Save as Image</span>
+            {/* Analysis View Controls - simplified */}
+            <AnalysisViewControls 
+              analysisView={analysisView} 
+              onViewChange={setAnalysisView} 
+            />
+            
+            {/* Quick Actions */}
+            <div className="flex items-center justify-between mt-3">
+              <Button variant="outline" size="sm" className="w-full flex-1 mr-2 h-8">
+                <Save className="h-3.5 w-3.5 mr-1.5" />
+                <span className="text-xs">Save</span>
               </Button>
-              
-              <Button variant="outline" size="sm" className="flex gap-2 justify-center">
-                <FileSpreadsheet className="h-3.5 w-3.5" />
-                <span>Export to Excel</span>
-              </Button>
-              
-              <Button variant="outline" size="sm" className="flex gap-2 justify-center">
-                <Save className="h-3.5 w-3.5" />
-                <span>Save Analysis</span>
-              </Button>
-              
-              <Button variant="outline" size="sm" className="flex gap-2 justify-center">
-                <BarChart3 className="h-3.5 w-3.5" />
-                <span>Generate Chart</span>
+              <Button variant="outline" size="sm" className="w-full flex-1 h-8">
+                <Download className="h-3.5 w-3.5 mr-1.5" />
+                <span className="text-xs">Export</span>
               </Button>
             </div>
           </div>
-          
-          <Separator />
-          
-          {/* Wizard */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium text-slate-600">ANALYSIS WIZARD</h3>
-            <Select defaultValue="wizard">
-              <SelectTrigger>
-                <SelectValue placeholder="Select wizard" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="wizard">Quick Analysis</SelectItem>
-                <SelectItem value="quick-compare">Comparative Analysis</SelectItem>
-                <SelectItem value="multi-template">Multi-Template Analysis</SelectItem>
-                <SelectItem value="treatment-prediction">Treatment Prediction</SelectItem>
-                <SelectItem value="superimposition">Superimposition</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <Separator />
-          
-          {/* Analysis Results - Conditionally rendered based on view */}
-          <div className="pt-2">
-            <Card>
-              <CardContent className="p-0">
+        )}
+        
+        {panelTab === "results" && (
+          <div className="p-3">
+            <Card className="shadow-none border">
+              <CardContent className="p-0 overflow-hidden">
                 {analysisView === 'chart' && <ChartView />}
                 {analysisView === 'profilogram' && <ProfilogramView />}
                 {analysisView === 'line' && <LineAnalysisView />}
               </CardContent>
             </Card>
+            
+            <div className="mt-3 flex justify-end">
+              <Button size="sm" variant="outline" className="h-7 text-xs">
+                <Maximize2 className="h-3.5 w-3.5 mr-1.5" />
+                Full View
+              </Button>
+            </div>
           </div>
-        </div>
-      </ScrollArea>
+        )}
+      </div>
+      
+      {/* Collapse/expand button */}
+      <Button 
+        variant="ghost" 
+        size="sm" 
+        className="self-end flex justify-center items-center gap-1 px-3 py-1.5 m-2 text-xs border border-slate-200 rounded-full"
+      >
+        <ChevronLeft className="h-3.5 w-3.5" />
+        <span>Collapse</span>
+      </Button>
     </div>
   );
 };
