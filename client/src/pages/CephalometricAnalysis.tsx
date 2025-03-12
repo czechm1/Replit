@@ -105,29 +105,7 @@ const CephalometricAnalysis: React.FC = () => {
         )}
       </div>
       
-      {/* Sidebar toggle icon positioned at right edge */}
-      <div className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="secondary" 
-                size="icon" 
-                className="h-10 w-10 rounded-full shadow-md"
-                onClick={() => setShowPanel(prev => !prev)}
-              >
-                {showPanel ? 
-                  <X className="h-5 w-5" /> : 
-                  <PanelRight className="h-5 w-5" />
-                }
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="left">
-              <p>{showPanel ? 'Collapse Sidebar' : 'Expand Sidebar'}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
+
 
       {/* Modals */}
       <KeyboardShortcutsModal
