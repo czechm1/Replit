@@ -24,6 +24,7 @@ import AnalysisTable from "./AnalysisTable";
 import { useAnalysisView } from "@/hooks/useAnalysisView";
 import { motion } from "framer-motion";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { rickettsAnalysisData } from "@/data/analysisData";
 
 interface ControlsSidebarProps {
   showDrawerPanel: boolean;
@@ -365,48 +366,19 @@ const ControlsSidebar: React.FC<ControlsSidebarProps> = ({
                   </Button>
                 </div>
                 
-                <div className="space-y-1.5">
-                  {patientMetrics.map((metric) => (
-                    <motion.div 
-                      key={metric.id}
-                      initial={{ opacity: 0, y: 5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="p-2 rounded-md border border-slate-100 hover:bg-slate-50 cursor-pointer"
-                    >
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-slate-800">{metric.name}</span>
-                        <div className="flex items-center gap-1.5">
-                          <Badge 
-                            className={`text-xs px-1.5 py-0.5 ${getStatusColor(metric.status)}`}
-                          >
-                            {metric.value}°
-                          </Badge>
-                          <span className="text-xs text-slate-500">{metric.norm}</span>
-                        </div>
-                      </div>
-                      <p className="text-xs text-slate-600 mt-1">{metric.significance}</p>
-                      <div className="flex mt-1.5 gap-1">
-                        {metric.landmark.map((mark, i) => (
-                          <Badge 
-                            key={i} 
-                            variant="outline" 
-                            className="text-[10px] px-1 py-0 bg-slate-50 border-slate-200"
-                          >
-                            {mark}
-                          </Badge>
-                        ))}
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
+                {/* New Analysis Table with collapsible columns and color coding */}
+                <AnalysisTable 
+                  measurements={rickettsAnalysisData} 
+                  analysisName={analysisSelected}
+                />
                 
                 <div className="flex justify-between pt-2">
                   <Button variant="outline" size="sm" className="h-7 text-xs gap-1">
                     <Bookmark className="h-3 w-3" />
                     Save
                   </Button>
-                  <Button variant="default" size="sm" className="h-7 text-xs">
+                  <Button variant="default" size="sm" className="h-7 text-xs gap-1">
+                    <FileText className="h-3.5 w-3.5 mr-1" />
                     Generate Report
                   </Button>
                 </div>
