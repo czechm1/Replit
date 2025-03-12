@@ -1,14 +1,12 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useLayerControls } from "@/hooks/useLayerControls";
 import { 
   ZoomIn, 
   ZoomOut, 
   RefreshCw, 
-  Layers,
-  RotateCcw,
-  RotateCw,
-  MoveHorizontal
+  Layers
 } from "lucide-react";
 
 interface RadiographViewerProps {
@@ -55,9 +53,7 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({ highContrastMode })
 
   return (
     <div 
-      className={`relative w-full h-full overflow-hidden bg-slate-900 flex justify-center items-center ${
-        highContrastMode ? 'high-contrast' : ''
-      }`}
+      className="relative w-full h-full overflow-hidden bg-slate-900 flex justify-center items-center"
     >
       {/* Radiograph with layers - simplified */}
       <div 
@@ -119,63 +115,83 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({ highContrastMode })
         )}
       </div>
       
-      {/* Minimal toolbar */}
+      {/* Minimal toolbar with tooltips */}
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-sm rounded-full shadow-md px-2 py-1 flex space-x-1">
-        <Button 
-          variant="ghost" 
-          size="icon"
-          onClick={handleZoomOut}
-          className="h-8 w-8 rounded-full text-slate-600"
-        >
-          <ZoomOut className="h-4 w-4" />
-        </Button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={handleZoomOut}
+                className="h-8 w-8 rounded-full text-slate-600"
+              >
+                <ZoomOut className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Zoom Out</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         
-        <Button 
-          variant="ghost" 
-          size="icon"
-          onClick={handleZoomIn}
-          className="h-8 w-8 rounded-full text-slate-600"
-        >
-          <ZoomIn className="h-4 w-4" />
-        </Button>
-        
-        <div className="w-[1px] h-6 my-1 bg-slate-200"></div>
-        
-        <Button 
-          variant="ghost" 
-          size="icon"
-          className="h-8 w-8 rounded-full text-slate-600"
-        >
-          <MoveHorizontal className="h-4 w-4" />
-        </Button>
-        
-        <Button 
-          variant="ghost" 
-          size="icon"
-          className="h-8 w-8 rounded-full text-slate-600"
-        >
-          <RotateCw className="h-4 w-4" />
-        </Button>
-        
-        <Button 
-          variant="ghost" 
-          size="icon"
-          onClick={handleResetView}
-          className="h-8 w-8 rounded-full text-slate-600"
-        >
-          <RefreshCw className="h-4 w-4" />
-        </Button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={handleZoomIn}
+                className="h-8 w-8 rounded-full text-slate-600"
+              >
+                <ZoomIn className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Zoom In</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         
         <div className="w-[1px] h-6 my-1 bg-slate-200"></div>
         
-        <Button 
-          variant="ghost" 
-          size="icon"
-          onClick={() => setShowLayerControls(!showLayerControls)}
-          className={`h-8 w-8 rounded-full ${showLayerControls ? 'bg-primary-50 text-primary-600' : 'text-slate-600'}`}
-        >
-          <Layers className="h-4 w-4" />
-        </Button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={handleResetView}
+                className="h-8 w-8 rounded-full text-slate-600"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Reset View</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        
+        <div className="w-[1px] h-6 my-1 bg-slate-200"></div>
+        
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => setShowLayerControls(!showLayerControls)}
+                className={`h-8 w-8 rounded-full ${showLayerControls ? 'bg-primary-50 text-primary-600' : 'text-slate-600'}`}
+              >
+                <Layers className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Layer Controls</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
       
       {/* Layer controls - simplified to a floating panel */}

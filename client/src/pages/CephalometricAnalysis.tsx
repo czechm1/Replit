@@ -3,33 +3,35 @@ import PatientInfoBar from "@/components/layout/PatientInfoBar";
 import RadiographViewer from "@/components/radiograph/RadiographViewer";
 import ControlsSidebar from "@/components/analysis/ControlsSidebar";
 import KeyboardShortcutsModal from "@/components/modals/KeyboardShortcutsModal";
+import ExportOptions from "@/components/export/ExportOptions";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
-import { 
-  Tabs, 
-  TabsList, 
-  TabsTrigger 
-} from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Menu, Eye, Settings, HelpCircle, FileImage, Save, FileText } from "lucide-react";
+import { 
+  BarChartBig, 
+  HelpCircle, 
+  Edit3
+} from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const CephalometricAnalysis: React.FC = () => {
   // Core state - simplified to only what's necessary
   const [showPanel, setShowPanel] = useState(true);
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
   const [highContrastMode, setHighContrastMode] = useState(false);
-  const [analysisMode, setAnalysisMode] = useState("analysis");
-
+  
+  // Patient and analysis data - would come from context or props in a real app
+  const patientName = "John Smith";
+  const analysisType = "Ricketts";
+  
+  // We're no longer managing modals here as they're now handled in the ExportOptions component
+  
   // Setup keyboard shortcuts
   useKeyboardShortcuts({
-    onToggleHighContrast: () => setHighContrastMode(prev => !prev),
     onToggleSidebar: () => setShowPanel(prev => !prev),
     onShowHelp: () => setShowKeyboardShortcuts(true),
+    onToggleHighContrast: () => {}, // Keep for keyboard shortcut handling but no longer used
+    // Print shortcut is not implemented at this level anymore
   });
-
-  const handleGenerateReport = () => {
-    console.log("Generating report...");
-    // Report generation logic would go here
-  };
 
   return (
     <div className="h-screen flex flex-col bg-white">
@@ -37,35 +39,27 @@ const CephalometricAnalysis: React.FC = () => {
       <header className="p-3 border-b border-slate-200 flex justify-between items-center">
         <div className="flex items-center space-x-2">
           <span className="font-bold text-xl text-primary-700">CephaloScan</span>
-          <Tabs value={analysisMode} onValueChange={setAnalysisMode} className="ml-6">
-            <TabsList>
-              <TabsTrigger value="digitization">Digitize</TabsTrigger>
-              <TabsTrigger value="analysis">Analyze</TabsTrigger>
-            </TabsList>
-          </Tabs>
         </div>
         
         <div className="flex items-center space-x-2">
-          {analysisMode === "analysis" && (
-            <Button size="sm" variant="default" onClick={handleGenerateReport}>
-              <FileText className="h-4 w-4 mr-1" />
-              <span className="text-sm">Report</span>
-            </Button>
-          )}
-          <Button size="sm" variant="ghost" onClick={() => setHighContrastMode(prev => !prev)}>
-            <Eye className="h-4 w-4 mr-1" />
-            <span className="text-sm">Contrast</span>
-          </Button>
+          {/* Replace the basic report button with our dropdown menu */}
+          <ExportOptions 
+            patientId={patientName} 
+            analysisType={analysisType} 
+          />
+          
           <Button size="sm" variant="ghost" onClick={() => setShowKeyboardShortcuts(true)}>
             <HelpCircle className="h-4 w-4 mr-1" />
             <span className="text-sm">Help</span>
           </Button>
-          <Button size="sm" variant="outline">
-            <Save className="h-4 w-4 mr-1" />
-            <span className="text-sm">Save</span>
-          </Button>
-          <Button size="sm" variant="ghost" onClick={() => setShowPanel(prev => !prev)}>
-            <Settings className="h-4 w-4" />
+          
+          <Button 
+            size="sm" 
+            variant={showPanel ? "default" : "outline"}
+            onClick={() => setShowPanel(prev => !prev)}
+          >
+            <BarChartBig className="h-4 w-4 mr-1" />
+            <span className="text-sm">Analyze</span>
           </Button>
         </div>
       </header>
@@ -77,7 +71,24 @@ const CephalometricAnalysis: React.FC = () => {
       <div className="flex-grow flex overflow-hidden">
         {/* Radiograph View - takes most of the space */}
         <div className="flex-grow bg-slate-50 relative">
-          <RadiographViewer highContrastMode={highContrastMode} />
+          <RadiographViewer highContrastMode={false} />
+          
+          {/* Edit landmarks button in top-right corner */}
+          <div className="absolute top-4 right-4">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="sm" variant="secondary" className="shadow-md">
+                    <Edit3 className="h-4 w-4 mr-1" />
+                    <span className="text-sm">Edit Landmarks</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Edit landmarks position</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
         </div>
         
         {/* Controls panel - conditionally rendered */}
@@ -89,7 +100,7 @@ const CephalometricAnalysis: React.FC = () => {
         )}
       </div>
       
-      {/* Keyboard Shortcuts Modal */}
+      {/* Modals */}
       <KeyboardShortcutsModal
         isOpen={showKeyboardShortcuts}
         onClose={() => setShowKeyboardShortcuts(false)}

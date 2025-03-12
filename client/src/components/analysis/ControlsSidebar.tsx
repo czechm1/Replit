@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { 
   Brain, 
-  FileText,
   Sliders,
   StethoscopeIcon,
   Eye,
-  Save,
-  Filter
+  ChevronRight,
+  ChevronDown
 } from "lucide-react";
 import AnalysisTable from "./AnalysisTable";
 import { Switch } from "@/components/ui/switch";
@@ -28,7 +26,7 @@ const ControlsSidebar: React.FC<ControlsSidebarProps> = ({
   const [showOnlyInvalid, setShowOnlyInvalid] = useState(false);
   const [width, setWidth] = useState(350);
   const [isResizing, setIsResizing] = useState(false);
-  const [aiInsightsCollapsed, setAiInsightsCollapsed] = useState(false);
+  const [aiInsightsCollapsed, setAiInsightsCollapsed] = useState(true); // Collapsed by default
   const sidebarRef = useRef<HTMLDivElement>(null);
   const resizeHandleRef = useRef<HTMLDivElement>(null);
 
@@ -69,7 +67,7 @@ const ControlsSidebar: React.FC<ControlsSidebarProps> = ({
     };
   }, [isResizing]);
 
-  // AI-generated clinical insights
+  // AI-generated clinical assessment
   const aiInsights = [
     {
       id: "skeletal_class",
@@ -96,9 +94,6 @@ const ControlsSidebar: React.FC<ControlsSidebarProps> = ({
       icon: <Eye className="h-5 w-5" />
     }
   ];
-
-  // Count invalid measurements
-  const invalidCount = rickettsAnalysisData.filter(m => !m.inRange).length;
   
   return (
     <div 
@@ -118,30 +113,31 @@ const ControlsSidebar: React.FC<ControlsSidebarProps> = ({
           <div className="w-2 h-2 rounded-full bg-emerald-500 mr-2"></div>
           <h3 className="font-medium text-slate-800">Analysis Results</h3>
         </div>
-        
-        <div className="flex items-center gap-1">
-          <Button 
-            variant={aiInsightsCollapsed ? "ghost" : "secondary"}
-            size="sm"
-            className="text-xs h-7 gap-1"
-            onClick={() => setAiInsightsCollapsed(!aiInsightsCollapsed)}
-          >
-            <Brain className="h-3.5 w-3.5" />
-            {aiInsightsCollapsed ? "Show AI" : "Hide AI"}
-          </Button>
+      </div>
+      
+      {/* AI Assessment Panel - Collapsible */}
+      <div 
+        className="border-b border-slate-200 cursor-pointer transition-colors hover:bg-slate-50"
+        onClick={() => setAiInsightsCollapsed(!aiInsightsCollapsed)}
+      >
+        <div className="p-3 flex items-center justify-between">
+          <div className="flex items-center">
+            <Brain className="h-4 w-4 text-amber-600 mr-2" />
+            <h4 className="text-sm font-medium text-amber-800">AI Clinical Assessment</h4>
+          </div>
+          <div>
+            {aiInsightsCollapsed ? (
+              <ChevronRight className="h-4 w-4 text-slate-400" />
+            ) : (
+              <ChevronDown className="h-4 w-4 text-slate-400" />
+            )}
+          </div>
         </div>
       </div>
       
-      {/* AI Insights Panel - Collapsible */}
+      {/* AI Assessment Content */}
       {!aiInsightsCollapsed && (
         <div className="p-3 bg-gradient-to-r from-amber-50 to-amber-100/30 border-b border-amber-200">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center">
-              <Brain className="h-4 w-4 text-amber-600 mr-1.5" />
-              <h4 className="text-sm font-medium text-amber-800">AI Clinical Insights</h4>
-            </div>
-          </div>
-          
           <div className="space-y-2">
             {aiInsights.map((insight, index) => (
               <div 
@@ -198,8 +194,6 @@ const ControlsSidebar: React.FC<ControlsSidebarProps> = ({
             } 
             analysisName={analysisSelected}
           />
-          
-
         </div>
       </div>
     </div>
