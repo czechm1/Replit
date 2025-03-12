@@ -14,13 +14,16 @@ import {
   AlertCircle,
   Bookmark,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  FileText
 } from "lucide-react";
 import ChartView from "./ChartView";
 import ProfilogramView from "./ProfilogramView";
 import LineAnalysisView from "./LineAnalysisView";
+import AnalysisTable from "./AnalysisTable";
 import { useAnalysisView } from "@/hooks/useAnalysisView";
 import { motion } from "framer-motion";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 interface ControlsSidebarProps {
   showDrawerPanel: boolean;

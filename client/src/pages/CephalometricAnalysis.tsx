@@ -10,7 +10,7 @@ import {
   TabsTrigger 
 } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Menu, Eye, Settings, HelpCircle, FileImage, Save } from "lucide-react";
+import { Menu, Eye, Settings, HelpCircle, FileImage, Save, FileText } from "lucide-react";
 
 const CephalometricAnalysis: React.FC = () => {
   // Core state - simplified to only what's necessary
@@ -26,6 +26,11 @@ const CephalometricAnalysis: React.FC = () => {
     onShowHelp: () => setShowKeyboardShortcuts(true),
   });
 
+  const handleGenerateReport = () => {
+    console.log("Generating report...");
+    // Report generation logic would go here
+  };
+
   return (
     <div className="h-screen flex flex-col bg-white">
       {/* Simplified header with core actions */}
@@ -36,12 +41,17 @@ const CephalometricAnalysis: React.FC = () => {
             <TabsList>
               <TabsTrigger value="digitization">Digitize</TabsTrigger>
               <TabsTrigger value="analysis">Analyze</TabsTrigger>
-              <TabsTrigger value="report">Report</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
         
         <div className="flex items-center space-x-2">
+          {analysisMode === "analysis" && (
+            <Button size="sm" variant="default" onClick={handleGenerateReport}>
+              <FileText className="h-4 w-4 mr-1" />
+              <span className="text-sm">Report</span>
+            </Button>
+          )}
           <Button size="sm" variant="ghost" onClick={() => setHighContrastMode(prev => !prev)}>
             <Eye className="h-4 w-4 mr-1" />
             <span className="text-sm">Contrast</span>
