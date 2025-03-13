@@ -60,7 +60,7 @@ const CephalometricAnalysis: React.FC = () => {
       {/* Header with core actions */}
       <header className="p-3 border-b border-slate-200 flex justify-between items-center">
         <div className="flex items-center space-x-2">
-          <span className="font-bold text-xl text-primary-700">CephaloScan</span>
+          <span className="font-bold text-xl text-primary-700">I❤️Ceph</span>
         </div>
         
         <div className="flex items-center space-x-2">
