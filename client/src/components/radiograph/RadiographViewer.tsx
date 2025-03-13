@@ -35,9 +35,6 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [rotation, setRotation] = useState(0);
   
-  // Only Invalid toggle state
-  const [onlyInvalidMode, setOnlyInvalidMode] = useState(false);
-  
   // Edit landmarks mode
   const [isEditMode, setIsEditMode] = useState(false);
   
@@ -86,13 +83,6 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
     setScale(1.0);
     setPosition({ x: 0, y: 0 });
     setRotation(0);
-  };
-  
-  // Handle Only Invalid toggle change
-  const handleOnlyInvalidModeChange = (enabled: boolean) => {
-    setOnlyInvalidMode(enabled);
-    console.log("Only Invalid mode:", enabled);
-    // Here we would filter to show only invalid measurements
   };
   
   // Toggle edit mode
@@ -187,8 +177,6 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
         onImageControlChange={updateImageControl}
         onResetLayers={resetControls}
         onResetImageControls={resetControls}
-        onlyInvalidMode={onlyInvalidMode}
-        onOnlyInvalidModeChange={handleOnlyInvalidModeChange}
         onZoomIn={handleZoomIn}
         onZoomOut={handleZoomOut}
         onResetView={handleResetView}

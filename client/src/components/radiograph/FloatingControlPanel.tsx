@@ -13,8 +13,6 @@ interface FloatingControlPanelProps {
   onImageControlChange: (control: keyof ImageControlsType, value: number) => void;
   onResetLayers: () => void;
   onResetImageControls: () => void;
-  onlyInvalidMode?: boolean;
-  onOnlyInvalidModeChange?: (enabled: boolean) => void;
   // Zoom controls props
   onZoomIn: () => void;
   onZoomOut: () => void;
@@ -31,8 +29,6 @@ const FloatingControlPanel: React.FC<FloatingControlPanelProps> = ({
   onImageControlChange,
   onResetLayers,
   onResetImageControls,
-  onlyInvalidMode = false,
-  onOnlyInvalidModeChange,
   onZoomIn,
   onZoomOut,
   onResetView,
@@ -200,8 +196,6 @@ const FloatingControlPanel: React.FC<FloatingControlPanelProps> = ({
             onLayerOpacityChange={onLayerOpacityChange}
             onClose={closeControls}
             onReset={onResetLayers}
-            onlyInvalidMode={onlyInvalidMode}
-            onOnlyInvalidModeChange={onOnlyInvalidModeChange}
           />
         </div>
       )}
