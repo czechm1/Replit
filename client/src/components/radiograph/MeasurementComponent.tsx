@@ -31,7 +31,8 @@ const MeasurementComponent: React.FC<MeasurementComponentProps> = ({
     return severity;
   };
 
-  if (!measurementData) return null;
+  // If opacity is 0 or no measurement data, don't render anything
+  if (!measurementData || opacity === 0) return null;
 
   return (
     <svg

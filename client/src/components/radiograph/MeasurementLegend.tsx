@@ -34,8 +34,8 @@ const MeasurementLegend: React.FC<MeasurementLegendProps> = ({
     return parseInt(a.id) - parseInt(b.id);
   };
 
-  // If no measurement groups are visible, don't render the legend
-  if (visibleMeasurementGroups.length === 0) {
+  // If no measurement groups are visible or opacity is 0, don't render the legend
+  if (visibleMeasurementGroups.length === 0 || opacity === 0) {
     return null;
   }
 

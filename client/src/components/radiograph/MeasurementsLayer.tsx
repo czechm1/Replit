@@ -50,7 +50,7 @@ const MeasurementsLayer: React.FC<MeasurementsLayerProps> = ({
         visibleMeasurementGroups={visibleMeasurementGroups}
       />
       
-      {showLegend && (
+      {showLegend && opacity > 0 && (
         <MeasurementLegend
           measurements={measurementData.measurements}
           opacity={opacity}
