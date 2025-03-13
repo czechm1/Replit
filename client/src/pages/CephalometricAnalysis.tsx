@@ -96,13 +96,11 @@ const CephalometricAnalysis: React.FC = () => {
           />
         </div>
         
-        {/* Controls panel */}
-        {showPanel && (
-          <ControlsSidebar 
-            showDrawerPanel={showPanel} 
-            onToggleDrawerPanel={() => setShowPanel(prev => !prev)} 
-          />
-        )}
+        {/* Controls panel - always render so pull tab is visible even when panel is hidden */}
+        <ControlsSidebar 
+          showDrawerPanel={showPanel} 
+          onToggleDrawerPanel={() => setShowPanel(prev => !prev)} 
+        />
       </div>
       
 
