@@ -6,7 +6,8 @@ export function useLayerControls() {
     tracing: 100,
     landmarks: 100,
     measurements: 100,
-    profile: 100
+    profile: 100,
+    comparison: 100
   });
 
   const [imageControls, setImageControls] = useState<ImageControlsType>({
@@ -50,7 +51,8 @@ export function useLayerControls() {
       tracing: 100,
       landmarks: 100,
       measurements: 100,
-      profile: 100
+      profile: 100,
+      comparison: 100
     });
   }, []);
 

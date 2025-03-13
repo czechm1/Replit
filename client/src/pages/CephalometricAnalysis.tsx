@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useRoute } from "wouter";
 import PatientInfoBar from "@/components/layout/PatientInfoBar";
 import RadiographViewer from "@/components/radiograph/RadiographViewer";
 import ControlsSidebar from "@/components/analysis/ControlsSidebar";
@@ -12,12 +12,13 @@ import {
   HelpCircle, 
   PanelRight,
   PanelLeftClose,
-  X
+  X,
+  Split
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const CephalometricAnalysis: React.FC = () => {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const { toast } = useToast();
   
   // Core state
@@ -25,19 +26,17 @@ const CephalometricAnalysis: React.FC = () => {
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
   const [highContrastMode, setHighContrastMode] = useState(false);
   
-  // Extract patient ID and image ID from URL if available
-  // Format could be like: /analysis/patient-123/image-456
+  // Get patient ID from route params
+  const [, params] = useRoute('/cephalometric/:patientId');
   const [patientId, setPatientId] = useState<string>("demo-patient-1");
   const [imageId, setImageId] = useState<string>("demo-image-1");
   
   useEffect(() => {
-    // Parse path to extract patient and image IDs
-    const pathParts = location.split('/').filter(Boolean);
-    if (pathParts.length >= 3 && pathParts[0] === 'analysis') {
-      setPatientId(pathParts[1]);
-      setImageId(pathParts[2]);
+    // Update from route params if available
+    if (params && params.patientId) {
+      setPatientId(params.patientId);
     }
-  }, [location]);
+  }, [params]);
   
   // Patient and analysis data - would come from context or props in a real app
   const patientName = "John Smith";
@@ -69,6 +68,24 @@ const CephalometricAnalysis: React.FC = () => {
             patientId={patientName} 
             analysisType={analysisType} 
           />
+          
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={() => setLocation(`/comparison/${patientId}`)}
+                >
+                  <Split className="h-4 w-4 mr-1" />
+                  <span className="text-sm">Compare Images</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Compare with other images</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           
           <Button size="sm" variant="ghost" onClick={() => setShowKeyboardShortcuts(true)}>
             <HelpCircle className="h-4 w-4 mr-1" />

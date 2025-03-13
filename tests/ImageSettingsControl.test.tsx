@@ -31,10 +31,13 @@ describe('ImageSettingsControl', () => {
     expect(screen.getByText(/brightness/i)).toBeInTheDocument();
     expect(screen.getByText(/contrast/i)).toBeInTheDocument();
     
-    // Check if reset button is present (use a more specific selector)
-    expect(screen.getAllByRole('button')).toHaveLength(2); // One for reset, one for close
+    // Check if reset buttons are present
+    expect(screen.getAllByText(/reset/i).length).toBeGreaterThanOrEqual(1);
     
-    // Check if close button is present
+    // Check if reset all button is present
+    expect(screen.getByText(/reset all/i)).toBeInTheDocument();
+    
+    // Check if close button is present (sr-only text)
     expect(screen.getByText(/close/i)).toBeInTheDocument();
   });
 

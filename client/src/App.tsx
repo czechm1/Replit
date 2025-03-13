@@ -7,6 +7,7 @@ import { TutorialProvider } from "./context/TutorialContext";
 import { TutorialController } from "./components/tutorial/TutorialController";
 import NotFound from "@/pages/not-found";
 import CephalometricAnalysis from "@/pages/CephalometricAnalysis";
+import ComparisonView from "@/pages/ComparisonView";
 import Home from "@/pages/Home";
 
 function Router() {
@@ -14,6 +15,9 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/cephalometric" component={CephalometricAnalysis} />
+      <Route path="/cephalometric/:patientId" component={CephalometricAnalysis} />
+      <Route path="/comparison" component={ComparisonView} />
+      <Route path="/comparison/:patientId" component={ComparisonView} />
       <Route component={NotFound} />
     </Switch>
   );
