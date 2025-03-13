@@ -26,7 +26,7 @@ const ControlsSidebar: React.FC<ControlsSidebarProps> = ({
   onToggleDrawerPanel 
 }) => {
   const [analysisSelected, setAnalysisSelected] = useState("Ricketts");
-  const [showOnlyInvalid, setShowOnlyInvalid] = useState(false);
+  const [showDeviations, setShowDeviations] = useState(false);
   const [width, setWidth] = useState(350);
   const [isResizing, setIsResizing] = useState(false);
   const [aiInsightsCollapsed, setAiInsightsCollapsed] = useState(true); // Collapsed by default
@@ -199,10 +199,10 @@ const ControlsSidebar: React.FC<ControlsSidebarProps> = ({
             </select>
             
             <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-500">Only Invalid</span>
+              <span className="text-xs text-slate-500">Show deviations</span>
               <Switch 
-                checked={showOnlyInvalid}
-                onCheckedChange={setShowOnlyInvalid}
+                checked={showDeviations}
+                onCheckedChange={setShowDeviations}
                 className="h-4 w-8 data-[state=checked]:bg-primary-600"
               />
             </div>
@@ -213,7 +213,7 @@ const ControlsSidebar: React.FC<ControlsSidebarProps> = ({
         <div className="flex-grow overflow-auto">
           <div className="p-3 pb-6 space-y-4">
             <AnalysisTable 
-              measurements={showOnlyInvalid 
+              measurements={showDeviations 
                 ? rickettsAnalysisData.filter(m => !m.inRange)
                 : rickettsAnalysisData
               } 
