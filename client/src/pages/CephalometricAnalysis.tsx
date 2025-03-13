@@ -90,6 +90,7 @@ const CephalometricAnalysis: React.FC = () => {
         {/* Radiograph View */}
         <div className="flex-grow bg-slate-50 relative">
           <RadiographViewer 
+          imageUrl="/images/cephalometric.png"
             highContrastMode={highContrastMode}
             patientId={patientId}
             imageId={imageId}

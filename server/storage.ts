@@ -2,9 +2,71 @@ import {
   users, 
   type User, 
   type InsertUser, 
-  type LandmarksCollection, 
   type AnalysisTemplate 
 } from "@shared/schema";
+import { v4 as uuidv4 } from 'uuid';
+import fs from 'fs';
+import path from 'path';
+import { Landmark, LandmarksCollection } from '../client/src/components/radiograph/types/landmark';
+
+// In-memory cache of landmarks collections
+let landmarksCollectionsCache: LandmarksCollection[] | null = null;
+
+// Helper functions to read/write landmarks JSON file
+async function readLandmarksJson(): Promise<{
+  status: string;
+  box: { left: number; right: number; top: number; bottom: number };
+  message: string;
+  collections: LandmarksCollection[];
+}> {
+  try {
+    const filePath = path.join(__dirname, 'mock', 'landmarks.json');
+    const fileData = await fs.promises.readFile(filePath, 'utf8');
+    return JSON.parse(fileData);
+  } catch (error) {
+    console.error('Error reading landmarks JSON:', error);
+    return {
+      status: 'error',
+      box: { left: 0, right: 0, top: 0, bottom: 0 },
+      message: 'Failed to read landmarks data',
+      collections: []
+    };
+  }
+}
+
+async function writeLandmarksJson(data: {
+  status: string;
+  box: { left: number; right: number; top: number; bottom: number };
+  message: string;
+  collections: LandmarksCollection[];
+}): Promise<void> {
+  try {
+    const filePath = path.join(__dirname, 'mock', 'landmarks.json');
+    await fs.promises.writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
+  } catch (error) {
+    console.error('Error writing landmarks JSON:', error);
+    throw new Error('Failed to write landmarks data');
+  }
+}
+
+// Helper function to get all landmarks collections
+async function getAllLandmarksCollections(): Promise<LandmarksCollection[]> {
+  if (landmarksCollectionsCache) {
+    return landmarksCollectionsCache;
+  }
+  
+  const data = await readLandmarksJson();
+  landmarksCollectionsCache = data.collections;
+  return data.collections;
+}
+
+// Helper function to save all landmarks collections
+async function saveAllLandmarksCollections(collections: LandmarksCollection[]): Promise<void> {
+  const data = await readLandmarksJson();
+  data.collections = collections;
+  landmarksCollectionsCache = collections;
+  await writeLandmarksJson(data);
+}
 
 // modify the interface with any CRUD methods
 // you might need
@@ -29,13 +91,11 @@ export interface IStorage {
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
-  private landmarksCollections: Map<string, LandmarksCollection>;
   private analysisTemplates: Map<string, AnalysisTemplate>;
   currentId: number;
 
   constructor() {
     this.users = new Map();
-    this.landmarksCollections = new Map();
     this.analysisTemplates = new Map();
     this.currentId = 1;
     
@@ -61,18 +121,21 @@ export class MemStorage implements IStorage {
     return user;
   }
   
-  // Landmarks methods
+  // Landmarks methods - these now use the JSON file
   async getLandmarksCollection(id: string): Promise<LandmarksCollection | undefined> {
-    return this.landmarksCollections.get(id);
+    const collections = await getAllLandmarksCollections();
+    return collections.find(collection => collection.id === id);
   }
   
   async getLandmarksCollectionsByPatient(patientId: string): Promise<LandmarksCollection[]> {
-    return Array.from(this.landmarksCollections.values())
-      .filter(collection => collection.patientId === patientId);
+    const collections = await getAllLandmarksCollections();
+    return collections.filter(collection => collection.patientId === patientId);
   }
   
   async createLandmarksCollection(collection: LandmarksCollection): Promise<LandmarksCollection> {
-    this.landmarksCollections.set(collection.id, collection);
+    const collections = await getAllLandmarksCollections();
+    collections.push(collection);
+    await saveAllLandmarksCollections(collections);
     return collection;
   }
   
@@ -80,24 +143,35 @@ export class MemStorage implements IStorage {
     id: string, 
     updates: Partial<LandmarksCollection>
   ): Promise<LandmarksCollection | undefined> {
-    const collection = this.landmarksCollections.get(id);
+    const collections = await getAllLandmarksCollections();
+    const index = collections.findIndex(c => c.id === id);
     
-    if (!collection) {
+    if (index === -1) {
       return undefined;
     }
     
     const updatedCollection = {
-      ...collection,
+      ...collections[index],
       ...updates,
       updatedAt: new Date().toISOString()
     };
     
-    this.landmarksCollections.set(id, updatedCollection);
+    collections[index] = updatedCollection;
+    await saveAllLandmarksCollections(collections);
     return updatedCollection;
   }
   
   async deleteLandmarksCollection(id: string): Promise<boolean> {
-    return this.landmarksCollections.delete(id);
+    const collections = await getAllLandmarksCollections();
+    const index = collections.findIndex(c => c.id === id);
+    
+    if (index === -1) {
+      return false;
+    }
+    
+    collections.splice(index, 1);
+    await saveAllLandmarksCollections(collections);
+    return true;
   }
   
   // Analysis template methods
@@ -175,3 +249,153 @@ export class MemStorage implements IStorage {
 }
 
 export const storage = new MemStorage();
+
+// Landmarks collections API - these now use the JSON file
+export async function getLandmarksCollection(id: string): Promise<LandmarksCollection | null> {
+  const collections = await getAllLandmarksCollections();
+  const collection = collections.find(c => c.id === id);
+  return collection || null;
+}
+
+export async function getLandmarksCollectionsByPatient(patientId: string): Promise<LandmarksCollection[]> {
+  const collections = await getAllLandmarksCollections();
+  return collections.filter(c => c.patientId === patientId);
+}
+
+export async function createLandmarksCollection(collection: Omit<LandmarksCollection, 'id' | 'createdAt' | 'updatedAt'>): Promise<LandmarksCollection> {
+  const now = new Date().toISOString();
+  const newCollection: LandmarksCollection = {
+    ...collection,
+    id: uuidv4(),
+    createdAt: now,
+    updatedAt: now,
+    landmarks: collection.landmarks || []
+  };
+  
+  const collections = await getAllLandmarksCollections();
+  collections.push(newCollection);
+  await saveAllLandmarksCollections(collections);
+  
+  return newCollection;
+}
+
+export async function updateLandmarksCollection(
+  id: string,
+  updates: Partial<LandmarksCollection>
+): Promise<LandmarksCollection | null> {
+  const collections = await getAllLandmarksCollections();
+  const index = collections.findIndex(c => c.id === id);
+  
+  if (index === -1) {
+    return null;
+  }
+  
+  const updatedCollection = {
+    ...collections[index],
+    ...updates,
+    updatedAt: new Date().toISOString()
+  };
+  
+  collections[index] = updatedCollection;
+  await saveAllLandmarksCollections(collections);
+  
+  return updatedCollection;
+}
+
+export async function deleteLandmarksCollection(id: string): Promise<boolean> {
+  const collections = await getAllLandmarksCollections();
+  const index = collections.findIndex(c => c.id === id);
+  
+  if (index === -1) {
+    return false;
+  }
+  
+  collections.splice(index, 1);
+  await saveAllLandmarksCollections(collections);
+  
+  return true;
+}
+
+export async function addLandmark(
+  collectionId: string,
+  landmark: Omit<Landmark, 'id' | 'createdAt' | 'updatedAt'>
+): Promise<LandmarksCollection | null> {
+  const collections = await getAllLandmarksCollections();
+  const collectionIndex = collections.findIndex(c => c.id === collectionId);
+  
+  if (collectionIndex === -1) {
+    return null;
+  }
+  
+  const now = new Date().toISOString();
+  const newLandmark: Landmark = {
+    ...landmark,
+    id: uuidv4(),
+    createdAt: now,
+    updatedAt: now
+  };
+  
+  collections[collectionIndex].landmarks.push(newLandmark);
+  collections[collectionIndex].updatedAt = now;
+  
+  await saveAllLandmarksCollections(collections);
+  
+  return collections[collectionIndex];
+}
+
+export async function updateLandmark(
+  collectionId: string,
+  landmarkId: string,
+  updates: Partial<Omit<Landmark, 'id' | 'createdAt' | 'updatedAt'>>
+): Promise<LandmarksCollection | null> {
+  const collections = await getAllLandmarksCollections();
+  const collectionIndex = collections.findIndex(c => c.id === collectionId);
+  
+  if (collectionIndex === -1) {
+    return null;
+  }
+  
+  const landmarkIndex = collections[collectionIndex].landmarks.findIndex(l => l.id === landmarkId);
+  
+  if (landmarkIndex === -1) {
+    return null;
+  }
+  
+  const now = new Date().toISOString();
+  collections[collectionIndex].landmarks[landmarkIndex] = {
+    ...collections[collectionIndex].landmarks[landmarkIndex],
+    ...updates,
+    updatedAt: now
+  };
+  
+  collections[collectionIndex].updatedAt = now;
+  
+  await saveAllLandmarksCollections(collections);
+  
+  return collections[collectionIndex];
+}
+
+export async function deleteLandmark(
+  collectionId: string,
+  landmarkId: string
+): Promise<LandmarksCollection | null> {
+  const collections = await getAllLandmarksCollections();
+  const collectionIndex = collections.findIndex(c => c.id === collectionId);
+  
+  if (collectionIndex === -1) {
+    return null;
+  }
+  
+  const landmarkIndex = collections[collectionIndex].landmarks.findIndex(l => l.id === landmarkId);
+  
+  if (landmarkIndex === -1) {
+    return null;
+  }
+  
+  collections[collectionIndex].landmarks.splice(landmarkIndex, 1);
+  collections[collectionIndex].updatedAt = new Date().toISOString();
+  
+  await saveAllLandmarksCollections(collections);
+  
+  return collections[collectionIndex];
+}

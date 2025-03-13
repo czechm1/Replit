@@ -8,6 +8,11 @@ import {
   LandmarksCollection,
   Landmark
 } from "@shared/schema";
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Define analysis data schemas
 const AnalysisSchema = z.object({
@@ -86,6 +91,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     ];
     
     res.json(templates);
+  });
+  
+  // Get tracing lines data
+  app.get('/api/tracing-lines', async (req, res) => {
+    try {
+      const tracingLinesPath = path.join(__dirname, 'mock', 'tracing-lines.json');
+      const tracingLinesData = await fs.promises.readFile(tracingLinesPath, 'utf-8');
+      console.log('tracingLinesData:', tracingLinesData);
+      // Add a slight delay to simulate network latency
+      setTimeout(() => {
+        res.json(JSON.parse(tracingLinesData));
+      }, 300);
+    } catch (error) {
+      console.error('Error reading tracing lines data:', error);
+      res.status(500).json({ message: 'Error reading tracing lines data' });
+    }
+  });
+  
+  // Get detected landmarks data - read from the JSON file
+  app.get('/api/detected-landmarks', async (req, res) => {
+    try {
+      const landmarksPath = path.join(__dirname, 'mock', 'landmarks.json');
+      const landmarksData = await fs.promises.readFile(landmarksPath, 'utf-8');
+      
+      // Add a slight delay to simulate network latency
+      setTimeout(() => {
+        res.json(JSON.parse(landmarksData));
+      }, 300);
+    } catch (error) {
+      console.error('Error reading landmarks data:', error);
+      res.status(500).json({ message: 'Error reading landmarks data' });
+    }
   });
   
   // Landmarks API

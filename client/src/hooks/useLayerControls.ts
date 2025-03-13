@@ -3,9 +3,9 @@ import { LayerOpacityType, ImageControlsType } from "@/components/radiograph/typ
 
 export function useLayerControls() {
   const [layerOpacity, setLayerOpacity] = useState<LayerOpacityType>({
-    tracing: 100,
-    landmarks: 100,
-    measurements: 100,
+    landmarks: 60,
+    measurements: 70,
+    tracing: 80,
     profile: 100
   });
 
@@ -47,9 +47,9 @@ export function useLayerControls() {
   // Reset layer opacity settings
   const resetLayerOpacity = useCallback(() => {
     setLayerOpacity({
-      tracing: 100,
-      landmarks: 100,
-      measurements: 100,
+      landmarks: 60,
+      measurements: 70,
+      tracing: 80,
       profile: 100
     });
   }, []);
