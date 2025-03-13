@@ -20,13 +20,8 @@ const Home: React.FC = () => {
               CephaloScan streamlines the cephalometric analysis process with an intuitive interface and comprehensive visualization tools.
             </p>
             <Link href="/cephalometric">
-              <Button size="lg" className="mr-2">
+              <Button size="lg" className="mr-4">
                 Open Application
-              </Button>
-            </Link>
-            <Link href="/comparison">
-              <Button variant="secondary" size="lg" className="mr-2">
-                Compare Images
               </Button>
             </Link>
             <Link href="/about">

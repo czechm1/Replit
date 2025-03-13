@@ -6,11 +6,8 @@ import { storage } from "./storage";
 import { z } from "zod";
 import { 
   LandmarksCollection,
-  Landmark,
-  WebSocketMessage
+  Landmark
 } from "@shared/schema";
-import { registerDebugRoutes } from "./debug_utils";
-import WebSocket, { WebSocketServer } from "ws";
 
 // Define analysis data schemas
 const AnalysisSchema = z.object({
@@ -27,9 +24,6 @@ type Analysis = z.infer<typeof AnalysisSchema>;
 const analyses: Analysis[] = [];
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Register debug routes
-  registerDebugRoutes(app);
-  
   // Static files are already being served in server/index.ts
   // Get all analyses for a patient
   app.get('/api/patients/:patientId/analyses', (req, res) => {
@@ -330,194 +324,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // Create HTTP server
+  // Create and return HTTP server (without WebSocket)
   const httpServer = createServer(app);
-  
-  // Set up WebSocket server
-  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
-  
-  // Store active users by collection ID
-  interface ActiveUser {
-    userId: string;
-    username: string;
-    socket: WebSocket;
-  }
-  
-  // Map of collection ID to list of active users
-  const activeCollections = new Map<string, ActiveUser[]>();
-  
-  // Set up WebSocket connection handling
-  wss.on('connection', (socket: WebSocket) => {
-    console.log('WebSocket client connected');
-    let userCollectionId: string | null = null;
-    let userId: string | null = null;
-    let username: string | null = null;
-    
-    socket.on('message', async (data: string) => {
-      try {
-        // Parse the message
-        const message: WebSocketMessage = JSON.parse(data);
-        
-        // Handle different message types
-        switch (message.type) {
-          case 'join_collection':
-            userCollectionId = message.collectionId;
-            userId = message.userId;
-            username = message.username;
-            
-            // Add user to active collection
-            if (!activeCollections.has(userCollectionId)) {
-              activeCollections.set(userCollectionId, []);
-            }
-            
-            const activeUsers = activeCollections.get(userCollectionId) || [];
-            activeUsers.push({ userId, username, socket });
-            activeCollections.set(userCollectionId, activeUsers);
-            
-            // Notify other users in the collection
-            broadcastToCollection(userCollectionId, {
-              type: 'user_joined',
-              userId,
-              username,
-              collectionId: userCollectionId,
-              timestamp: new Date().toISOString()
-            }, socket);
-            
-            // Send list of active users to the new user
-            const userList = activeUsers.map(user => ({
-              id: user.userId,
-              username: user.username
-            }));
-            
-            socket.send(JSON.stringify({
-              type: 'active_users',
-              users: userList,
-              collectionId: userCollectionId,
-              timestamp: new Date().toISOString()
-            }));
-            break;
-            
-          case 'add_landmark':
-            if (!userCollectionId) break;
-            
-            // Add the landmark to the database
-            const collection = await storage.getLandmarksCollection(message.collectionId);
-            if (collection) {
-              const updatedLandmarks = [...collection.landmarks, message.landmark];
-              await storage.updateLandmarksCollection(
-                message.collectionId,
-                {
-                  landmarks: updatedLandmarks,
-                  lastModifiedBy: username || 'unknown'
-                }
-              );
-              
-              // Broadcast the new landmark to all users
-              broadcastToCollection(message.collectionId, message);
-            }
-            break;
-            
-          case 'update_landmark':
-            if (!userCollectionId) break;
-            
-            // Update the landmark in the database
-            const updateCollection = await storage.getLandmarksCollection(message.collectionId);
-            if (updateCollection) {
-              const updatedLandmarks = updateCollection.landmarks.map(l => 
-                l.id === message.landmark.id ? message.landmark : l
-              );
-              
-              await storage.updateLandmarksCollection(
-                message.collectionId,
-                {
-                  landmarks: updatedLandmarks,
-                  lastModifiedBy: username || 'unknown'
-                }
-              );
-              
-              // Broadcast the updated landmark to all users
-              broadcastToCollection(message.collectionId, message);
-            }
-            break;
-            
-          case 'delete_landmark':
-            if (!userCollectionId) break;
-            
-            // Delete the landmark from the database
-            const deleteCollection = await storage.getLandmarksCollection(message.collectionId);
-            if (deleteCollection) {
-              const updatedLandmarks = deleteCollection.landmarks.filter(l => 
-                l.id !== message.landmarkId
-              );
-              
-              await storage.updateLandmarksCollection(
-                message.collectionId,
-                {
-                  landmarks: updatedLandmarks,
-                  lastModifiedBy: username || 'unknown'
-                }
-              );
-              
-              // Broadcast the deletion to all users
-              broadcastToCollection(message.collectionId, message);
-            }
-            break;
-        }
-      } catch (error) {
-        console.error('Error processing WebSocket message:', error);
-      }
-    });
-    
-    socket.on('close', () => {
-      // Remove user from active collections
-      if (userCollectionId && userId) {
-        const users = activeCollections.get(userCollectionId);
-        if (users) {
-          const updatedUsers = users.filter(u => u.userId !== userId);
-          
-          if (updatedUsers.length === 0) {
-            activeCollections.delete(userCollectionId);
-          } else {
-            activeCollections.set(userCollectionId, updatedUsers);
-            
-            // Notify other users that this user has left
-            broadcastToCollection(userCollectionId, {
-              type: 'user_left',
-              userId: userId,
-              username: username || 'Unknown user',
-              collectionId: userCollectionId,
-              timestamp: new Date().toISOString()
-            });
-          }
-        }
-      }
-      
-      console.log('WebSocket client disconnected');
-    });
-  });
-  
-  // Function to broadcast a message to all users in a collection
-  function broadcastToCollection(
-    collectionId: string, 
-    message: WebSocketMessage, 
-    excludeSocket?: WebSocket
-  ) {
-    const users = activeCollections.get(collectionId) || [];
-    
-    users.forEach(user => {
-      // Don't send the message back to the sender
-      if (excludeSocket && user.socket === excludeSocket) {
-        return;
-      }
-      
-      // Only send messages to connected sockets
-      if (user.socket.readyState === WebSocket.OPEN) {
-        user.socket.send(JSON.stringify(message));
-      }
-    });
-  }
-  
-  console.log('Starting server with WebSocket support');
+  console.log('Starting server in single-user mode');
   
   return httpServer;
 }

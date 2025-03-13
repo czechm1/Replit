@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sliders, Layers, ZoomIn, ZoomOut, RefreshCw, Edit2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import ImageSettingsControl from "./ImageSettingsControl";
 import ObjectVisibilityControl from "./ObjectVisibilityControl";
 import { LayerOpacityType, ImageControlsType } from "./types";
-import { useTutorial } from "@/context/TutorialContext";
 
 interface FloatingControlPanelProps {
   layerOpacity: LayerOpacityType;
@@ -41,38 +40,15 @@ const FloatingControlPanel: React.FC<FloatingControlPanelProps> = ({
   onToggleEditMode
 }) => {
   const [activeControl, setActiveControl] = useState<'none' | 'image' | 'layers'>('none');
-  const tutorial = useTutorial();
   
   const toggleImageSettings = () => {
     setActiveControl(prev => prev === 'image' ? 'none' : 'image');
     if (activeControl === 'layers') setActiveControl('image');
-    tutorial?.recordInteraction && tutorial.recordInteraction('image_settings');
   };
   
   const toggleObjectVisibility = () => {
     setActiveControl(prev => prev === 'layers' ? 'none' : 'layers');
     if (activeControl === 'image') setActiveControl('layers');
-    tutorial?.recordInteraction && tutorial.recordInteraction('layer_controls');
-  };
-  
-  const handleToggleEditMode = () => {
-    onToggleEditMode();
-    tutorial?.recordInteraction && tutorial.recordInteraction('landmark_editor');
-  };
-  
-  const handleZoomIn = () => {
-    onZoomIn();
-    tutorial?.recordInteraction && tutorial.recordInteraction('zoom_controls');
-  };
-  
-  const handleZoomOut = () => {
-    onZoomOut();
-    tutorial?.recordInteraction && tutorial.recordInteraction('zoom_controls');
-  };
-  
-  const handleResetView = () => {
-    onResetView();
-    tutorial?.recordInteraction && tutorial.recordInteraction('zoom_controls');
   };
   
   const closeControls = () => {
@@ -90,9 +66,8 @@ const FloatingControlPanel: React.FC<FloatingControlPanelProps> = ({
               <Button 
                 variant="ghost" 
                 size="icon"
-                onClick={handleZoomOut}
+                onClick={onZoomOut}
                 className="h-9 w-9 rounded-full text-slate-600"
-                data-tutorial="zoom_controls"
               >
                 <ZoomOut className="h-4 w-4" />
               </Button>
@@ -110,9 +85,8 @@ const FloatingControlPanel: React.FC<FloatingControlPanelProps> = ({
               <Button 
                 variant="ghost" 
                 size="icon"
-                onClick={handleZoomIn}
+                onClick={onZoomIn}
                 className="h-9 w-9 rounded-full text-slate-600"
-                data-tutorial="zoom_controls"
               >
                 <ZoomIn className="h-4 w-4" />
               </Button>
@@ -130,9 +104,8 @@ const FloatingControlPanel: React.FC<FloatingControlPanelProps> = ({
               <Button 
                 variant="ghost" 
                 size="icon"
-                onClick={handleResetView}
+                onClick={onResetView}
                 className="h-9 w-9 rounded-full text-slate-600"
-                data-tutorial="zoom_controls"
               >
                 <RefreshCw className="h-4 w-4" />
               </Button>
@@ -153,8 +126,7 @@ const FloatingControlPanel: React.FC<FloatingControlPanelProps> = ({
                 variant={isEditMode ? "default" : "ghost"}
                 size="sm" 
                 className="h-9 w-9 rounded-full"
-                onClick={handleToggleEditMode}
-                data-tutorial="landmark_editor"
+                onClick={onToggleEditMode}
               >
                 <Edit2 className="h-4 w-4" />
                 <span className="sr-only">Edit Landmarks</span>
@@ -177,7 +149,6 @@ const FloatingControlPanel: React.FC<FloatingControlPanelProps> = ({
                 size="sm" 
                 className="h-9 w-9 rounded-full"
                 onClick={toggleImageSettings}
-                data-tutorial="image_settings"
               >
                 <Sliders className="h-4 w-4" />
                 <span className="sr-only">Image Settings</span>
@@ -198,7 +169,6 @@ const FloatingControlPanel: React.FC<FloatingControlPanelProps> = ({
                 size="sm" 
                 className="h-9 w-9 rounded-full"
                 onClick={toggleObjectVisibility}
-                data-tutorial="layer_controls"
               >
                 <Layers className="h-4 w-4" />
                 <span className="sr-only">Object Visibility</span>

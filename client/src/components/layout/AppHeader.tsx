@@ -101,7 +101,6 @@ const AppHeader: React.FC<AppHeaderProps> = ({
             size="icon"
             className="text-slate-600 hover:text-primary-600 rounded-full hover:bg-slate-100"
             onClick={onShowKeyboardShortcuts}
-            data-tutorial="keyboard_shortcuts"
           >
             <Keyboard className="h-5 w-5" />
             <span className="sr-only">Keyboard shortcuts</span>

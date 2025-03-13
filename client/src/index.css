@@ -11,24 +11,3 @@
     @apply font-sans antialiased bg-background text-foreground;
   }
 }
-
-/* Tutorial highlight effect */
-.tutorial-highlight {
-  position: relative;
-  z-index: 40;
-  animation: pulse 2s infinite;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
-  border-radius: 0.25rem;
-}
-
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
-  }
-  70% {
-    box-shadow: 0 0 0 6px rgba(59, 130, 246, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
-  }
-}

@@ -42,6 +42,7 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  console.log("Starting server in single-user mode");
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

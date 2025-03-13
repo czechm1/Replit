@@ -43,7 +43,7 @@ const AnalysisViewControls: React.FC<AnalysisViewControlsProps> = ({
   const [selectedDate, setSelectedDate] = useState("2025-01-30");
 
   return (
-    <div className="space-y-3" data-tutorial="analysis_view">
+    <div className="space-y-3">
       <div className="space-y-3">
         <h3 className="text-sm font-medium text-slate-600">VIEW MODE</h3>
         
