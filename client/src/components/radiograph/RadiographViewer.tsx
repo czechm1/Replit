@@ -8,6 +8,7 @@ import { LandmarkEditor } from "./LandmarkEditor";
 import TracingLinesLayer from './TracingLinesLayer';
 import AnalysisLinesLayer from './AnalysisLinesLayer';
 import LandmarksLayer from "./LandmarksLayer";
+import MeasurementsLayer from "./MeasurementsLayer";
 
 interface RadiographViewerProps {
   highContrastMode: boolean;
@@ -47,6 +48,11 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
   const [imageDimensions, setImageDimensions] = useState({ width: 800, height: 1000 });
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
+  
+  // Measurement group visibility state
+  const [visibleMeasurementGroups, setVisibleMeasurementGroups] = useState<string[]>([
+    'skeletal', 'dental', 'soft-tissue'
+  ]);
   
   // Update image dimensions when the container is resized or image loads
   useEffect(() => {
@@ -128,6 +134,17 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
     setShowObjectVisibility(false);
   };
 
+  // Toggle measurement group visibility
+  const handleMeasurementGroupToggle = (group: string, visible: boolean) => {
+    setVisibleMeasurementGroups(prev => {
+      if (visible) {
+        return [...prev, group];
+      } else {
+        return prev.filter(g => g !== group);
+      }
+    });
+  };
+
   return (
     <div className="relative w-full h-full overflow-hidden bg-slate-900 flex justify-center items-center">
       {/* Radiograph with all layers in a single transformed container */}
@@ -187,6 +204,14 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
           />
         </div>
 
+        {/* Measurements layer - positioned over the landmarks */}
+        <div className="absolute top-0 right-0 w-full h-full pointer-events-none">
+          <MeasurementsLayer
+            opacity={layerOpacity.measurements || 100}
+            visibleMeasurementGroups={visibleMeasurementGroups}
+          />
+        </div>
+
         {/* Landmark Editor component */}
         <div className="absolute inset-0">
           <LandmarkEditor 
@@ -213,6 +238,8 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
         onResetView={handleResetView}
         isEditMode={isEditMode}
         onToggleEditMode={toggleEditMode}
+        visibleMeasurementGroups={visibleMeasurementGroups}
+        onMeasurementGroupToggle={handleMeasurementGroupToggle}
       />
     </div>
   );

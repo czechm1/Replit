@@ -20,6 +20,9 @@ interface FloatingControlPanelProps {
   // Edit mode controls
   isEditMode: boolean;
   onToggleEditMode: () => void;
+  // Measurement group visibility
+  visibleMeasurementGroups?: string[];
+  onMeasurementGroupToggle?: (group: string, visible: boolean) => void;
 }
 
 const FloatingControlPanel: React.FC<FloatingControlPanelProps> = ({
@@ -33,7 +36,9 @@ const FloatingControlPanel: React.FC<FloatingControlPanelProps> = ({
   onZoomOut,
   onResetView,
   isEditMode,
-  onToggleEditMode
+  onToggleEditMode,
+  visibleMeasurementGroups = ['skeletal', 'dental', 'soft-tissue'],
+  onMeasurementGroupToggle = () => {}
 }) => {
   const [activeControl, setActiveControl] = useState<'none' | 'image' | 'layers'>('none');
   
@@ -196,6 +201,8 @@ const FloatingControlPanel: React.FC<FloatingControlPanelProps> = ({
             onLayerOpacityChange={onLayerOpacityChange}
             onClose={closeControls}
             onReset={onResetLayers}
+            visibleMeasurementGroups={visibleMeasurementGroups}
+            onMeasurementGroupToggle={onMeasurementGroupToggle}
           />
         </div>
       )}

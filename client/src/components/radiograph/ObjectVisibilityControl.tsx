@@ -1,21 +1,26 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { X, Eye, EyeOff } from "lucide-react";
+import { X, Eye, EyeOff, ChevronDown, ChevronUp } from "lucide-react";
 import { LayerOpacityType } from "./types";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface ObjectVisibilityProps {
   layerOpacity: LayerOpacityType;
   onLayerOpacityChange: (layer: keyof LayerOpacityType, value: number) => void;
   onClose: () => void;
   onReset: () => void;
+  visibleMeasurementGroups?: string[];
+  onMeasurementGroupToggle?: (group: string, visible: boolean) => void;
 }
 
 const ObjectVisibilityControl: React.FC<ObjectVisibilityProps> = ({
   layerOpacity,
   onLayerOpacityChange,
   onClose,
-  onReset
+  onReset,
+  visibleMeasurementGroups = ['skeletal', 'dental', 'soft-tissue'],
+  onMeasurementGroupToggle = () => {}
 }) => {
   
   // Helper function to toggle layer visibility
@@ -25,6 +30,29 @@ const ObjectVisibilityControl: React.FC<ObjectVisibilityProps> = ({
     } else {
       onLayerOpacityChange(layer, 100); // Show at full opacity
     }
+  };
+
+  // State for expanded sections
+  const [expandedSections, setExpandedSections] = useState({
+    measurements: false
+  });
+
+  // Toggle section expansion
+  const toggleSection = (section: keyof typeof expandedSections) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
+  // Check if a measurement group is visible
+  const isMeasurementGroupVisible = (group: string) => {
+    return visibleMeasurementGroups.includes(group);
+  };
+
+  // Toggle measurement group visibility
+  const toggleMeasurementGroup = (group: string) => {
+    onMeasurementGroupToggle(group, !isMeasurementGroupVisible(group));
   };
 
   return (
@@ -106,6 +134,14 @@ const ObjectVisibilityControl: React.FC<ObjectVisibilityProps> = ({
                 >
                   {layerOpacity.measurements > 0 ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                 </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="p-0 h-6 w-6 ml-1"
+                  onClick={() => toggleSection('measurements')}
+                >
+                  {expandedSections.measurements ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </Button>
               </div>
               <span className="text-xs text-slate-500">{layerOpacity.measurements}%</span>
             </div>
@@ -117,6 +153,56 @@ const ObjectVisibilityControl: React.FC<ObjectVisibilityProps> = ({
               onValueChange={(value) => onLayerOpacityChange('measurements', value[0])}
               className="w-full"
             />
+            
+            {/* Measurement groups */}
+            {expandedSections.measurements && (
+              <div className="mt-2 pl-4 space-y-2 border-l-2 border-slate-200">
+                <div className="flex items-center">
+                  <Checkbox
+                    id="skeletal-measurements"
+                    checked={isMeasurementGroupVisible('skeletal')}
+                    onCheckedChange={() => toggleMeasurementGroup('skeletal')}
+                    className="mr-2 h-4 w-4"
+                  />
+                  <label
+                    htmlFor="skeletal-measurements"
+                    className="text-xs text-slate-600 cursor-pointer"
+                  >
+                    Skeletal Measurements
+                  </label>
+                </div>
+                
+                <div className="flex items-center">
+                  <Checkbox
+                    id="dental-measurements"
+                    checked={isMeasurementGroupVisible('dental')}
+                    onCheckedChange={() => toggleMeasurementGroup('dental')}
+                    className="mr-2 h-4 w-4"
+                  />
+                  <label
+                    htmlFor="dental-measurements"
+                    className="text-xs text-slate-600 cursor-pointer"
+                  >
+                    Dental Measurements
+                  </label>
+                </div>
+                
+                <div className="flex items-center">
+                  <Checkbox
+                    id="soft-tissue-measurements"
+                    checked={isMeasurementGroupVisible('soft-tissue')}
+                    onCheckedChange={() => toggleMeasurementGroup('soft-tissue')}
+                    className="mr-2 h-4 w-4"
+                  />
+                  <label
+                    htmlFor="soft-tissue-measurements"
+                    className="text-xs text-slate-600 cursor-pointer"
+                  >
+                    Soft Tissue Measurements
+                  </label>
+                </div>
+              </div>
+            )}
           </div>
           
           {/* Analysis line visibility */}
@@ -146,8 +232,6 @@ const ObjectVisibilityControl: React.FC<ObjectVisibilityProps> = ({
               />
             </div>
           )}
-          
-
         </div>
         
         <Button 
