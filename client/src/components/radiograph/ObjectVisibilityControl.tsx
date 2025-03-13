@@ -35,7 +35,7 @@ const ObjectVisibilityControl: React.FC<ObjectVisibilityProps> = ({
     }
   };
   
-  // Handler for Only Invalid toggle
+  // Handler for Show deviations toggle (renamed from "Only Invalid")
   const handleOnlyInvalidToggle = (checked: boolean) => {
     setOnlyInvalid(checked);
     // Call the parent handler if provided
@@ -164,22 +164,22 @@ const ObjectVisibilityControl: React.FC<ObjectVisibilityProps> = ({
             </div>
           )}
           
-          {/* High-contrast "Only Invalid" toggle with improved visibility */}
-          <div className="flex items-center justify-between mt-4 p-2 bg-red-50 border border-red-100 rounded-md">
+          {/* High-contrast "Show deviations" toggle with improved visibility */}
+          <div className="flex items-center justify-between mt-4 p-2 bg-indigo-100 border border-indigo-200 rounded-md shadow-sm">
             <div className="flex items-center space-x-2">
-              <AlertCircle className="h-4 w-4 text-red-500" />
+              <AlertCircle className="h-4 w-4 text-indigo-600" />
               <Label
-                htmlFor="only-invalid"
-                className="text-sm font-medium text-red-700 cursor-pointer"
+                htmlFor="show-deviations"
+                className="text-sm font-medium text-indigo-800 cursor-pointer"
               >
-                Only Invalid
+                Show deviations
               </Label>
             </div>
             <Switch
-              id="only-invalid"
+              id="show-deviations"
               checked={onlyInvalid}
               onCheckedChange={handleOnlyInvalidToggle}
-              className="data-[state=checked]:bg-red-500"
+              className="data-[state=checked]:bg-indigo-600"
             />
           </div>
         </div>
