@@ -124,28 +124,9 @@ export function LandmarkEditor({
   }, [isEditMode, newLandmarkMode, handleAddLandmark]);
 
   if (!isEditMode) {
-    return (
-      <div className="absolute top-4 right-4 flex flex-col gap-2">
-        {/* Edit mode toggle */}
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={onToggleEditMode}
-                className="h-10 w-10 rounded-full bg-white/90 backdrop-blur-sm shadow-md text-primary"
-              >
-                <Edit2 className="h-5 w-5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="left">
-              <p>Edit Landmarks</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
-    );
+    // Return empty fragment when not in edit mode
+    // This removes the floating edit button
+    return <></>;
   }
 
   return (

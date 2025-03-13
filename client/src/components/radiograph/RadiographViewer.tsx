@@ -160,15 +160,17 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
           </svg>
         )}
 
-        {/* Landmark Editor component */}
-        <LandmarkEditor 
-          collectionId={`${patientId}-${imageId}`}
-          userId="local-user"
-          username="Local User"
-          isEditMode={isEditMode}
-          onToggleEditMode={toggleEditMode}
-          imageDimensions={imageDimensions}
-        />
+        {/* Landmark Editor component - with edit button removed */}
+        <div className="relative">
+          <LandmarkEditor 
+            collectionId={`${patientId}-${imageId}`}
+            userId="local-user"
+            username="Local User"
+            isEditMode={isEditMode}
+            onToggleEditMode={toggleEditMode}
+            imageDimensions={imageDimensions}
+          />
+        </div>
       </div>
       
       {/* Unified Floating Control Panel */}
