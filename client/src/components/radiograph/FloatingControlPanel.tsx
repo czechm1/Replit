@@ -41,38 +41,38 @@ const FloatingControlPanel: React.FC<FloatingControlPanelProps> = ({
   onToggleEditMode
 }) => {
   const [activeControl, setActiveControl] = useState<'none' | 'image' | 'layers'>('none');
-  const { recordInteraction } = useTutorial();
+  const tutorial = useTutorial();
   
   const toggleImageSettings = () => {
     setActiveControl(prev => prev === 'image' ? 'none' : 'image');
     if (activeControl === 'layers') setActiveControl('image');
-    recordInteraction('image_settings');
+    tutorial?.recordInteraction && tutorial.recordInteraction('image_settings');
   };
   
   const toggleObjectVisibility = () => {
     setActiveControl(prev => prev === 'layers' ? 'none' : 'layers');
     if (activeControl === 'image') setActiveControl('layers');
-    recordInteraction('layer_controls');
+    tutorial?.recordInteraction && tutorial.recordInteraction('layer_controls');
   };
   
   const handleToggleEditMode = () => {
     onToggleEditMode();
-    recordInteraction('landmark_editor');
+    tutorial?.recordInteraction && tutorial.recordInteraction('landmark_editor');
   };
   
   const handleZoomIn = () => {
     onZoomIn();
-    recordInteraction('zoom_controls');
+    tutorial?.recordInteraction && tutorial.recordInteraction('zoom_controls');
   };
   
   const handleZoomOut = () => {
     onZoomOut();
-    recordInteraction('zoom_controls');
+    tutorial?.recordInteraction && tutorial.recordInteraction('zoom_controls');
   };
   
   const handleResetView = () => {
     onResetView();
-    recordInteraction('zoom_controls');
+    tutorial?.recordInteraction && tutorial.recordInteraction('zoom_controls');
   };
   
   const closeControls = () => {

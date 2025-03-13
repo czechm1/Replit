@@ -3,20 +3,31 @@ import { useComparisonViewer } from "@/hooks/useComparisonViewer";
 import { useLayerControls } from "@/hooks/useLayerControls";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { 
   X, 
   Eye, 
   EyeOff, 
-  Plus, 
-  MinusCircle, 
+  ZoomIn,
+  ZoomOut,
+  RefreshCw,
   LayoutGrid, 
   Layers,
   ChevronLeft,
-  RotateCw
+  RotateCw,
+  Sliders,
+  Info,
+  Clock,
+  Calendar,
+  Plus as PlusIcon,
+  Minus as MinusIcon
 } from "lucide-react";
+import FloatingControlPanel from "./FloatingControlPanel";
 import { ComparisonImageType } from "./types";
 
 interface ComparisonViewerProps {
@@ -110,6 +121,10 @@ const ComparisonViewer: React.FC<ComparisonViewerProps> = ({
     }
   ];
 
+  // State for edit mode (not used for landmarks, just to enable the FloatingControlPanel)
+  const [isEditMode, setIsEditMode] = useState(false);
+  const toggleEditMode = () => setIsEditMode(prev => !prev);
+
   // Zoom and pan handlers
   const handleZoomIn = () => setScale(prev => Math.min(prev + 0.1, 2.5));
   const handleZoomOut = () => setScale(prev => Math.max(prev - 0.1, 0.3));
@@ -195,11 +210,11 @@ const ComparisonViewer: React.FC<ComparisonViewerProps> = ({
           {/* Zoom controls */}
           <div className="flex items-center space-x-1">
             <Button variant="ghost" size="sm" onClick={handleZoomOut}>
-              <MinusCircle className="h-4 w-4" />
+              <MinusIcon className="h-4 w-4" />
             </Button>
             <span className="text-sm bg-slate-700 px-2 py-1 rounded">{Math.round(scale * 100)}%</span>
             <Button variant="ghost" size="sm" onClick={handleZoomIn}>
-              <Plus className="h-4 w-4" />
+              <PlusIcon className="h-4 w-4" />
             </Button>
             <Button variant="ghost" size="sm" onClick={handleResetView}>
               <RotateCw className="h-4 w-4" />
@@ -209,222 +224,156 @@ const ComparisonViewer: React.FC<ComparisonViewerProps> = ({
       </div>
       
       {/* Main content area */}
-      <div className="flex-1 flex">
-        {/* Sidebar with image controls */}
-        <div className="w-64 bg-slate-800 p-3 overflow-y-auto">
-          <div className="mb-4">
-            <h4 className="text-white font-medium mb-2">Images</h4>
-            
-            {/* Image list */}
-            <div className="space-y-3">
-              {comparisonImages.length > 0 ? (
-                comparisonImages.map(image => (
-                  <div key={image.id} className={`
-                    bg-slate-700 rounded p-2 
-                    ${activeImageId === image.id ? 'ring-2 ring-blue-500' : ''}
-                  `}>
-                    <div className="flex justify-between items-center mb-1">
-                      <button 
-                        className="text-sm font-medium text-slate-200 flex-1 text-left"
-                        onClick={() => setActiveImageId(image.id)}
-                      >
-                        {image.description || image.imageType}
-                      </button>
-                      <div className="flex space-x-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => toggleImageVisibility(image.id)}
-                          className="text-slate-300 hover:text-white h-6 w-6 p-0"
+      <div className="flex-1 flex flex-col">
+        {/* Upper section with image controls and viewer */}
+        <div className="flex-1 flex min-h-0">
+          {/* Sidebar with image controls */}
+          <div className="w-64 bg-slate-800 p-3 overflow-y-auto">
+            <div className="mb-4">
+              <h4 className="text-white font-medium mb-2">Images</h4>
+              
+              {/* Image list */}
+              <div className="space-y-3">
+                {comparisonImages.length > 0 ? (
+                  comparisonImages.map(image => (
+                    <div key={image.id} className={`
+                      bg-slate-700 rounded p-2 
+                      ${activeImageId === image.id ? 'ring-2 ring-blue-500' : ''}
+                    `}>
+                      <div className="flex justify-between items-center mb-1">
+                        <button 
+                          className="text-sm font-medium text-slate-200 flex-1 text-left"
+                          onClick={() => setActiveImageId(image.id)}
                         >
-                          {image.visible ? 
-                            <Eye className="h-3.5 w-3.5" /> : 
-                            <EyeOff className="h-3.5 w-3.5" />
-                          }
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeComparisonImage(image.id)}
-                          className="text-slate-300 hover:text-red-400 h-6 w-6 p-0"
-                        >
-                          <X className="h-3.5 w-3.5" />
-                        </Button>
+                          {image.description || image.imageType}
+                        </button>
+                        <div className="flex space-x-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleImageVisibility(image.id)}
+                            className="text-slate-300 hover:text-white h-6 w-6 p-0"
+                          >
+                            {image.visible ? 
+                              <Eye className="h-3.5 w-3.5" /> : 
+                              <EyeOff className="h-3.5 w-3.5" />
+                            }
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeComparisonImage(image.id)}
+                            className="text-slate-300 hover:text-red-400 h-6 w-6 p-0"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      {/* Opacity control */}
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xs text-slate-400 w-14">Opacity</span>
+                        <Slider
+                          value={[image.opacity]}
+                          min={0}
+                          max={100}
+                          step={1}
+                          onValueChange={(value) => updateImageOpacity(image.id, value[0])}
+                          className="flex-1"
+                        />
+                        <span className="text-xs text-slate-400 w-7">{image.opacity}%</span>
+                      </div>
+                      
+                      {/* Color filter selection */}
+                      <div className="mt-1.5 flex gap-1">
+                        <button 
+                          className={`h-5 w-5 rounded-full ${image.colorFilter === undefined ? 'ring-2 ring-white' : ''}`}
+                          style={{ background: 'white' }}
+                          onClick={() => updateImageColorFilter(image.id, "")}
+                        />
+                        <button 
+                          className={`h-5 w-5 rounded-full ${image.colorFilter === 'hue-rotate(120deg)' ? 'ring-2 ring-white' : ''}`}
+                          style={{ background: 'green' }}
+                          onClick={() => updateImageColorFilter(image.id, 'hue-rotate(120deg)')}
+                        />
+                        <button 
+                          className={`h-5 w-5 rounded-full ${image.colorFilter === 'hue-rotate(180deg)' ? 'ring-2 ring-white' : ''}`}
+                          style={{ background: 'blue' }}
+                          onClick={() => updateImageColorFilter(image.id, 'hue-rotate(180deg)')}
+                        />
+                        <button 
+                          className={`h-5 w-5 rounded-full ${image.colorFilter === 'hue-rotate(0deg) sepia(1) hue-rotate(310deg) saturate(3)' ? 'ring-2 ring-white' : ''}`}
+                          style={{ background: 'red' }}
+                          onClick={() => updateImageColorFilter(image.id, 'hue-rotate(0deg) sepia(1) hue-rotate(310deg) saturate(3)')}
+                        />
+                      </div>
+
+                      {/* Image details */}
+                      <div className="mt-2 text-xs text-slate-400">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          <span>{image.timestamp}</span>
+                        </div>
                       </div>
                     </div>
-                    
-                    {/* Opacity control */}
-                    <div className="flex items-center space-x-2">
-                      <span className="text-xs text-slate-400 w-14">Opacity</span>
-                      <Slider
-                        value={[image.opacity]}
-                        min={0}
-                        max={100}
-                        step={1}
-                        onValueChange={(value) => updateImageOpacity(image.id, value[0])}
-                        className="flex-1"
-                      />
-                      <span className="text-xs text-slate-400 w-7">{image.opacity}%</span>
-                    </div>
-                    
-                    {/* Color filter selection */}
-                    <div className="mt-1.5 flex gap-1">
-                      <button 
-                        className={`h-5 w-5 rounded-full ${image.colorFilter === undefined ? 'ring-2 ring-white' : ''}`}
-                        style={{ background: 'white' }}
-                        onClick={() => updateImageColorFilter(image.id, "")}
-                      />
-                      <button 
-                        className={`h-5 w-5 rounded-full ${image.colorFilter === 'hue-rotate(120deg)' ? 'ring-2 ring-white' : ''}`}
-                        style={{ background: 'green' }}
-                        onClick={() => updateImageColorFilter(image.id, 'hue-rotate(120deg)')}
-                      />
-                      <button 
-                        className={`h-5 w-5 rounded-full ${image.colorFilter === 'hue-rotate(180deg)' ? 'ring-2 ring-white' : ''}`}
-                        style={{ background: 'blue' }}
-                        onClick={() => updateImageColorFilter(image.id, 'hue-rotate(180deg)')}
-                      />
-                      <button 
-                        className={`h-5 w-5 rounded-full ${image.colorFilter === 'hue-rotate(0deg) sepia(1) hue-rotate(310deg) saturate(3)' ? 'ring-2 ring-white' : ''}`}
-                        style={{ background: 'red' }}
-                        onClick={() => updateImageColorFilter(image.id, 'hue-rotate(0deg) sepia(1) hue-rotate(310deg) saturate(3)')}
-                      />
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-slate-400 text-sm">No images added for comparison</div>
-              )}
-            </div>
-            
-            {/* Add image button */}
-            <div className="mt-3">
-              <h5 className="text-slate-300 text-sm mb-1">Add Images:</h5>
-              <div className="grid grid-cols-1 gap-1">
-                {sampleImages
-                  .filter(img => !comparisonImages.some(existingImg => existingImg.id === img.id))
-                  .map(image => (
-                    <Button 
-                      key={image.id} 
-                      variant="outline" 
-                      size="sm"
-                      className="text-xs text-left justify-start bg-slate-700 hover:bg-slate-600 border-slate-600"
-                      onClick={() => addComparisonImage(image)}
-                    >
-                      <Plus className="h-3 w-3 mr-1" />
-                      {image.description || image.imageType}
-                    </Button>
                   ))
-                }
-                
-                {sampleImages.length === comparisonImages.length && (
-                  <p className="text-slate-400 text-xs italic">All available images added</p>
+                ) : (
+                  <div className="text-slate-400 text-sm">No images added for comparison</div>
                 )}
+              </div>
+              
+              {/* Add image button */}
+              <div className="mt-3">
+                <h5 className="text-slate-300 text-sm mb-1">Add Images:</h5>
+                <div className="grid grid-cols-1 gap-1">
+                  {sampleImages
+                    .filter(img => !comparisonImages.some(existingImg => existingImg.id === img.id))
+                    .map(image => (
+                      <Button 
+                        key={image.id} 
+                        variant="outline" 
+                        size="sm"
+                        className="text-xs text-left justify-start bg-slate-700 hover:bg-slate-600 border-slate-600"
+                        onClick={() => addComparisonImage(image)}
+                      >
+                        <PlusIcon className="h-3 w-3 mr-1" />
+                        {image.description || image.imageType}
+                      </Button>
+                    ))
+                  }
+                  
+                  {sampleImages.length === comparisonImages.length && (
+                    <p className="text-slate-400 text-xs italic">All available images added</p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
           
-          {/* Global Controls */}
-          <div className="mt-4">
-            <h4 className="text-white font-medium mb-2">Global Controls</h4>
-            
-            <div className="space-y-3">
-              {/* Image Controls */}
-              <div>
-                <div className="flex justify-between items-center mb-1">
-                  <Label className="text-sm text-slate-300">Brightness</Label>
-                  <span className="text-xs text-slate-400">{imageControls.brightness}</span>
-                </div>
-                <Slider
-                  value={[imageControls.brightness]}
-                  min={-100}
-                  max={100}
-                  step={1}
-                  onValueChange={(value) => updateImageControl('brightness', value[0])}
-                />
-              </div>
-              
-              <div>
-                <div className="flex justify-between items-center mb-1">
-                  <Label className="text-sm text-slate-300">Contrast</Label>
-                  <span className="text-xs text-slate-400">{imageControls.contrast}</span>
-                </div>
-                <Slider
-                  value={[imageControls.contrast]}
-                  min={-100}
-                  max={100}
-                  step={1}
-                  onValueChange={(value) => updateImageControl('contrast', value[0])}
-                />
-              </div>
-              
-              {/* Reset Button */}
-              <Button 
-                className="w-full mt-2" 
-                variant="outline"
-                onClick={resetAllControls}
+          {/* Image view area */}
+          <div className="flex-1 relative overflow-hidden bg-black"
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            ref={containerRef}
+          >
+            {comparisonMode === 'overlay' ? (
+              // Overlay mode
+              <div 
+                className="w-full h-full relative"
+                style={{ 
+                  cursor: isDragging ? 'grabbing' : 'grab',
+                }}
               >
-                Reset All Controls
-              </Button>
-            </div>
-          </div>
-        </div>
-        
-        {/* Image view area */}
-        <div className="flex-1 relative overflow-hidden"
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          ref={containerRef}
-        >
-          {comparisonMode === 'overlay' ? (
-            // Overlay mode
-            <div 
-              className="w-full h-full relative"
-              style={{ 
-                cursor: isDragging ? 'grabbing' : 'grab',
-              }}
-            >
-              {comparisonImages
-                .filter(img => img.visible)
-                .map((image, index) => (
-                  <div 
-                    key={image.id}
-                    className="absolute top-0 left-0 w-full h-full bg-center bg-no-repeat bg-contain"
-                    style={{
-                      backgroundImage: `url(${image.url})`,
-                      opacity: image.opacity / 100,
-                      filter: `
-                        brightness(${100 + imageControls.brightness}%) 
-                        contrast(${100 + imageControls.contrast}%)
-                        ${image.colorFilter || ''}
-                        ${highContrastMode ? 'brightness(120%) contrast(140%) grayscale(20%)' : ''}
-                      `,
-                      transform: `scale(${scale}) translate(${position.x}px, ${position.y}px)`,
-                      transition: isDragging ? 'none' : 'transform 0.2s ease-out',
-                      zIndex: index
-                    }}
-                  />
-                ))}
-            </div>
-          ) : (
-            // Side by side mode
-            <div className="w-full h-full grid grid-cols-2 gap-1 p-1 bg-black">
-              {comparisonImages
-                .filter(img => img.visible)
-                .map((image) => (
-                  <div 
-                    key={image.id}
-                    className="relative bg-center bg-no-repeat bg-contain h-full overflow-hidden"
-                    style={{
-                      cursor: isDragging ? 'grabbing' : 'grab',
-                    }}
-                  >
-                    <div
+                {comparisonImages
+                  .filter(img => img.visible)
+                  .map((image, index) => (
+                    <div 
+                      key={image.id}
                       className="absolute top-0 left-0 w-full h-full bg-center bg-no-repeat bg-contain"
                       style={{
                         backgroundImage: `url(${image.url})`,
@@ -437,25 +386,157 @@ const ComparisonViewer: React.FC<ComparisonViewerProps> = ({
                         `,
                         transform: `scale(${scale}) translate(${position.x}px, ${position.y}px)`,
                         transition: isDragging ? 'none' : 'transform 0.2s ease-out',
+                        zIndex: index
                       }}
                     />
-                    <div className="absolute top-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
-                      {image.description || image.imageType}
-                    </div>
-                  </div>
-                ))}
-            </div>
-          )}
-          
-          {/* Empty state */}
-          {comparisonImages.length === 0 && (
-            <div className="w-full h-full flex items-center justify-center text-slate-400">
-              <div className="text-center">
-                <p>Please add images from the sidebar to begin comparison</p>
+                  ))}
               </div>
-            </div>
-          )}
+            ) : (
+              // Side by side mode
+              <div className="w-full h-full grid grid-cols-2 gap-1 p-1 bg-black">
+                {comparisonImages
+                  .filter(img => img.visible)
+                  .map((image) => (
+                    <div 
+                      key={image.id}
+                      className="relative bg-center bg-no-repeat bg-contain h-full overflow-hidden"
+                      style={{
+                        cursor: isDragging ? 'grabbing' : 'grab',
+                      }}
+                    >
+                      <div
+                        className="absolute top-0 left-0 w-full h-full bg-center bg-no-repeat bg-contain"
+                        style={{
+                          backgroundImage: `url(${image.url})`,
+                          opacity: image.opacity / 100,
+                          filter: `
+                            brightness(${100 + imageControls.brightness}%) 
+                            contrast(${100 + imageControls.contrast}%)
+                            ${image.colorFilter || ''}
+                            ${highContrastMode ? 'brightness(120%) contrast(140%) grayscale(20%)' : ''}
+                          `,
+                          transform: `scale(${scale}) translate(${position.x}px, ${position.y}px)`,
+                          transition: isDragging ? 'none' : 'transform 0.2s ease-out',
+                        }}
+                      />
+                      <div className="absolute top-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
+                        {image.description || image.imageType}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
+            
+            {/* Empty state */}
+            {comparisonImages.length === 0 && (
+              <div className="w-full h-full flex items-center justify-center text-slate-400">
+                <div className="text-center">
+                  <p>Please add images from the sidebar to begin comparison</p>
+                </div>
+              </div>
+            )}
+
+            {/* Floating control panel */}
+            {comparisonImages.length > 0 && (
+              <FloatingControlPanel
+                layerOpacity={layerOpacity}
+                imageControls={imageControls}
+                onLayerOpacityChange={updateLayerOpacity}
+                onImageControlChange={updateImageControl}
+                onResetLayers={() => resetAllControls()}
+                onResetImageControls={() => resetAllControls()}
+                onZoomIn={handleZoomIn}
+                onZoomOut={handleZoomOut}
+                onResetView={handleResetView}
+                isEditMode={isEditMode}
+                onToggleEditMode={toggleEditMode}
+              />
+            )}
+          </div>
         </div>
+
+        {/* Bottom section with data table */}
+        {comparisonImages.length > 0 && (
+          <div className="h-48 bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 overflow-auto">
+            <Tabs defaultValue="measurements" className="w-full">
+              <TabsList className="w-full justify-start px-4 pt-2">
+                <TabsTrigger value="measurements">Measurements</TabsTrigger>
+                <TabsTrigger value="details">Image Details</TabsTrigger>
+              </TabsList>
+              <TabsContent value="measurements" className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Measurement</TableHead>
+                      {comparisonImages.filter(img => img.visible).map(image => (
+                        <TableHead key={image.id}>
+                          {image.description || image.imageType}
+                        </TableHead>
+                      ))}
+                      <TableHead>Difference</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {/* Sample measurements rows */}
+                    <TableRow>
+                      <TableCell className="font-medium">SNA (°)</TableCell>
+                      <TableCell>82.0</TableCell>
+                      <TableCell>83.5</TableCell>
+                      <TableCell className="text-green-600">+1.5</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">SNB (°)</TableCell>
+                      <TableCell>78.0</TableCell>
+                      <TableCell>79.0</TableCell>
+                      <TableCell className="text-green-600">+1.0</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">ANB (°)</TableCell>
+                      <TableCell>4.0</TableCell>
+                      <TableCell>4.5</TableCell>
+                      <TableCell className="text-amber-600">+0.5</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">Wits (mm)</TableCell>
+                      <TableCell>2.5</TableCell>
+                      <TableCell>1.0</TableCell>
+                      <TableCell className="text-green-600">-1.5</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TabsContent>
+              <TabsContent value="details">
+                <div className="p-4">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {comparisonImages.map(image => (
+                      <Card key={image.id}>
+                        <CardHeader className="py-3">
+                          <CardTitle className="text-sm font-medium">{image.description || image.imageType}</CardTitle>
+                        </CardHeader>
+                        <CardContent className="py-2">
+                          <div className="space-y-1 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Date:</span>
+                              <span>{image.timestamp}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Type:</span>
+                              <span className="capitalize">{image.imageType}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Patient ID:</span>
+                              <span>{patientId}</span>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+        )}
       </div>
     </div>
   );
