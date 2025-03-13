@@ -167,10 +167,10 @@ const ObjectVisibilityControl: React.FC<ObjectVisibilityProps> = ({
           {/* High-contrast "Show deviations" toggle with improved visibility */}
           <div className="flex items-center justify-between mt-4 p-2 bg-indigo-100 border border-indigo-200 rounded-md shadow-sm">
             <div className="flex items-center space-x-2">
-              <AlertCircle className="h-4 w-4 text-indigo-600" />
+              <AlertCircle className="h-4 w-4 text-indigo-700" />
               <Label
                 htmlFor="show-deviations"
-                className="text-sm font-medium text-indigo-800 cursor-pointer"
+                className="text-sm font-medium text-indigo-900 cursor-pointer"
               >
                 Show deviations
               </Label>
@@ -179,7 +179,7 @@ const ObjectVisibilityControl: React.FC<ObjectVisibilityProps> = ({
               id="show-deviations"
               checked={onlyInvalid}
               onCheckedChange={handleOnlyInvalidToggle}
-              className="data-[state=checked]:bg-indigo-600"
+              className="data-[state=checked]:bg-indigo-800 h-[22px] w-[40px]"
             />
           </div>
         </div>

@@ -199,11 +199,11 @@ const ControlsSidebar: React.FC<ControlsSidebarProps> = ({
             </select>
             
             <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-500">Show deviations</span>
+              <span className="text-xs font-medium text-indigo-900">Show deviations</span>
               <Switch 
                 checked={showDeviations}
                 onCheckedChange={setShowDeviations}
-                className="h-4 w-8 data-[state=checked]:bg-primary-600"
+                className="h-[22px] w-[40px] data-[state=checked]:bg-indigo-800"
               />
             </div>
           </div>
