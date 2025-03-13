@@ -16,6 +16,8 @@ import {
   Split
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { api } from "@/services/clientStorage";
+import { useQuery } from "@tanstack/react-query";
 
 const CephalometricAnalysis: React.FC = () => {
   const [location, setLocation] = useLocation();
@@ -28,8 +30,8 @@ const CephalometricAnalysis: React.FC = () => {
   
   // Get patient ID from route params
   const [, params] = useRoute('/cephalometric/:patientId');
-  const [patientId, setPatientId] = useState<string>("demo-patient-1");
-  const [imageId, setImageId] = useState<string>("demo-image-1");
+  const [patientId, setPatientId] = useState<string>("p1");
+  const [imageId, setImageId] = useState<string>("img1");
   
   useEffect(() => {
     // Update from route params if available
@@ -38,8 +40,19 @@ const CephalometricAnalysis: React.FC = () => {
     }
   }, [params]);
   
-  // Patient and analysis data - would come from context or props in a real app
-  const patientName = "John Smith";
+  // Fetch patient and image data from client storage
+  const { data: patientData } = useQuery({
+    queryKey: ['patient', patientId],
+    queryFn: () => api.getPatient(patientId),
+  });
+  
+  const { data: analysisTemplates } = useQuery({
+    queryKey: ['analysisTemplates'],
+    queryFn: () => api.getAnalysisTemplates(),
+  });
+  
+  // Patient and analysis data
+  const patientName = patientData?.name || "Patient";
   const analysisType = "Ricketts";
   
   // Toggle high contrast mode for improved visibility

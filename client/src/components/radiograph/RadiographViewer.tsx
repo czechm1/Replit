@@ -5,6 +5,8 @@ import { useLayerControls } from "@/hooks/useLayerControls";
 import { Edit2 } from "lucide-react";
 import FloatingControlPanel from "./FloatingControlPanel";
 import { LandmarkEditor } from "./LandmarkEditor";
+import { api } from "@/services/clientStorage";
+import { useQuery } from "@tanstack/react-query";
 
 interface RadiographViewerProps {
   highContrastMode: boolean;
@@ -14,8 +16,8 @@ interface RadiographViewerProps {
 
 const RadiographViewer: React.FC<RadiographViewerProps> = ({ 
   highContrastMode,
-  patientId = "demo-patient-1", // Default for demonstration purposes
-  imageId = "demo-image-1"      // Default for demonstration purposes
+  patientId = "p1", // Default to first patient
+  imageId = "img1"  // Default to first image
 }) => {
   const { 
     layerOpacity, 
@@ -41,6 +43,18 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
   // Image dimensions for landmark positioning
   const [imageDimensions, setImageDimensions] = useState({ width: 800, height: 1000 });
   const imageContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Fetch image data
+  const { data: imageData } = useQuery({
+    queryKey: ['image', imageId],
+    queryFn: () => api.getImage(imageId)
+  });
+
+  // Fetch landmarks collection for this image
+  const { data: landmarksCollection } = useQuery({
+    queryKey: ['landmarksCollection', `${patientId}-${imageId}`],
+    queryFn: () => api.getLandmarksCollection(`${patientId}-${imageId}`)
+  });
   
   // Update image dimensions when the container is resized
   useEffect(() => {
@@ -107,8 +121,8 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
         style={{ 
           transform: `scale(${scale}) translate(${position.x}px, ${position.y}px) rotate(${rotation}deg)`,
           transition: 'transform 0.2s ease-out',
-          // Move background image inside the container so it scales with everything else
-          backgroundImage: "url('/images/cephalometric.png')",
+          // Use the image URL from our client storage API
+          backgroundImage: `url('${imageData?.url || "/images/ceph1.jpg"}')`,
           backgroundPosition: "center",
           backgroundSize: "contain",
           backgroundRepeat: "no-repeat",

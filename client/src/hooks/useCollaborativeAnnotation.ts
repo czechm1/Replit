@@ -1,6 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Landmark, LandmarksCollection } from '@shared/schema';
 import { nanoid } from 'nanoid';
+import { api } from '@/services/clientStorage';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 // Simplified version without any collaboration features
 export interface CollaborativeUser {
@@ -14,79 +16,97 @@ interface UseCollaborativeAnnotationProps {
   username: string;
 }
 
-// This is a mock implementation that doesn't attempt any network connections
+// This hook uses client-side storage to provide a collaborative-like experience
 export function useCollaborativeAnnotation({
   collectionId,
   userId,
   username
 }: UseCollaborativeAnnotationProps) {
-  // Static mock data to avoid network requests
+  // For a client-side only app, always just have the current user
   const [collaborativeUsers] = useState<CollaborativeUser[]>([
     { id: userId, username } // Only the current user
   ]);
-  
-  // Local collection with no network sync
-  const [collection, setCollection] = useState<LandmarksCollection | null>({
-    id: collectionId,
-    patientId: 'demo-patient',
-    imageId: 'demo-image',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    lastModifiedBy: username,
-    landmarks: []
-  });
 
-  // Local-only landmark operations
-  const updateLandmark = useCallback((landmark: Landmark) => {
-    setCollection((prevCollection) => {
-      if (!prevCollection) return null;
-      
-      const updatedLandmarks = prevCollection.landmarks.map(l => 
-        l.id === landmark.id ? landmark : l
-      );
+  // Use React Query to fetch and manage the collection data
+  const queryClient = useQueryClient();
+  
+  // Fetch the landmarks collection from our client storage
+  const { data: collection, isLoading } = useQuery({
+    queryKey: ['landmarksCollection', collectionId],
+    queryFn: () => api.getLandmarksCollection(collectionId),
+    // If collection doesn't exist, create a new one
+    initialData: () => {
+      // Try to construct a patientId and imageId from the collectionId pattern
+      const parts = collectionId.split('-');
+      const patientId = parts[0];
+      const imageId = parts.length > 1 ? parts[1] : 'default';
       
       return {
-        ...prevCollection,
-        landmarks: updatedLandmarks,
+        id: collectionId,
+        patientId: patientId,
+        imageId: imageId,
+        createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        lastModifiedBy: username
+        createdBy: username,
+        lastModifiedBy: username,
+        landmarks: []
       };
-    });
-  }, [username]);
+    },
+  });
+
+  // Create a new collection if it doesn't exist
+  useEffect(() => {
+    if (collection && !isLoading) {
+      api.createLandmarksCollection(collection);
+    }
+  }, [collection, isLoading]);
+
+  // Mutation for updating a landmark
+  const updateLandmarkMutation = useMutation({
+    mutationFn: ({ landmarkId, landmark }: { landmarkId: string, landmark: Landmark }) => 
+      api.updateLandmark(collectionId, landmarkId, landmark, username),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['landmarksCollection', collectionId] });
+    },
+  });
+
+  // Mutation for adding a new landmark
+  const addLandmarkMutation = useMutation({
+    mutationFn: (landmark: Landmark) => 
+      api.addLandmark(collectionId, landmark, username),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['landmarksCollection', collectionId] });
+    },
+  });
+
+  // Mutation for removing a landmark
+  const removeLandmarkMutation = useMutation({
+    mutationFn: (landmarkId: string) => 
+      api.deleteLandmark(collectionId, landmarkId, username),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['landmarksCollection', collectionId] });
+    },
+  });
+
+  // Wrapper functions for the mutations
+  const updateLandmark = useCallback((landmark: Landmark) => {
+    updateLandmarkMutation.mutate({ landmarkId: landmark.id, landmark });
+  }, [updateLandmarkMutation]);
 
   const addLandmark = useCallback((landmark: Landmark) => {
     const newLandmark = {
       ...landmark,
       id: landmark.id || nanoid()
     };
-    
-    setCollection((prevCollection) => {
-      if (!prevCollection) return null;
-      
-      return {
-        ...prevCollection,
-        landmarks: [...prevCollection.landmarks, newLandmark],
-        updatedAt: new Date().toISOString(),
-        lastModifiedBy: username
-      };
-    });
-  }, [username]);
+    addLandmarkMutation.mutate(newLandmark);
+  }, [addLandmarkMutation]);
 
   const removeLandmark = useCallback((landmarkId: string) => {
-    setCollection((prevCollection) => {
-      if (!prevCollection) return null;
-      
-      return {
-        ...prevCollection,
-        landmarks: prevCollection.landmarks.filter(l => l.id !== landmarkId),
-        updatedAt: new Date().toISOString(),
-        lastModifiedBy: username
-      };
-    });
-  }, [username]);
+    removeLandmarkMutation.mutate(landmarkId);
+  }, [removeLandmarkMutation]);
 
   return {
-    isConnected: true, // Always consider connected since we're not doing network requests
+    isConnected: true, // Always true for a client-side only application
     collaborativeUsers,
     collection,
     updateLandmark,
