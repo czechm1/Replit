@@ -6,6 +6,7 @@ import { Edit2 } from "lucide-react";
 import FloatingControlPanel from "./FloatingControlPanel";
 import { LandmarkEditor } from "./LandmarkEditor";
 import TracingLinesLayer from './TracingLinesLayer';
+import AnalysisLinesLayer from './AnalysisLinesLayer';
 
 interface RadiographViewerProps {
   highContrastMode: boolean;
@@ -34,6 +35,9 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
   const [scale, setScale] = useState(1.0);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [rotation, setRotation] = useState(0);
+  
+  // Only Invalid toggle state
+  const [onlyInvalidMode, setOnlyInvalidMode] = useState(false);
   
   // Edit landmarks mode
   const [isEditMode, setIsEditMode] = useState(false);
@@ -84,7 +88,7 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
     setPosition({ x: 0, y: 0 });
     setRotation(0);
   };
-  
+
   // Toggle edit mode
   const toggleEditMode = () => {
     setIsEditMode(prev => !prev);
@@ -131,10 +135,9 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
         className="relative w-full h-full"
         style={{ 
           transform: `scale(${scale}) translate(${position.x}px, ${position.y}px) rotate(${rotation}deg)`,
-          transition: 'transform 0.2s ease-out',  width: 976,
-          height: 719.8976
+          transition: 'transform 0.2s ease-out',  width: 1007,
+          height: 741.288
         }}
-
       >
         {/* Radiograph image */}
         <img
@@ -144,17 +147,36 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
           className="absolute top-0 left-0 w-full h-full object-contain"
           style={{ 
             filter: `brightness(${100 + imageControls.brightness}%) contrast(${100 + imageControls.contrast}%)
-                    ${highContrastMode ? 'brightness(120%) contrast(140%) grayscale(20%)' : ''}`
+                    ${highContrastMode ? 'brightness(120%) contrast(140%) grayscale(20%)' : ''}`,
           }}
           onLoad={handleImageLoad}
         />
         
         {/* Tracing lines layer - positioned directly over the image */}
-        <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+        <svg 
+          className="relative top-0 left-0 w-full h-full pointer-events-none"
+          style={{ 
+            transform: `scale(${scale}) translate(${position.x}px, ${position.y}px) rotate(${rotation}deg)`,
+            transition: 'transform 0.2s ease-out',
+          }}
+        >
           <TracingLinesLayer
             opacity={layerOpacity.tracing}
           />
-        </div>
+        </svg>
+
+        {/* Analysis lines layer - positioned over the image */}
+        <svg 
+          className="absolute top-0 left-0 w-full h-full pointer-events-none"
+          style={{ 
+            transform: `scale(${scale}) translate(${position.x}px, ${position.y}px) rotate(${rotation}deg)`,
+            transition: 'transform 0.2s ease-out',
+          }}
+        >
+          <AnalysisLinesLayer
+            opacity={layerOpacity.analysisLine} // Changed from profile to analysisLine
+          />
+        </svg>
 
         {/* Landmark Editor component */}
         <div className="absolute inset-0">

@@ -119,29 +119,29 @@ const ObjectVisibilityControl: React.FC<ObjectVisibilityProps> = ({
             />
           </div>
           
-          {/* Profile visibility (if available) */}
-          {layerOpacity.profile !== undefined && (
+          {/* Analysis line visibility */}
+          {layerOpacity.analysisLine !== undefined && (
             <div>
               <div className="flex justify-between items-center mb-1">
                 <div className="flex items-center">
-                  <label className="text-sm text-slate-600 font-medium mr-2">Profile</label>
+                  <label className="text-sm text-slate-600 font-medium mr-2">Analysis Line</label>
                   <Button 
                     variant="ghost" 
                     size="sm" 
                     className="p-0 h-6 w-6"
-                    onClick={() => toggleLayerVisibility('profile', layerOpacity.profile || 0)}
+                    onClick={() => toggleLayerVisibility('analysisLine', layerOpacity.analysisLine || 0)}
                   >
-                    {(layerOpacity.profile || 0) > 0 ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                    {(layerOpacity.analysisLine || 0) > 0 ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                   </Button>
                 </div>
-                <span className="text-xs text-slate-500">{layerOpacity.profile || 0}%</span>
+                <span className="text-xs text-slate-500">{layerOpacity.analysisLine || 0}%</span>
               </div>
               <Slider
-                value={[layerOpacity.profile || 0]}
+                value={[layerOpacity.analysisLine || 0]}
                 min={0}
                 max={100}
                 step={1}
-                onValueChange={(value) => onLayerOpacityChange('profile', value[0])}
+                onValueChange={(value) => onLayerOpacityChange('analysisLine', value[0])}
                 className="w-full"
               />
             </div>

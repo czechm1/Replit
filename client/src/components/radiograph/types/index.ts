@@ -2,7 +2,7 @@ export interface LayerOpacityType {
   landmarks: number;
   measurements: number;
   tracing: number;
-  profile?: number;
+  analysisLine: number;
 }
 
 export interface ImageControlsType {
@@ -10,4 +10,5 @@ export interface ImageControlsType {
   contrast: number;
 }
 
-export * from './tracingLine'; 
+export * from './tracingLine';
+export * from './analysisLine';

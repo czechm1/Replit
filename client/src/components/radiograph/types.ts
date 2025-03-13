@@ -2,7 +2,7 @@ export type LayerOpacityType = {
   tracing: number;
   landmarks: number;
   measurements: number;
-  profile?: number;
+  analysisLine: number;
 };
 
 export type ImageControlsType = {

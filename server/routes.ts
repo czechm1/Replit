@@ -98,7 +98,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const tracingLinesPath = path.join(__dirname, 'mock', 'tracing-lines.json');
       const tracingLinesData = await fs.promises.readFile(tracingLinesPath, 'utf-8');
-      console.log('tracingLinesData:', tracingLinesData);
       // Add a slight delay to simulate network latency
       setTimeout(() => {
         res.json(JSON.parse(tracingLinesData));
@@ -108,6 +107,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: 'Error reading tracing lines data' });
     }
   });
+
+    // Add analysis lines endpoint
+    app.get('/api/analysis-lines', async (req, res) => {
+      try {
+        const analysisLinesPath = path.join(__dirname, 'mock', 'analysis-lines.json');
+        const analysisLinesData = await fs.promises.readFile(analysisLinesPath, 'utf-8');
+        console.log('tracingLinesData:', analysisLinesData);
+        // Add a slight delay to simulate network latency
+        setTimeout(() => {
+          res.json(JSON.parse(analysisLinesData));
+        }, 300);
+      } catch (error) {
+        console.error('Error fetching analysis lines:', error);
+        res.status(500).json({
+          status: 'error',
+          message: 'Failed to retrieve analysis lines',
+          data: []
+        });
+      }
+    });
   
   // Get detected landmarks data - read from the JSON file
   app.get('/api/detected-landmarks', async (req, res) => {

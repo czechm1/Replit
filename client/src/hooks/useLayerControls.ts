@@ -6,6 +6,7 @@ export function useLayerControls() {
     landmarks: 60,
     measurements: 70,
     tracing: 80,
+    analysis: 75,
     profile: 100
   });
 
@@ -50,6 +51,7 @@ export function useLayerControls() {
       landmarks: 60,
       measurements: 70,
       tracing: 80,
+      analysis: 75,
       profile: 100
     });
   }, []);

@@ -1,0 +1,168 @@
+{
+  "status": "success",
+  "message": "Analysis lines retrieved successfully",
+  "data": [
+    {
+      "id": "PtGn",
+      "name": "Point Gnathion",
+      "pathData": "M605.2019900497512,292.5810945273632L757.5044776119403,656.3034825870647",
+      "color": "#ff0000",
+      "strokeWidth": 1,
+      "strokeDasharray": null,
+      "transform": "matrix(1,0,0,1,0,0)"
+    },
+    {
+      "id": "NaBa",
+      "name": "Nasion Basion",
+      "pathData": "M799.5880597014925,203.4039800995025L447.88955223880595,375.7462686567164",
+      "color": "#ff0000",
+      "strokeWidth": 1,
+      "strokeDasharray": null,
+      "transform": "matrix(1,0,0,1,0,0)"
+    },
+    {
+      "id": "CorpusLeftMe",
+      "name": "Corpus Left Menton",
+      "pathData": "M540.0726368159204,567.1263681592039L740.4706467661691,662.315422885572",
+      "color": "#ff0000",
+      "strokeWidth": 1,
+      "strokeDasharray": null,
+      "transform": "matrix(1,0,0,1,0,0)"
+    },
+    {
+      "id": "XiDC",
+      "name": "Xi DC",
+      "pathData": "M559.5613432835821,472.33810945273626L502.2575323383084,349.10335323383083",
+      "color": "#ff0000",
+      "strokeWidth": 1,
+      "strokeDasharray": null,
+      "transform": "matrix(1,0,0,1,0,0)"
+    },
+    {
+      "id": "NaPog",
+      "name": "Nasion Pogonion",
+      "pathData": "M799.5880597014925,203.4039800995025L762.5144278606965,641.273631840796",
+      "color": "#ff0000",
+      "strokeWidth": 1,
+      "strokeDasharray": null,
+      "transform": "matrix(1,0,0,1,0,0)"
+    },
+    {
+      "id": "AtoNaPog",
+      "name": "A Point to Nasion Pogonion",
+      "pathData": "M787.5641791044776,427.8497512437811L780.6343201067731,427.2630126101082",
+      "color": "#ff0000",
+      "strokeWidth": 1,
+      "strokeDasharray": null,
+      "transform": "matrix(1,0,0,1,0,0)"
+    },
+    {
+      "id": "PoOr",
+      "name": "Porion Orbitale",
+      "pathData": "M447.88955223880595,295.5870646766169L752.494527363184,302.6009950248756",
+      "color": "#ff0000",
+      "strokeWidth": 1,
+      "strokeDasharray": null,
+      "transform": "matrix(1,0,0,1,0,0)"
+    },
+    {
+      "id": "PNSANS",
+      "name": "PNS ANS",
+      "pathData": "M614.2199004975124,395.7860696517413L802.5940298507462,414.8238805970149",
+      "color": "#ff0000",
+      "strokeWidth": 1,
+      "strokeDasharray": null,
+      "transform": "matrix(1,0,0,1,0,0)"
+    },
+    {
+      "id": "ANSXi",
+      "name": "ANS Xi",
+      "pathData": "M802.5940298507462,414.8238805970149L559.5613432835821,472.33810945273626",
+      "color": "#ff0000",
+      "strokeWidth": 1,
+      "strokeDasharray": null,
+      "transform": "matrix(1,0,0,1,0,0)"
+    },
+    {
+      "id": "XiPM",
+      "name": "Xi PM",
+      "pathData": "M559.5613432835821,472.33810945273626L761.5124378109452,620.2318407960199",
+      "color": "#ff0000",
+      "strokeWidth": 1,
+      "strokeDasharray": null,
+      "transform": "matrix(1,0,0,1,0,0)"
+    },
+    {
+      "id": "APog",
+      "name": "A Point Pogonion",
+      "pathData": "M787.5641791044776,427.8497512437811L762.5144278606965,641.273631840796",
+      "color": "#ff0000",
+      "strokeWidth": 1,
+      "strokeDasharray": null,
+      "transform": "matrix(1,0,0,1,0,0)"
+    },
+    {
+      "id": "L1IncisalTiptoAPog",
+      "name": "L1 Incisal Tip to APog",
+      "pathData": "M794.5781094527363,504.0009950248756L778.8430053281878,502.15415181776893",
+      "color": "#ff0000",
+      "strokeWidth": 1,
+      "strokeDasharray": null,
+      "transform": "matrix(1,0,0,1,0,0)"
+    },
+    {
+      "id": "Pt-vertical",
+      "name": "Pt-vertical",
+      "pathData": "M605.2019900497512,292.5810945273632L605.2019900497512,494.9830845771144",
+      "color": "#ff0000",
+      "strokeWidth": 1,
+      "strokeDasharray": null,
+      "transform": "matrix(1,0,0,1,0,0)"
+    },
+    {
+      "id": "U6DistaltoPt-vertical",
+      "name": "U6 Distal to Pt-vertical",
+      "pathData": "M677.3452736318408,480.955223880597L605.2019900497512,480.955223880597",
+      "color": "#ff0000",
+      "strokeWidth": 1,
+      "strokeDasharray": null,
+      "transform": "matrix(1,0,0,1,0,0)"
+    },
+    {
+      "id": "L1RootTipL1IncisalTip",
+      "name": "L1 Root Tip to L1 Incisal Tip",
+      "pathData": "M763.5164179104477,566.1243781094527L794.5781094527363,504.0009950248756",
+      "color": "#ff0000",
+      "strokeWidth": 1,
+      "strokeDasharray": null,
+      "transform": "matrix(1,0,0,1,0,0)"
+    },
+    {
+      "id": "U1RootTipU1IncisalTip",
+      "name": "U1 Root Tip to U1 Incisal Tip",
+      "pathData": "M777.5442786069651,434.86368159203977L803.5960199004975,510.01293532338303",
+      "color": "#ff0000",
+      "strokeWidth": 1,
+      "strokeDasharray": null,
+      "transform": "matrix(1,0,0,1,0,0)"
+    },
+    {
+      "id": "PrnSoftTissuePog",
+      "name": "Prn Soft Tissue Pogonion",
+      "pathData": "M893.7751243781094,383.7621890547263L806.6019900497512,633.257711442786",
+      "color": "#ff0000",
+      "strokeWidth": 1,
+      "strokeDasharray": null,
+      "transform": "matrix(1,0,0,1,0,0)"
+    },
+    {
+      "id": "LowerLiptoPrnSoftTissuePog",
+      "name": "Lower Lip to Prn Soft Tissue Pogonion",
+      "pathData": "M842.673631840796,549.0905472636815L836.7347992250905,547.0155334581941",
+      "color": "#ff0000",
+      "strokeWidth": 1,
+      "strokeDasharray": null,
+      "transform": "matrix(1,0,0,1,0,0)"
+    }
+  ]
+} 
