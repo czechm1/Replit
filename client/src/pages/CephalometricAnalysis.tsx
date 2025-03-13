@@ -64,6 +64,29 @@ const CephalometricAnalysis: React.FC = () => {
         </div>
         
         <div className="flex items-center space-x-2">
+          {/* Analysis panel toggle */}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={() => setShowPanel(prev => !prev)}
+                  className="border-slate-200"
+                >
+                  {showPanel ? (
+                    <><PanelLeftClose className="h-4 w-4 mr-1" /><span className="text-sm">Hide Analysis</span></>
+                  ) : (
+                    <><PanelRight className="h-4 w-4 mr-1" /><span className="text-sm">Show Analysis</span></>
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{showPanel ? "Hide" : "Show"} analysis results panel</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
           {/* Export options dropdown */}
           <ExportOptions 
             patientId={patientName} 

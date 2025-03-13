@@ -224,7 +224,7 @@ const ControlsSidebar: React.FC<ControlsSidebarProps> = ({
             <div className="flex items-center gap-2 p-2 bg-red-50 border border-red-100 rounded-md">
               <div className="flex items-center gap-1">
                 <AlertCircle className="h-3 w-3 text-red-500" />
-                <span className="text-xs font-medium text-red-700">Only Invalid</span>
+                <span className="text-xs font-medium text-red-700">Show deviations</span>
               </div>
               <Switch 
                 checked={showOnlyInvalid}

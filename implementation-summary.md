@@ -49,7 +49,60 @@ We've successfully implemented a pull tab feature for the expandable side panel,
 </div>
 ```
 
-## 2. Removed Edit Button Functionality
+## 2. Improved Deviation Toggle with Better Label and Contrast
+
+We've enhanced the visibility and contrast of the deviation toggle to make it more noticeable and intuitive for users. We've also renamed it from "Only Invalid" to the more descriptive "Show deviations" to better reflect its purpose of filtering measurements that deviate from normal values.
+
+### Key Changes:
+
+#### In ControlsSidebar.tsx:
+```jsx
+<div className="flex items-center gap-2 p-2 bg-red-50 border border-red-100 rounded-md">
+  <div className="flex items-center gap-1">
+    <AlertCircle className="h-3 w-3 text-red-500" />
+    <span className="text-xs font-medium text-red-700">Show deviations</span>
+  </div>
+  <Switch 
+    checked={showOnlyInvalid}
+    onCheckedChange={setShowOnlyInvalid}
+    className="h-4 w-8 data-[state=checked]:bg-red-500"
+  />
+</div>
+```
+
+## 3. Added Button to Show/Hide Analysis Results Panel
+
+We've added a prominent button in the header that allows users to show or hide the Analysis Results panel. This makes it more intuitive to manage the workspace layout and provides a consistent way to control panel visibility directly from the main toolbar.
+
+### Key Changes:
+
+#### In CephalometricAnalysis.tsx:
+```jsx
+{/* Analysis panel toggle */}
+<TooltipProvider>
+  <Tooltip>
+    <TooltipTrigger asChild>
+      <Button 
+        size="sm" 
+        variant="outline" 
+        onClick={() => setShowPanel(prev => !prev)}
+        className="border-slate-200"
+      >
+        {showPanel ? (
+          <><PanelLeftClose className="h-4 w-4 mr-1" /><span className="text-sm">Hide Analysis</span></>
+        ) : (
+          <><PanelRight className="h-4 w-4 mr-1" /><span className="text-sm">Show Analysis</span></>
+        )}
+      </Button>
+    </TooltipTrigger>
+    <TooltipContent>
+      <p>{showPanel ? "Hide" : "Show"} analysis results panel</p>
+    </TooltipContent>
+  </Tooltip>
+</TooltipProvider>
+```
+
+## 4. Removed Edit Button Functionality
 
 We've simplified the LandmarkEditor component by removing the floating edit button when not in edit mode, making the interface cleaner and more focused.
 
@@ -74,7 +127,20 @@ These changes provide several improvements to the user experience:
 - **Smooth transitions**: CSS transitions provide a polished sliding effect
 - **Consistent UI**: Always having a way to access the panel creates a more consistent UI
 
-### 2. LandmarkEditor Improvements:
+### 2. "Show deviations" Toggle Improvements:
+- **Clearer label**: Renamed from "Only Invalid" to "Show deviations" for better user understanding
+- **Enhanced visibility**: Red background and border make the toggle stand out
+- **Clear purpose**: The AlertCircle icon visually communicates caution/warning
+- **Better readability**: Darker text color improves contrast for better readability
+- **Consistent styling**: The toggle matches the styling used in ObjectVisibilityControl
+
+### 3. Analysis Panel Toggle Button Improvements:
+- **Convenient access**: Users can now toggle the analysis panel directly from the main toolbar
+- **Clear visual feedback**: Button text and icon change to reflect the current panel state
+- **Contextual help**: Tooltip provides additional information about the button's function
+- **Consistent placement**: Located in the header for easy discovery and access
+
+### 4. LandmarkEditor Improvements:
 - **Cleaner interface**: By removing the floating edit button when not in edit mode, the interface is less cluttered
 - **Better focus**: The editing experience is more focused when needed, and completely out of the way when not needed
 - **Simplified workflow**: Users can enter edit mode through other UI elements, making the overall workflow more intuitive
@@ -83,5 +149,8 @@ These changes provide several improvements to the user experience:
 
 1. We used CSS transforms for the slide-in/out effect for better performance (GPU acceleration)
 2. The pull tab uses fixed positioning to ensure it's always visible at the edge of the screen
-3. Conditional rendering in React is used carefully to show/hide elements without completely removing them from the DOM when needed
-4. We maintained the resizable functionality of the panel while adding the new slide-in/out behavior
+3. Applied consistent styling between related components (ObjectVisibilityControl and ControlsSidebar)
+4. Used semantic colors for the "Show deviations" toggle (red for warning/caution)
+5. Maintained the resizable functionality of the panel while adding the new slide-in/out behavior
+6. Implemented conditional rendering in the button text and icon based on the panel state
+7. Added multiple ways to toggle the analysis panel for better UX (header button and pull tab)

@@ -164,19 +164,19 @@ const ObjectVisibilityControl: React.FC<ObjectVisibilityProps> = ({
             </div>
           )}
           
-          {/* High-contrast "Only Invalid" toggle with improved visibility */}
+          {/* High-contrast "Show deviations" toggle with improved visibility */}
           <div className="flex items-center justify-between mt-4 p-2 bg-red-50 border border-red-100 rounded-md">
             <div className="flex items-center space-x-2">
               <AlertCircle className="h-4 w-4 text-red-500" />
               <Label
-                htmlFor="only-invalid"
+                htmlFor="show-deviations"
                 className="text-sm font-medium text-red-700 cursor-pointer"
               >
-                Only Invalid
+                Show deviations
               </Label>
             </div>
             <Switch
-              id="only-invalid"
+              id="show-deviations"
               checked={onlyInvalid}
               onCheckedChange={handleOnlyInvalidToggle}
               className="data-[state=checked]:bg-red-500"
