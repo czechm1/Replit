@@ -1,9 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { X, Eye, EyeOff, AlertCircle } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+import { X, Eye, EyeOff } from "lucide-react";
 import { LayerOpacityType } from "./types";
 
 interface ObjectVisibilityProps {
@@ -11,20 +9,14 @@ interface ObjectVisibilityProps {
   onLayerOpacityChange: (layer: keyof LayerOpacityType, value: number) => void;
   onClose: () => void;
   onReset: () => void;
-  onlyInvalidMode?: boolean;
-  onOnlyInvalidModeChange?: (enabled: boolean) => void;
 }
 
 const ObjectVisibilityControl: React.FC<ObjectVisibilityProps> = ({
   layerOpacity,
   onLayerOpacityChange,
   onClose,
-  onReset,
-  onlyInvalidMode = false,
-  onOnlyInvalidModeChange
+  onReset
 }) => {
-  // Use local state that syncs with props, defaulting to false if not provided
-  const [onlyInvalid, setOnlyInvalid] = useState(onlyInvalidMode);
   
   // Helper function to toggle layer visibility
   const toggleLayerVisibility = (layer: keyof LayerOpacityType, currentValue: number) => {
@@ -32,16 +24,6 @@ const ObjectVisibilityControl: React.FC<ObjectVisibilityProps> = ({
       onLayerOpacityChange(layer, 0); // Hide
     } else {
       onLayerOpacityChange(layer, 100); // Show at full opacity
-    }
-  };
-  
-  // Handler for "Show deviations" toggle with improved logging
-  const handleOnlyInvalidToggle = (checked: boolean) => {
-    setOnlyInvalid(checked);
-    console.log("Show deviations mode:", checked);
-    // Call the parent handler if provided
-    if (onOnlyInvalidModeChange) {
-      onOnlyInvalidModeChange(checked);
     }
   };
 
@@ -165,24 +147,7 @@ const ObjectVisibilityControl: React.FC<ObjectVisibilityProps> = ({
             </div>
           )}
           
-          {/* High-contrast "Show deviations" toggle with improved visibility */}
-          <div className="flex items-center justify-between mt-4 p-2 bg-indigo-100 border border-indigo-200 rounded-md shadow-sm">
-            <div className="flex items-center space-x-2">
-              <AlertCircle className="h-4 w-4 text-indigo-700" />
-              <Label
-                htmlFor="show-deviations"
-                className="text-sm font-medium text-indigo-900 cursor-pointer"
-              >
-                Show deviations
-              </Label>
-            </div>
-            <Switch
-              id="show-deviations"
-              checked={onlyInvalid}
-              onCheckedChange={handleOnlyInvalidToggle}
-              className="data-[state=checked]:bg-indigo-800 h-[22px] w-[40px]"
-            />
-          </div>
+
         </div>
         
         <Button 
