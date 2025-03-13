@@ -2,11 +2,14 @@ import express, { type Express, Request, Response } from "express";
 import path from "path";
 import fs from "fs";
 import { createServer, type Server } from "http";
+import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { z } from "zod";
 import { 
   LandmarksCollection,
-  Landmark
+  Landmark,
+  WebSocketMessage,
+  WebSocketMessageSchema
 } from "@shared/schema";
 import { registerDebugRoutes } from "./debug_utils";
 
@@ -159,6 +162,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Direct test route for static HTML page
   app.get('/test', (req, res) => {
     res.sendFile(path.join(process.cwd(), 'public/test.html'));
+  });
+  
+  // Serve our custom index.html directly
+  app.get('/', (req, res) => {
+    res.sendFile(path.join(process.cwd(), 'public/index.html'));
   });
   
   // Root level health check
@@ -333,9 +341,235 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // Create and return HTTP server (without WebSocket)
+  // Create HTTP server
   const httpServer = createServer(app);
-  console.log('Starting server in single-user mode');
+  
+  // Create WebSocket server on a different path to avoid conflicts with Vite HMR
+  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+  
+  // Map to track active connections and their collections
+  interface ActiveUser {
+    userId: string;
+    username: string;
+    socket: WebSocket;
+  }
+  
+  // Map collection IDs to active users
+  const collectionUsers = new Map<string, ActiveUser[]>();
+  
+  wss.on('connection', (socket: WebSocket) => {
+    console.log('WebSocket client connected');
+    let userCollectionId: string | null = null;
+    let userId: string | null = null;
+    
+    socket.on('message', (message: string) => {
+      try {
+        const parsedMessage = JSON.parse(message);
+        const result = WebSocketMessageSchema.safeParse(parsedMessage);
+        
+        if (!result.success) {
+          console.error('Invalid WebSocket message format:', result.error);
+          socket.send(JSON.stringify({
+            type: 'error',
+            message: 'Invalid message format'
+          }));
+          return;
+        }
+        
+        const validatedMessage = result.data;
+        
+        switch (validatedMessage.type) {
+          case 'join_collection': {
+            const { collectionId, userId: newUserId, username } = validatedMessage;
+            userCollectionId = collectionId;
+            userId = newUserId;
+            
+            // Add user to collection
+            const users = collectionUsers.get(collectionId) || [];
+            collectionUsers.set(collectionId, [
+              ...users.filter(u => u.userId !== newUserId),
+              { userId: newUserId, username, socket }
+            ]);
+            
+            // Notify all users in the collection
+            const usersInCollection = collectionUsers.get(collectionId) || [];
+            const usersInfo = usersInCollection.map(u => ({ id: u.userId, username: u.username }));
+            
+            // Broadcast current users to all clients in the collection
+            broadcastToCollection(collectionId, {
+              type: 'users_in_collection',
+              collectionId,
+              users: usersInfo
+            });
+            
+            // Send collection data to the new user
+            (async () => {
+              const collection = await storage.getLandmarksCollection(collectionId);
+              if (collection) {
+                socket.send(JSON.stringify({
+                  type: 'collection_data',
+                  collection
+                }));
+              }
+            })();
+            
+            break;
+          }
+          
+          case 'leave_collection': {
+            const { collectionId, userId: leavingUserId } = validatedMessage;
+            
+            // Remove user from collection
+            const users = collectionUsers.get(collectionId) || [];
+            collectionUsers.set(
+              collectionId, 
+              users.filter(u => u.userId !== leavingUserId)
+            );
+            
+            // Notify remaining users
+            const updatedUsers = collectionUsers.get(collectionId) || [];
+            broadcastToCollection(collectionId, {
+              type: 'users_in_collection',
+              collectionId,
+              users: updatedUsers.map(u => ({ id: u.userId, username: u.username }))
+            });
+            
+            break;
+          }
+          
+          case 'update_landmark': {
+            const { collectionId, landmark, userId: senderId, username } = validatedMessage;
+            
+            // Update landmark in storage
+            (async () => {
+              const collection = await storage.getLandmarksCollection(collectionId);
+              if (!collection) return;
+              
+              const updatedLandmarks = collection.landmarks.map(l => 
+                l.id === landmark.id ? landmark : l
+              );
+              
+              await storage.updateLandmarksCollection(
+                collectionId,
+                {
+                  landmarks: updatedLandmarks,
+                  lastModifiedBy: username
+                }
+              );
+              
+              // Broadcast to all other users in the collection
+              broadcastToCollection(collectionId, validatedMessage, senderId);
+            })();
+            
+            break;
+          }
+          
+          case 'add_landmark': {
+            const { collectionId, landmark, userId: senderId, username } = validatedMessage;
+            
+            // Add landmark to storage
+            (async () => {
+              const collection = await storage.getLandmarksCollection(collectionId);
+              if (!collection) return;
+              
+              const updatedLandmarks = [...collection.landmarks, landmark];
+              
+              await storage.updateLandmarksCollection(
+                collectionId,
+                {
+                  landmarks: updatedLandmarks,
+                  lastModifiedBy: username
+                }
+              );
+              
+              // Broadcast to all other users in the collection
+              broadcastToCollection(collectionId, validatedMessage, senderId);
+            })();
+            
+            break;
+          }
+          
+          case 'remove_landmark': {
+            const { collectionId, landmarkId, userId: senderId, username } = validatedMessage;
+            
+            // Remove landmark from storage
+            (async () => {
+              const collection = await storage.getLandmarksCollection(collectionId);
+              if (!collection) return;
+              
+              const updatedLandmarks = collection.landmarks.filter(l => l.id !== landmarkId);
+              
+              await storage.updateLandmarksCollection(
+                collectionId,
+                {
+                  landmarks: updatedLandmarks,
+                  lastModifiedBy: username
+                }
+              );
+              
+              // Broadcast to all other users in the collection
+              broadcastToCollection(collectionId, validatedMessage, senderId);
+            })();
+            
+            break;
+          }
+        }
+      } catch (error) {
+        console.error('Error processing WebSocket message:', error);
+        socket.send(JSON.stringify({
+          type: 'error',
+          message: 'Failed to process message'
+        }));
+      }
+    });
+    
+    socket.on('close', () => {
+      console.log('WebSocket client disconnected');
+      
+      // Remove user from all collections
+      if (userCollectionId && userId) {
+        const users = collectionUsers.get(userCollectionId) || [];
+        collectionUsers.set(
+          userCollectionId, 
+          users.filter(u => u.userId !== userId)
+        );
+        
+        // Notify remaining users
+        const updatedUsers = collectionUsers.get(userCollectionId) || [];
+        broadcastToCollection(userCollectionId, {
+          type: 'users_in_collection',
+          collectionId: userCollectionId,
+          users: updatedUsers.map(u => ({ id: u.userId, username: u.username }))
+        });
+      }
+    });
+    
+    socket.on('error', (error) => {
+      console.error('WebSocket error:', error);
+    });
+  });
+  
+  // Helper function to broadcast messages to all clients in a collection
+  function broadcastToCollection(
+    collectionId: string, 
+    message: WebSocketMessage, 
+    excludeUserId?: string
+  ) {
+    const users = collectionUsers.get(collectionId) || [];
+    const messageStr = JSON.stringify(message);
+    
+    users.forEach(user => {
+      // Skip the sender if excludeUserId is provided
+      if (excludeUserId && user.userId === excludeUserId) return;
+      
+      // Only send to clients that are connected
+      if (user.socket.readyState === WebSocket.OPEN) {
+        user.socket.send(messageStr);
+      }
+    });
+  }
+  
+  console.log('Starting server with WebSocket support');
   
   return httpServer;
 }

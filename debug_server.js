@@ -1,30 +1,39 @@
 const express = require('express');
 const path = require('path');
-const fs = require('fs');
-
 const app = express();
-const port = 3000;
+const port = 8080;
 
-// Serve static files from public folder
-app.use('/images', express.static(path.join(__dirname, 'public/images')));
-app.use('/public', express.static(path.join(__dirname, 'public')));
+// Serve static files
+app.use(express.static(__dirname));
 
-// Set up route for debug page
-app.get('/', (req, res) => {
-  fs.readFile(path.join(__dirname, 'debug.html'), 'utf8', (err, data) => {
-    if (err) {
-      console.error('Error reading debug.html:', err);
-      return res.status(500).send('Error reading debug file');
-    }
-    res.send(data);
+// Forward API requests to the main server
+app.use('/api', (req, res) => {
+  const url = `http://localhost:5000${req.url}`;
+  console.log(`Proxying request to: ${url}`);
+  
+  fetch(url, {
+    method: req.method,
+    headers: req.headers,
+    body: req.method !== 'GET' && req.method !== 'HEAD' ? JSON.stringify(req.body) : undefined
+  })
+  .then(response => response.json())
+  .then(data => res.json(data))
+  .catch(error => {
+    console.error('Error proxying request:', error);
+    res.status(500).json({ error: 'Proxy error' });
   });
 });
 
-// Test API endpoint
-app.get('/api/test', (req, res) => {
-  res.json({ status: 'ok', message: 'API is working' });
+// Serve debug.html for root path
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'debug.html'));
 });
 
-app.listen(port, '0.0.0.0', () => {
-  console.log(`Debug server running at http://localhost:${port}`);
+// Serve test page
+app.get('/test', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/test.html'));
+});
+
+app.listen(port, () => {
+  console.log(`Debug server listening at http://localhost:${port}`);
 });

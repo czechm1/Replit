@@ -8,8 +8,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // Setup static file serving
-app.use('/images', express.static(path.join(process.cwd(), 'public/images')));
-app.use('/public', express.static(path.join(process.cwd(), 'public')));
+const publicPath = path.join(process.cwd(), 'public');
+app.use(express.static(publicPath));
+app.use('/images', express.static(path.join(publicPath, 'images')));
+app.use('/public', express.static(publicPath));
+
+// Create a catchall route for serving index.html
+app.get('/', (req, res) => {
+  res.sendFile(path.join(publicPath, 'index.html'));
+});
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -81,24 +88,31 @@ app.use((req, res, next) => {
     res.json({ routes });
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
+  // Temporarily disabling Vite to use direct static file serving
+  // This ensures we serve our static HTML directly
+  if (false && app.get("env") === "development") {
     await setupVite(app, server);
   } else {
-    serveStatic(app);
+    // No need to call serveStatic since we're handling it directly
+    // serveStatic(app);
+    
+    // Add a fallback route handler for any unmatched routes
+    app.use('*', (req, res) => {
+      res.sendFile(path.join(process.cwd(), 'public/index.html'));
+    });
   }
 
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = 5000;
+  // Use the port provided by Replit's environment, or default to 5000
+  const port = process.env.PORT || 5000;
   server.listen({
     port,
     host: "0.0.0.0",
     reusePort: true,
   }, () => {
-    log(`serving on port ${port}`);
+    log(`Server is running on port ${port}`);
+    log(`Direct URL: http://localhost:${port}`);
+    if (process.env.REPL_SLUG && process.env.REPL_OWNER) {
+      log(`Replit URL: https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`);
+    }
   });
 })();
