@@ -4,8 +4,8 @@ import fs from "fs";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
-import swaggerUi from 'swagger-ui-express';
-import YAML from "js-yaml";
+// import swaggerUi from 'swagger-ui-express';
+// import YAML from "js-yaml";
 import { LandmarksCollection, Landmark } from "@shared/schema";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
@@ -14,9 +14,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Load Swagger document
-const swaggerPath = path.join(__dirname, "swagger.yaml");
-console.log("Loading Swagger from:", swaggerPath);
-const swaggerDocument = YAML.load(fs.readFileSync(swaggerPath, 'utf8')) as swaggerUi.JsonObject;
+// const swaggerPath = path.join(__dirname, "swagger.yaml");
+// console.log("Loading Swagger from:", swaggerPath);
+// const swaggerDocument = YAML.load(fs.readFileSync(swaggerPath, 'utf8')) as swaggerUi.JsonObject;
 
 // Define analysis data schemas
 const AnalysisSchema = z.object({
@@ -34,7 +34,7 @@ const analyses: Analysis[] = [];
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Serve Swagger UI
-  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+  // app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
   // Static files are already being served in server/index.ts
   // Get all analyses for a patient
