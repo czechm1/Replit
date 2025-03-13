@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { X, Eye, EyeOff, ChevronDown, ChevronUp } from "lucide-react";
+import { X, Eye, EyeOff, ChevronDown, ChevronUp, List } from "lucide-react";
 import { LayerOpacityType } from "./types";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -12,6 +12,8 @@ interface ObjectVisibilityProps {
   onReset: () => void;
   visibleMeasurementGroups?: string[];
   onMeasurementGroupToggle?: (group: string, visible: boolean) => void;
+  showMeasurementLegend?: boolean;
+  onLegendToggle?: () => void;
 }
 
 const ObjectVisibilityControl: React.FC<ObjectVisibilityProps> = ({
@@ -20,7 +22,9 @@ const ObjectVisibilityControl: React.FC<ObjectVisibilityProps> = ({
   onClose,
   onReset,
   visibleMeasurementGroups = ['skeletal', 'dental', 'soft-tissue'],
-  onMeasurementGroupToggle = () => {}
+  onMeasurementGroupToggle = () => {},
+  showMeasurementLegend = true,
+  onLegendToggle = () => {}
 }) => {
   
   // Helper function to toggle layer visibility
@@ -199,6 +203,22 @@ const ObjectVisibilityControl: React.FC<ObjectVisibilityProps> = ({
                     className="text-xs text-slate-600 cursor-pointer"
                   >
                     Soft Tissue Measurements
+                  </label>
+                </div>
+                
+                <div className="flex items-center mt-2 pt-2 border-t border-slate-200">
+                  <Checkbox
+                    id="show-legend"
+                    checked={showMeasurementLegend}
+                    onCheckedChange={onLegendToggle}
+                    className="mr-2 h-4 w-4"
+                  />
+                  <label
+                    htmlFor="show-legend"
+                    className="text-xs text-slate-600 cursor-pointer flex items-center"
+                  >
+                    <List className="h-3 w-3 mr-1" />
+                    Show Measurement Legend
                   </label>
                 </div>
               </div>

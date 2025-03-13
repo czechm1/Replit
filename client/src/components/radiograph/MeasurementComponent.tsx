@@ -54,14 +54,15 @@ const MeasurementComponent: React.FC<MeasurementComponentProps> = ({
               r="10"
               fill={getMeasurementColor(measurement)}
               stroke="#ffffff"
-              strokeWidth="1"
+              strokeWidth="0.8"
+              filter="drop-shadow(0px 1px 1px rgba(0, 0, 0, 0.5))"
             />
             
             {/* Measurement ID text */}
             <text
               x={measurement.coordinates.x - 15}
-              y={measurement.coordinates.y + 4}
-              fontSize="12"
+              y={measurement.coordinates.y + 3}
+              fontSize="10"
               fontWeight="bold"
               fill="#ffffff"
               textAnchor="middle"
@@ -73,11 +74,12 @@ const MeasurementComponent: React.FC<MeasurementComponentProps> = ({
             {/* Measurement value */}
             <text
               x={measurement.coordinates.x}
-              y={measurement.coordinates.y + 4}
-              fontSize="14"
+              y={measurement.coordinates.y + 3}
+              fontSize="12"
               fontWeight="bold"
               fill={getMeasurementColor(measurement)}
               className="select-none pointer-events-none"
+              filter="drop-shadow(0px 1px 1px rgba(0, 0, 0, 0.7))"
             >
               {measurement.value} {getSeverityMarker(measurement.severity)}
             </text>

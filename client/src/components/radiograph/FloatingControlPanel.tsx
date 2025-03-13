@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Sliders, Layers, ZoomIn, ZoomOut, RefreshCw, Edit2 } from "lucide-react";
+import { Sliders, Layers, ZoomIn, ZoomOut, RefreshCw, Edit2, List } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import ImageSettingsControl from "./ImageSettingsControl";
 import ObjectVisibilityControl from "./ObjectVisibilityControl";
@@ -23,6 +23,9 @@ interface FloatingControlPanelProps {
   // Measurement group visibility
   visibleMeasurementGroups?: string[];
   onMeasurementGroupToggle?: (group: string, visible: boolean) => void;
+  // Legend visibility
+  showMeasurementLegend?: boolean;
+  onLegendToggle?: () => void;
 }
 
 const FloatingControlPanel: React.FC<FloatingControlPanelProps> = ({
@@ -38,7 +41,9 @@ const FloatingControlPanel: React.FC<FloatingControlPanelProps> = ({
   isEditMode,
   onToggleEditMode,
   visibleMeasurementGroups = ['skeletal', 'dental', 'soft-tissue'],
-  onMeasurementGroupToggle = () => {}
+  onMeasurementGroupToggle = () => {},
+  showMeasurementLegend = true,
+  onLegendToggle = () => {}
 }) => {
   const [activeControl, setActiveControl] = useState<'none' | 'image' | 'layers'>('none');
   
@@ -118,6 +123,26 @@ const FloatingControlPanel: React.FC<FloatingControlPanelProps> = ({
         </TooltipProvider>
         
         <div className="w-[1px] h-6 mx-1 bg-slate-200"></div>
+        
+        {/* Toggle Legend */}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant={showMeasurementLegend ? "default" : "ghost"}
+                size="sm" 
+                className="h-9 w-9 rounded-full"
+                onClick={onLegendToggle}
+              >
+                <List className="h-4 w-4" />
+                <span className="sr-only">Toggle Legend</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{showMeasurementLegend ? "Hide Legend" : "Show Legend"}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         
         {/* Edit Landmarks Button */}
         <TooltipProvider>
@@ -203,6 +228,8 @@ const FloatingControlPanel: React.FC<FloatingControlPanelProps> = ({
             onReset={onResetLayers}
             visibleMeasurementGroups={visibleMeasurementGroups}
             onMeasurementGroupToggle={onMeasurementGroupToggle}
+            showMeasurementLegend={showMeasurementLegend}
+            onLegendToggle={onLegendToggle}
           />
         </div>
       )}

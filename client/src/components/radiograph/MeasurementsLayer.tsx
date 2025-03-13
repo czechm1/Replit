@@ -1,12 +1,14 @@
 import React from 'react';
 import { useMeasurements } from '../../hooks/useMeasurements';
 import MeasurementComponent from './MeasurementComponent';
+import MeasurementLegend from './MeasurementLegend';
 import { LoadingSpinner } from '../ui/loading-spinner';
 
 interface MeasurementsLayerProps {
   opacity: number;
   visibleMeasurementGroups: string[];
   className?: string;
+  showLegend?: boolean;
 }
 
 /**
@@ -16,6 +18,7 @@ const MeasurementsLayer: React.FC<MeasurementsLayerProps> = ({
   opacity,
   visibleMeasurementGroups,
   className,
+  showLegend = true,
 }) => {
   const { measurementData, loading, error } = useMeasurements();
 
@@ -40,11 +43,21 @@ const MeasurementsLayer: React.FC<MeasurementsLayerProps> = ({
   }
 
   return (
-    <MeasurementComponent
-      measurementData={measurementData}
-      opacity={opacity}
-      visibleMeasurementGroups={visibleMeasurementGroups}
-    />
+    <>
+      <MeasurementComponent
+        measurementData={measurementData}
+        opacity={opacity}
+        visibleMeasurementGroups={visibleMeasurementGroups}
+      />
+      
+      {showLegend && (
+        <MeasurementLegend
+          measurements={measurementData.measurements}
+          opacity={opacity}
+          visibleMeasurementGroups={visibleMeasurementGroups}
+        />
+      )}
+    </>
   );
 };
 

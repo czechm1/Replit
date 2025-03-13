@@ -54,6 +54,9 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
     'skeletal', 'dental', 'soft-tissue'
   ]);
   
+  // Legend visibility state
+  const [showMeasurementLegend, setShowMeasurementLegend] = useState(true);
+  
   // Update image dimensions when the container is resized or image loads
   useEffect(() => {
     const updateDimensions = () => {
@@ -145,6 +148,11 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
     });
   };
 
+  // Toggle legend visibility
+  const handleLegendToggle = () => {
+    setShowMeasurementLegend(prev => !prev);
+  };
+
   return (
     <div className="relative w-full h-full overflow-hidden bg-slate-900 flex justify-center items-center">
       {/* Radiograph with all layers in a single transformed container */}
@@ -209,6 +217,7 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
           <MeasurementsLayer
             opacity={layerOpacity.measurements || 100}
             visibleMeasurementGroups={visibleMeasurementGroups}
+            showLegend={showMeasurementLegend}
           />
         </div>
 
@@ -240,6 +249,8 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
         onToggleEditMode={toggleEditMode}
         visibleMeasurementGroups={visibleMeasurementGroups}
         onMeasurementGroupToggle={handleMeasurementGroupToggle}
+        showMeasurementLegend={showMeasurementLegend}
+        onLegendToggle={handleLegendToggle}
       />
     </div>
   );
