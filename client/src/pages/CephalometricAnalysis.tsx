@@ -64,29 +64,6 @@ const CephalometricAnalysis: React.FC = () => {
         </div>
         
         <div className="flex items-center space-x-2">
-          {/* Analysis panel toggle */}
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  onClick={() => setShowPanel(prev => !prev)}
-                  className="border-slate-200"
-                >
-                  {showPanel ? (
-                    <><PanelLeftClose className="h-4 w-4 mr-1" /><span className="text-sm">Hide Analysis</span></>
-                  ) : (
-                    <><PanelRight className="h-4 w-4 mr-1" /><span className="text-sm">Show Analysis</span></>
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{showPanel ? "Hide" : "Show"} analysis results panel</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          
           {/* Export options dropdown */}
           <ExportOptions 
             patientId={patientName} 
@@ -119,11 +96,13 @@ const CephalometricAnalysis: React.FC = () => {
           />
         </div>
         
-        {/* Controls panel - always render so pull tab is visible even when panel is hidden */}
-        <ControlsSidebar 
-          showDrawerPanel={showPanel} 
-          onToggleDrawerPanel={() => setShowPanel(prev => !prev)} 
-        />
+        {/* Controls panel */}
+        {showPanel && (
+          <ControlsSidebar 
+            showDrawerPanel={showPanel} 
+            onToggleDrawerPanel={() => setShowPanel(prev => !prev)} 
+          />
+        )}
       </div>
       
 

@@ -8,8 +8,7 @@ import {
   ChevronRight,
   ChevronDown,
   PanelRight,
-  PanelLeft,
-  AlertCircle
+  PanelLeft
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import AnalysisTable from "./AnalysisTable";
@@ -101,54 +100,32 @@ const ControlsSidebar: React.FC<ControlsSidebarProps> = ({
   
   return (
     <div className="relative">
-      {/* Pull tab - always visible regardless of panel state */}
-      <div className={`fixed right-0 top-1/2 transform -translate-y-1/2 z-20 ${showDrawerPanel ? 'hidden' : 'block'}`}>
+      {/* Sidebar toggle button */}
+      <div className="absolute left-0 top-1/2 transform -translate-x-full -translate-y-1/2 z-10">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button 
-                variant="default" 
-                size="sm"
+                variant="ghost" 
+                size="icon"
                 onClick={onToggleDrawerPanel}
-                className="h-28 w-8 rounded-l-md rounded-r-none bg-white shadow-lg text-slate-600 hover:bg-slate-50 border border-r-0 border-slate-200 flex flex-col justify-center items-center gap-2"
+                className="h-8 w-8 rounded-l-md rounded-r-none border-r-0 border-slate-200 bg-white shadow-md text-slate-600"
               >
-                <PanelLeft className="h-4 w-4" />
-                <div className="rotate-90 text-xs font-medium whitespace-nowrap">Open Panel</div>
+                {showDrawerPanel ? <PanelRight className="h-4 w-4" /> : <PanelLeft className="h-4 w-4" />}
               </Button>
             </TooltipTrigger>
             <TooltipContent side="left">
-              <p>Show Analysis Panel</p>
+              <p>{showDrawerPanel ? "Hide" : "Show"} Panel</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
       </div>
       
-      {/* Main panel and close button - only visible when panel is shown */}
       <div 
         ref={sidebarRef}
-        className={`resizable-panel bg-white border-l border-slate-200 flex flex-col overflow-hidden shadow-md transition-all duration-300 ease-in-out ${showDrawerPanel ? 'translate-x-0' : 'translate-x-full'}`}
+        className="resizable-panel bg-white border-l border-slate-200 flex flex-col overflow-hidden shadow-md"
         style={{ width: `${width}px` }}
       >
-        {/* Close Panel Button */}
-        <div className="absolute left-0 top-1/2 transform -translate-x-full -translate-y-1/2 z-10">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  onClick={onToggleDrawerPanel}
-                  className="h-8 w-8 rounded-l-md rounded-r-none border-r-0 border-slate-200 bg-white shadow-md text-slate-600"
-                >
-                  <PanelRight className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="left">
-                <p>Hide Panel</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
         {/* Resize handle */}
         <div 
           ref={resizeHandleRef}
@@ -221,15 +198,12 @@ const ControlsSidebar: React.FC<ControlsSidebarProps> = ({
               <option value="Downs">Downs Analysis</option>
             </select>
             
-            <div className="flex items-center gap-2 p-2 bg-red-50 border border-red-100 rounded-md">
-              <div className="flex items-center gap-1">
-                <AlertCircle className="h-3 w-3 text-red-500" />
-                <span className="text-xs font-medium text-red-700">Show deviations</span>
-              </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-500">Only Invalid</span>
               <Switch 
                 checked={showOnlyInvalid}
                 onCheckedChange={setShowOnlyInvalid}
-                className="h-4 w-8 data-[state=checked]:bg-red-500"
+                className="h-4 w-8 data-[state=checked]:bg-primary-600"
               />
             </div>
           </div>
