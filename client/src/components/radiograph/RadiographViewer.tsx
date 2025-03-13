@@ -6,6 +6,7 @@ import { Edit2 } from "lucide-react";
 import FloatingControlPanel from "./FloatingControlPanel";
 import { LandmarkEditor } from "./LandmarkEditor";
 import TracingLinesLayer from './TracingLinesLayer';
+import LandmarksLayer from "./LandmarksLayer";
 
 interface RadiographViewerProps {
   highContrastMode: boolean;
@@ -153,6 +154,14 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
         <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
           <TracingLinesLayer
             opacity={layerOpacity.tracing}
+          />
+        </div>
+
+        {/* Landmark layer - positioned directly over the image */}
+        <div className="absolute top-0 right-0 w-full h-full pointer-events-none">
+          <LandmarksLayer
+            opacity={layerOpacity.landmarks}
+            visibleLandmarkGroups={['skeletal', 'dental']}
           />
         </div>
 

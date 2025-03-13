@@ -1,78 +1,539 @@
 {
   "status": "success",
-  "message": "Landmarks retrieved successfully",
-  "data": [
-    {
-      "id": "nasion",
-      "name": "Nasion",
-      "symbol": "N",
-      "x": 563.5,
-      "y": 262.2,
-      "type": "soft-tissue",
-      "description": "Deepest point on the nasal bridge"
+  "message": "Successfully detected facial area and landmarks.",
+  "data": {
+    "box": {
+      "left": 354,
+      "right": 946,
+      "top": 59,
+      "bottom": 798
     },
-    {
-      "id": "sella",
-      "name": "Sella",
-      "symbol": "S",
-      "x": 597.9,
-      "y": 392.0,
-      "type": "skeletal",
-      "description": "Center of sella turcica"
-    },
-    {
-      "id": "porion",
-      "name": "Porion",
-      "symbol": "Po",
-      "x": 764.3,
-      "y": 520.5,
-      "type": "skeletal",
-      "description": "Most superior point of external auditory meatus"
-    },
-    {
-      "id": "orbitale",
-      "name": "Orbitale",
-      "symbol": "Or",
-      "x": 809.9,
-      "y": 161.2,
-      "type": "skeletal",
-      "description": "Lowest point on infraorbital margin"
-    },
-    {
-      "id": "pogonion",
-      "name": "Pogonion",
-      "symbol": "Pg",
-      "x": 774.0,
-      "y": 498.2,
-      "type": "soft-tissue",
-      "description": "Most anterior point of soft tissue chin"
-    },
-    {
-      "id": "a-point",
-      "name": "A Point",
-      "symbol": "A",
-      "x": 670.2,
-      "y": 440.1,
-      "type": "skeletal",
-      "description": "Deepest point on anterior maxillary contour"
-    },
-    {
-      "id": "b-point",
-      "name": "B Point",
-      "symbol": "B",
-      "x": 710.3,
-      "y": 442.9,
-      "type": "skeletal",
-      "description": "Deepest point on anterior mandibular contour"
-    },
-    {
-      "id": "gnathion",
-      "name": "Gnathion",
-      "symbol": "Gn",
-      "x": 749.2,
-      "y": 434.5,
-      "type": "skeletal",
-      "description": "Most anterior-inferior point on chin"
-    }
-  ]
+    "points": [
+      {
+        "landmark": "A",
+        "coordinates": {
+          "x": 786,
+          "y": 427
+        }
+      },
+      {
+        "landmark": "ANS",
+        "coordinates": {
+          "x": 801,
+          "y": 414
+        }
+      },
+      {
+        "landmark": "An",
+        "coordinates": {
+          "x": 573,
+          "y": 567
+        }
+      },
+      {
+        "landmark": "Ar",
+        "coordinates": {
+          "x": 478,
+          "y": 347
+        }
+      },
+      {
+        "landmark": "B",
+        "coordinates": {
+          "x": 761,
+          "y": 584
+        }
+      },
+      {
+        "landmark": "Ba",
+        "coordinates": {
+          "x": 447,
+          "y": 375
+        }
+      },
+      {
+        "landmark": "C",
+        "coordinates": {
+          "x": 667,
+          "y": 716
+        }
+      },
+      {
+        "landmark": "Co",
+        "coordinates": {
+          "x": 491,
+          "y": 301
+        }
+      },
+      {
+        "landmark": "Columella",
+        "coordinates": {
+          "x": 875,
+          "y": 412
+        }
+      },
+      {
+        "landmark": "CorpusLeft",
+        "coordinates": {
+          "x": 539,
+          "y": 566
+        }
+      },
+      {
+        "landmark": "DorsumOfNose",
+        "coordinates": {
+          "x": 870,
+          "y": 338
+        }
+      },
+      {
+        "landmark": "G",
+        "coordinates": {
+          "x": 834,
+          "y": 166
+        }
+      },
+      {
+        "landmark": "Gn",
+        "coordinates": {
+          "x": 756,
+          "y": 655
+        }
+      },
+      {
+        "landmark": "Go",
+        "coordinates": {
+          "x": 501,
+          "y": 540
+        }
+      },
+      {
+        "landmark": "Id",
+        "coordinates": {
+          "x": 787,
+          "y": 536
+        }
+      },
+      {
+        "landmark": "L1IncisalTip",
+        "coordinates": {
+          "x": 793,
+          "y": 503
+        }
+      },
+      {
+        "landmark": "L1RootTip",
+        "coordinates": {
+          "x": 762,
+          "y": 565
+        }
+      },
+      {
+        "landmark": "L6Distal",
+        "coordinates": {
+          "x": 678,
+          "y": 494
+        }
+      },
+      {
+        "landmark": "L6Mesial",
+        "coordinates": {
+          "x": 719,
+          "y": 502
+        }
+      },
+      {
+        "landmark": "LabraleInferius",
+        "coordinates": {
+          "x": 829,
+          "y": 561
+        }
+      },
+      {
+        "landmark": "LabraleSuperius",
+        "coordinates": {
+          "x": 855,
+          "y": 481
+        }
+      },
+      {
+        "landmark": "LowerEmbrasure",
+        "coordinates": {
+          "x": 797,
+          "y": 513
+        }
+      },
+      {
+        "landmark": "LowerLip",
+        "coordinates": {
+          "x": 841,
+          "y": 548
+        }
+      },
+      {
+        "landmark": "Me",
+        "coordinates": {
+          "x": 739,
+          "y": 661
+        }
+      },
+      {
+        "landmark": "Na",
+        "coordinates": {
+          "x": 798,
+          "y": 203
+        }
+      },
+      {
+        "landmark": "NasalBridgePoint",
+        "coordinates": {
+          "x": 841,
+          "y": 288
+        }
+      },
+      {
+        "landmark": "Or",
+        "coordinates": {
+          "x": 751,
+          "y": 302
+        }
+      },
+      {
+        "landmark": "PM",
+        "coordinates": {
+          "x": 760,
+          "y": 619
+        }
+      },
+      {
+        "landmark": "PNS",
+        "coordinates": {
+          "x": 613,
+          "y": 395
+        }
+      },
+      {
+        "landmark": "Po",
+        "coordinates": {
+          "x": 447,
+          "y": 295
+        }
+      },
+      {
+        "landmark": "Pog",
+        "coordinates": {
+          "x": 761,
+          "y": 640
+        }
+      },
+      {
+        "landmark": "Prn",
+        "coordinates": {
+          "x": 892,
+          "y": 383
+        }
+      },
+      {
+        "landmark": "Pt",
+        "coordinates": {
+          "x": 604,
+          "y": 292
+        }
+      },
+      {
+        "landmark": "R1",
+        "coordinates": {
+          "x": 626,
+          "y": 452
+        }
+      },
+      {
+        "landmark": "R3",
+        "coordinates": {
+          "x": 553,
+          "y": 376
+        }
+      },
+      {
+        "landmark": "RamusDown",
+        "coordinates": {
+          "x": 491,
+          "y": 490
+        }
+      },
+      {
+        "landmark": "S",
+        "coordinates": {
+          "x": 536,
+          "y": 214
+        }
+      },
+      {
+        "landmark": "Sd",
+        "coordinates": {
+          "x": 802,
+          "y": 469
+        }
+      },
+      {
+        "landmark": "SoftTissueA",
+        "coordinates": {
+          "x": 839,
+          "y": 439
+        }
+      },
+      {
+        "landmark": "SoftTissueB",
+        "coordinates": {
+          "x": 805,
+          "y": 582
+        }
+      },
+      {
+        "landmark": "SoftTissueGn",
+        "coordinates": {
+          "x": 785,
+          "y": 664
+        }
+      },
+      {
+        "landmark": "SoftTissueMe",
+        "coordinates": {
+          "x": 748,
+          "y": 680
+        }
+      },
+      {
+        "landmark": "SoftTissueNa",
+        "coordinates": {
+          "x": 817,
+          "y": 233
+        }
+      },
+      {
+        "landmark": "SoftTissuePog",
+        "coordinates": {
+          "x": 805,
+          "y": 632
+        }
+      },
+      {
+        "landmark": "Stmi",
+        "coordinates": {
+          "x": 822,
+          "y": 512
+        }
+      },
+      {
+        "landmark": "Stms",
+        "coordinates": {
+          "x": 829,
+          "y": 513
+        }
+      },
+      {
+        "landmark": "SubmandibularPoint",
+        "coordinates": {
+          "x": 718,
+          "y": 694
+        }
+      },
+      {
+        "landmark": "Subnasale",
+        "coordinates": {
+          "x": 842,
+          "y": 427
+        }
+      },
+      {
+        "landmark": "U1IncisalTip",
+        "coordinates": {
+          "x": 802,
+          "y": 509
+        }
+      },
+      {
+        "landmark": "U1RootTip",
+        "coordinates": {
+          "x": 776,
+          "y": 434
+        }
+      },
+      {
+        "landmark": "U6Distal",
+        "coordinates": {
+          "x": 676,
+          "y": 480
+        }
+      },
+      {
+        "landmark": "U6Mesial",
+        "coordinates": {
+          "x": 716,
+          "y": 486
+        }
+      },
+      {
+        "landmark": "UpperEmbrasure",
+        "coordinates": {
+          "x": 805,
+          "y": 507
+        }
+      },
+      {
+        "landmark": "UpperLip",
+        "coordinates": {
+          "x": 857,
+          "y": 499
+        }
+      },
+      {
+        "landmark": "mandible_outline_1",
+        "coordinates": {
+          "x": 686,
+          "y": 627
+        }
+      },
+      {
+        "landmark": "mandible_outline_2",
+        "coordinates": {
+          "x": 624,
+          "y": 593
+        }
+      },
+      {
+        "landmark": "mandible_outline_3",
+        "coordinates": {
+          "x": 493,
+          "y": 400
+        }
+      },
+      {
+        "landmark": "mandible_outline_4",
+        "coordinates": {
+          "x": 474,
+          "y": 316
+        }
+      },
+      {
+        "landmark": "mandible_outline_5",
+        "coordinates": {
+          "x": 512,
+          "y": 311
+        }
+      },
+      {
+        "landmark": "mandible_outline_6",
+        "coordinates": {
+          "x": 523,
+          "y": 352
+        }
+      },
+      {
+        "landmark": "maxilla_outline_1",
+        "coordinates": {
+          "x": 793,
+          "y": 420
+        }
+      },
+      {
+        "landmark": "maxilla_outline_10",
+        "coordinates": {
+          "x": 756,
+          "y": 447
+        }
+      },
+      {
+        "landmark": "maxilla_outline_11",
+        "coordinates": {
+          "x": 779,
+          "y": 475
+        }
+      },
+      {
+        "landmark": "maxilla_outline_2",
+        "coordinates": {
+          "x": 782,
+          "y": 405
+        }
+      },
+      {
+        "landmark": "maxilla_outline_3",
+        "coordinates": {
+          "x": 759,
+          "y": 384
+        }
+      },
+      {
+        "landmark": "maxilla_outline_4",
+        "coordinates": {
+          "x": 721,
+          "y": 393
+        }
+      },
+      {
+        "landmark": "maxilla_outline_5",
+        "coordinates": {
+          "x": 688,
+          "y": 396
+        }
+      },
+      {
+        "landmark": "maxilla_outline_6",
+        "coordinates": {
+          "x": 644,
+          "y": 395
+        }
+      },
+      {
+        "landmark": "maxilla_outline_7",
+        "coordinates": {
+          "x": 644,
+          "y": 403
+        }
+      },
+      {
+        "landmark": "maxilla_outline_8",
+        "coordinates": {
+          "x": 691,
+          "y": 407
+        }
+      },
+      {
+        "landmark": "maxilla_outline_9",
+        "coordinates": {
+          "x": 734,
+          "y": 420
+        }
+      },
+      {
+        "landmark": "symphysis_outline_1",
+        "coordinates": {
+          "x": 722,
+          "y": 643
+        }
+      },
+      {
+        "landmark": "symphysis_outline_2",
+        "coordinates": {
+          "x": 721,
+          "y": 615
+        }
+      },
+      {
+        "landmark": "symphysis_outline_3",
+        "coordinates": {
+          "x": 735,
+          "y": 588
+        }
+      },
+      {
+        "landmark": "symphysis_outline_4",
+        "coordinates": {
+          "x": 770,
+          "y": 529
+        }
+      }
+    ]
+  }
 }
