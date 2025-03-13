@@ -35,9 +35,10 @@ const ObjectVisibilityControl: React.FC<ObjectVisibilityProps> = ({
     }
   };
   
-  // Handler for Show deviations toggle (renamed from "Only Invalid")
+  // Handler for "Show deviations" toggle with improved logging
   const handleOnlyInvalidToggle = (checked: boolean) => {
     setOnlyInvalid(checked);
+    console.log("Show deviations mode:", checked);
     // Call the parent handler if provided
     if (onOnlyInvalidModeChange) {
       onOnlyInvalidModeChange(checked);
