@@ -1,667 +1,72 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WebCeph Debug Page</title>
+  <title>CephaloScan Debug Page</title>
   <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 20px;
-      line-height: 1.6;
-      color: #333;
-    }
-    
-    h1, h2, h3 {
-      color: #0066cc;
-    }
-    
-    h1 {
-      border-bottom: 2px solid #eee;
-      padding-bottom: 10px;
-      margin-bottom: 20px;
-    }
-    
-    section {
-      margin-bottom: 30px;
-      border: 1px solid #eee;
-      border-radius: 8px;
-      padding: 20px;
-      background-color: #fff;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
-    }
-    
-    @media (max-width: 768px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
-    }
-    
-    .card {
-      border: 1px solid #eee;
-      border-radius: 6px;
-      padding: 15px;
-      margin-bottom: 10px;
-      background-color: #f9f9f9;
-    }
-    
-    button {
-      background-color: #0066cc;
-      color: white;
-      border: none;
-      padding: 8px 15px;
-      border-radius: 4px;
-      cursor: pointer;
-      margin-right: 10px;
-      font-size: 14px;
-      transition: background-color 0.2s;
-    }
-    
-    button:hover {
-      background-color: #004080;
-    }
-    
-    button.secondary {
-      background-color: #6c757d;
-    }
-    
-    button.secondary:hover {
-      background-color: #5a6268;
-    }
-    
-    button.success {
-      background-color: #28a745;
-    }
-    
-    button.success:hover {
-      background-color: #218838;
-    }
-    
-    button.danger {
-      background-color: #dc3545;
-    }
-    
-    button.danger:hover {
-      background-color: #c82333;
-    }
-    
-    pre {
-      background-color: #f8f9fa;
-      padding: 10px;
-      border-radius: 5px;
-      overflow-x: auto;
-      font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size: 14px;
-      white-space: pre-wrap;
-      max-height: 300px;
-      overflow-y: auto;
-    }
-    
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 20px;
-      font-size: 14px;
-    }
-    
-    table, th, td {
-      border: 1px solid #ddd;
-    }
-    
-    th, td {
-      padding: 8px 12px;
-      text-align: left;
-    }
-    
-    th {
-      background-color: #f8f9fa;
-      font-weight: 600;
-    }
-    
-    tr:nth-child(even) {
-      background-color: #f8f9fa;
-    }
-    
-    tr:hover {
-      background-color: #f1f1f1;
-    }
-    
-    .status {
-      padding: 10px;
-      border-radius: 5px;
-      margin-bottom: 15px;
-    }
-    
-    .status.success {
-      background-color: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
-    }
-    
-    .status.error {
-      background-color: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-    }
-    
-    .status.warning {
-      background-color: #fff3cd;
-      color: #856404;
-      border: 1px solid #ffeeba;
-    }
-    
-    .status.info {
-      background-color: #d1ecf1;
-      color: #0c5460;
-      border: 1px solid #bee5eb;
-    }
-    
-    .tabs {
-      margin-bottom: 20px;
-      border-bottom: 1px solid #dee2e6;
-    }
-    
-    .tab-list {
-      display: flex;
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    
-    .tab-item {
-      margin-right: 5px;
-      margin-bottom: -1px;
-    }
-    
-    .tab-button {
-      padding: 8px 16px;
-      background-color: transparent;
-      color: #495057;
-      border: 1px solid transparent;
-      border-top-left-radius: 4px;
-      border-top-right-radius: 4px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    
-    .tab-button:hover {
-      border-color: #e9ecef #e9ecef #dee2e6;
-      background-color: #f8f9fa;
-    }
-    
-    .tab-button.active {
-      color: #0066cc;
-      background-color: #fff;
-      border-color: #dee2e6 #dee2e6 #fff;
-    }
-    
-    .tab-content {
-      display: none;
-      padding: 20px 0;
-    }
-    
-    .tab-content.active {
-      display: block;
-    }
-    
-    .loader {
-      border: 3px solid #f3f3f3;
-      border-radius: 50%;
-      border-top: 3px solid #0066cc;
-      width: 24px;
-      height: 24px;
-      animation: spin 1s linear infinite;
-      display: inline-block;
-      vertical-align: middle;
-      margin-right: 10px;
-    }
-    
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    
-    .hidden {
-      display: none;
-    }
+    body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+    h1 { color: #1e40af; }
+    .test-section { margin-bottom: 20px; padding: 15px; border: 1px solid #e5e7eb; border-radius: 8px; }
+    button { background: #3b82f6; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+    button:hover { background: #2563eb; }
+    pre { background: #f1f5f9; padding: 10px; overflow-x: auto; border-radius: 4px; }
   </style>
 </head>
 <body>
-  <h1>WebCeph Diagnostic Page</h1>
+  <h1>CephaloScan Debug Page</h1>
   
-  <div class="tabs">
-    <ul class="tab-list">
-      <li class="tab-item"><button class="tab-button active" data-tab="server-status">Server Status</button></li>
-      <li class="tab-item"><button class="tab-button" data-tab="api-testing">API Testing</button></li>
-      <li class="tab-item"><button class="tab-button" data-tab="routes-info">Routes</button></li>
-      <li class="tab-item"><button class="tab-button" data-tab="image-testing">Image Testing</button></li>
-      <li class="tab-item"><button class="tab-button" data-tab="system-info">System Info</button></li>
-    </ul>
+  <div class="test-section">
+    <h2>API Tests</h2>
+    <button onclick="testEndpoint('/api/health')">Test Health</button>
+    <button onclick="testEndpoint('/api/debug/image-paths')">Test Images</button>
+    <button onclick="testEndpoint('/api/debug/routes')">Test Routes</button>
+    <button onclick="testEndpoint('/api/debug/browser-info')">Browser Info</button>
+    <button onclick="testEndpoint('/api/debug/app-state')">App State</button>
   </div>
   
-  <div id="server-status" class="tab-content active">
-    <section>
-      <h2>Server Health</h2>
-      <div id="health-status" class="status info">
-        <div class="loader"></div> Checking server health...
-      </div>
-      <button id="refresh-health">Refresh Health Status</button>
-    </section>
-    
-    <div class="grid">
-      <section>
-        <h2>Environment</h2>
-        <div id="environment-info">Loading...</div>
-      </section>
-      
-      <section>
-        <h2>Connection Details</h2>
-        <table>
-          <tbody>
-            <tr>
-              <th>Current URL</th>
-              <td id="current-url"></td>
-            </tr>
-            <tr>
-              <th>Hostname</th>
-              <td id="hostname"></td>
-            </tr>
-            <tr>
-              <th>Protocol</th>
-              <td id="protocol"></td>
-            </tr>
-            <tr>
-              <th>Port</th>
-              <td id="port"></td>
-            </tr>
-            <tr>
-              <th>Origin</th>
-              <td id="origin"></td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-    </div>
+  <div class="test-section">
+    <h2>Navigation Tests</h2>
+    <button onclick="navigateTo('/')">Go Home</button>
+    <button onclick="navigateTo('/cephalometric')">Go Analysis</button>
   </div>
   
-  <div id="api-testing" class="tab-content">
-    <section>
-      <h2>API Health Check</h2>
-      <div id="api-health-status" class="status info">
-        Click the button to check API health
-      </div>
-      <button id="check-api-health">Check API Health</button>
-    </section>
-    
-    <section>
-      <h2>Test API Endpoint</h2>
-      <div class="card">
-        <div>
-          <label for="api-endpoint">API Endpoint:</label>
-          <select id="api-endpoint" style="width: 300px; padding: 5px; margin: 10px 0;">
-            <option value="/api/health">GET /api/health</option>
-            <option value="/api/debug/routes">GET /api/debug/routes</option>
-            <option value="/api/analysis-templates">GET /api/analysis-templates</option>
-            <option value="/healthz">GET /healthz</option>
-          </select>
-        </div>
-        
-        <button id="test-api-call">Test API Call</button>
-        <button id="clear-api-results" class="secondary">Clear Results</button>
-      </div>
-      
-      <h3>Response:</h3>
-      <pre id="api-response">// API response will appear here</pre>
-    </section>
+  <div class="test-section">
+    <h2>Image Test</h2>
+    <div>Trying to load cephalometric.png:</div>
+    <img src="/images/cephalometric.png" alt="Cephalometric" style="max-width: 100%; margin-top: 10px;">
   </div>
   
-  <div id="routes-info" class="tab-content">
-    <section>
-      <h2>Available Routes</h2>
-      <button id="load-routes">Load Routes</button>
-      <div id="routes-list" style="margin-top: 15px;">
-        <div class="loader"></div> Click "Load Routes" to fetch available API routes
-      </div>
-    </section>
+  <div class="test-section">
+    <h2>Results</h2>
+    <pre id="results">Tests will appear here...</pre>
   </div>
-  
-  <div id="image-testing" class="tab-content">
-    <section>
-      <h2>Image Loading Test</h2>
-      <p>Testing image loading from the server:</p>
-      
-      <div style="margin: 20px 0;">
-        <button id="test-image-load">Test Image Load</button>
-        <button id="hide-image" class="secondary" style="display: none;">Hide Image</button>
-      </div>
-      
-      <div id="image-result" style="margin-top: 15px;">
-        <!-- Images will be displayed here -->
-      </div>
-    </section>
-  </div>
-  
-  <div id="system-info" class="tab-content">
-    <section>
-      <h2>Browser Information</h2>
-      <table>
-        <tbody>
-          <tr>
-            <th>User Agent</th>
-            <td id="user-agent"></td>
-          </tr>
-          <tr>
-            <th>Platform</th>
-            <td id="platform"></td>
-          </tr>
-          <tr>
-            <th>Cookies Enabled</th>
-            <td id="cookies-enabled"></td>
-          </tr>
-          <tr>
-            <th>Language</th>
-            <td id="language"></td>
-          </tr>
-          <tr>
-            <th>Screen Resolution</th>
-            <td id="screen-resolution"></td>
-          </tr>
-          <tr>
-            <th>Window Size</th>
-            <td id="window-size"></td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
-    
-    <section>
-      <h2>Network Test</h2>
-      <div class="card">
-        <button id="ping-server">Ping Server</button>
-      </div>
-      <div id="ping-results" class="status info" style="display: none;">
-        Results will appear here
-      </div>
-    </section>
-  </div>
-  
+
   <script>
-    // Tabs functionality
-    document.querySelectorAll('.tab-button').forEach(button => {
-      button.addEventListener('click', () => {
-        // Deactivate all tabs
-        document.querySelectorAll('.tab-button').forEach(btn => {
-          btn.classList.remove('active');
-        });
-        document.querySelectorAll('.tab-content').forEach(content => {
-          content.classList.remove('active');
-        });
-        
-        // Activate the clicked tab
-        button.classList.add('active');
-        const tabId = button.getAttribute('data-tab');
-        document.getElementById(tabId).classList.add('active');
-      });
-    });
-    
-    // Connection details
-    document.getElementById('current-url').textContent = window.location.href;
-    document.getElementById('hostname').textContent = window.location.hostname;
-    document.getElementById('protocol').textContent = window.location.protocol;
-    document.getElementById('port').textContent = window.location.port || '(default)';
-    document.getElementById('origin').textContent = window.location.origin;
-    
-    // Browser info
-    document.getElementById('user-agent').textContent = navigator.userAgent;
-    document.getElementById('platform').textContent = navigator.platform;
-    document.getElementById('cookies-enabled').textContent = navigator.cookieEnabled ? 'Yes' : 'No';
-    document.getElementById('language').textContent = navigator.language;
-    document.getElementById('screen-resolution').textContent = `${screen.width} × ${screen.height}`;
-    document.getElementById('window-size').textContent = `${window.innerWidth} × ${window.innerHeight}`;
-    
-    // Health check
-    function checkHealth() {
-      const healthStatus = document.getElementById('health-status');
-      healthStatus.innerHTML = '<div class="loader"></div> Checking server health...';
-      healthStatus.className = 'status info';
+    async function testEndpoint(endpoint) {
+      const results = document.getElementById('results');
+      results.textContent = 'Loading...';
       
-      fetch('/api/health')
-        .then(response => response.json())
-        .then(data => {
-          healthStatus.className = 'status success';
-          healthStatus.innerHTML = `
-            <strong>Server is healthy! ✓</strong><br>
-            Status: ${data.status}<br>
-            Timestamp: ${data.timestamp}<br>
-            Mode: ${data.mode}
-          `;
-          
-          // Also update API health status if visible
-          const apiHealthStatus = document.getElementById('api-health-status');
-          apiHealthStatus.className = 'status success';
-          apiHealthStatus.innerHTML = `
-            <strong>API is responsive! ✓</strong><br>
-            Status: ${data.status}<br>
-            Timestamp: ${data.timestamp}
-          `;
-        })
-        .catch(error => {
-          healthStatus.className = 'status error';
-          healthStatus.innerHTML = `
-            <strong>Server health check failed! ✗</strong><br>
-            Error: ${error.message}
-          `;
-        });
+      try {
+        const response = await fetch(endpoint);
+        const data = await response.json();
+        results.textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        results.textContent = 'Error: ' + error.message;
+      }
     }
     
-    document.getElementById('refresh-health').addEventListener('click', checkHealth);
-    document.getElementById('check-api-health').addEventListener('click', () => {
-      const apiHealthStatus = document.getElementById('api-health-status');
-      apiHealthStatus.innerHTML = '<div class="loader"></div> Checking API health...';
-      apiHealthStatus.className = 'status info';
-      
-      fetch('/api/health')
-        .then(response => response.json())
-        .then(data => {
-          apiHealthStatus.className = 'status success';
-          apiHealthStatus.innerHTML = `
-            <strong>API is responsive! ✓</strong><br>
-            Status: ${data.status}<br>
-            Timestamp: ${data.timestamp}
-          `;
-        })
-        .catch(error => {
-          apiHealthStatus.className = 'status error';
-          apiHealthStatus.innerHTML = `
-            <strong>API health check failed! ✗</strong><br>
-            Error: ${error.message}
-          `;
-        });
-    });
-    
-    // Environment info
-    function loadEnvironmentInfo() {
-      const envInfo = document.getElementById('environment-info');
-      envInfo.innerHTML = '<div class="loader"></div> Loading environment info...';
-      
-      // We'll just display static environment info since we don't want to expose server environment variables
-      envInfo.innerHTML = `
-        <table>
-          <tbody>
-            <tr>
-              <th>App Environment</th>
-              <td>Development</td>
-            </tr>
-            <tr>
-              <th>Client Time</th>
-              <td>${new Date().toISOString()}</td>
-            </tr>
-            <tr>
-              <th>Timezone</th>
-              <td>${Intl.DateTimeFormat().resolvedOptions().timeZone}</td>
-            </tr>
-            <tr>
-              <th>Locale</th>
-              <td>${Intl.DateTimeFormat().resolvedOptions().locale}</td>
-            </tr>
-          </tbody>
-        </table>
-      `;
+    function navigateTo(path) {
+      document.getElementById('results').textContent = 'Navigating to: ' + path;
+      window.location.href = path;
     }
     
-    // Test API call
-    document.getElementById('test-api-call').addEventListener('click', () => {
-      const endpoint = document.getElementById('api-endpoint').value;
-      const responseElem = document.getElementById('api-response');
-      responseElem.textContent = 'Loading...';
-      
-      fetch(endpoint)
-        .then(response => {
-          const contentType = response.headers.get('content-type');
-          if (contentType && contentType.includes('application/json')) {
-            return response.json();
-          } else {
-            return response.text();
-          }
-        })
-        .then(data => {
-          if (typeof data === 'object') {
-            responseElem.textContent = JSON.stringify(data, null, 2);
-          } else {
-            responseElem.textContent = data;
-          }
-        })
-        .catch(error => {
-          responseElem.textContent = `Error: ${error.message}`;
-        });
+    // Show browser information when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      testEndpoint('/api/debug/browser-info');
     });
-    
-    document.getElementById('clear-api-results').addEventListener('click', () => {
-      document.getElementById('api-response').textContent = '// API response will appear here';
-    });
-    
-    // Load routes
-    document.getElementById('load-routes').addEventListener('click', () => {
-      const routesList = document.getElementById('routes-list');
-      routesList.innerHTML = '<div class="loader"></div> Loading routes...';
-      
-      fetch('/api/debug/routes')
-        .then(response => response.json())
-        .then(data => {
-          let routesHtml = '<table><thead><tr><th>Method</th><th>Path</th></tr></thead><tbody>';
-          
-          if (data.routes && Array.isArray(data.routes)) {
-            data.routes.forEach(route => {
-              routesHtml += `<tr><td>${route.method}</td><td>${route.path}</td></tr>`;
-            });
-          } else {
-            routesHtml = '<tr><td colspan="2">No routes found or invalid response format</td></tr>';
-          }
-          
-          routesHtml += '</tbody></table>';
-          routesList.innerHTML = routesHtml;
-        })
-        .catch(error => {
-          routesList.innerHTML = `<div class="status error">Error loading routes: ${error.message}</div>`;
-        });
-    });
-    
-    // Test image loading
-    document.getElementById('test-image-load').addEventListener('click', () => {
-      const imageResult = document.getElementById('image-result');
-      const hideButton = document.getElementById('hide-image');
-      
-      imageResult.innerHTML = `
-        <div class="status info">Testing image loading...</div>
-        <div style="margin-top: 15px;">
-          <h3>Sample Image:</h3>
-          <img id="test-image" src="/images/webceph-1.png" alt="Test image" style="max-width: 100%; border: 1px solid #ddd;">
-        </div>
-      `;
-      
-      // Show hide button
-      hideButton.style.display = 'inline-block';
-      
-      // Check if image loaded successfully
-      const img = document.getElementById('test-image');
-      img.onload = () => {
-        imageResult.innerHTML = `
-          <div class="status success">Image loaded successfully! ✓</div>
-          <div style="margin-top: 15px;">
-            <h3>Sample Image:</h3>
-            <img src="/images/webceph-1.png" alt="Test image" style="max-width: 100%; border: 1px solid #ddd;">
-          </div>
-        `;
-      };
-      
-      img.onerror = () => {
-        imageResult.innerHTML = `
-          <div class="status error">Failed to load image! ✗</div>
-          <p>This could indicate that:</p>
-          <ul>
-            <li>The image file does not exist at the specified path</li>
-            <li>There are permissions issues accessing the image</li>
-            <li>The server is not properly configured to serve static files</li>
-          </ul>
-        `;
-      };
-    });
-    
-    document.getElementById('hide-image').addEventListener('click', () => {
-      document.getElementById('image-result').innerHTML = '';
-      document.getElementById('hide-image').style.display = 'none';
-    });
-    
-    // Ping server
-    document.getElementById('ping-server').addEventListener('click', () => {
-      const pingResults = document.getElementById('ping-results');
-      pingResults.style.display = 'block';
-      pingResults.className = 'status info';
-      pingResults.innerHTML = '<div class="loader"></div> Pinging server...';
-      
-      const startTime = performance.now();
-      
-      fetch('/healthz')
-        .then(response => {
-          const endTime = performance.now();
-          const pingTime = Math.round(endTime - startTime);
-          
-          if (response.ok) {
-            pingResults.className = 'status success';
-            pingResults.innerHTML = `
-              <strong>Ping successful! ✓</strong><br>
-              Response time: ${pingTime}ms<br>
-              Status: ${response.status} ${response.statusText}
-            `;
-          } else {
-            pingResults.className = 'status warning';
-            pingResults.innerHTML = `
-              <strong>Ping received but with error status</strong><br>
-              Response time: ${pingTime}ms<br>
-              Status: ${response.status} ${response.statusText}
-            `;
-          }
-        })
-        .catch(error => {
-          pingResults.className = 'status error';
-          pingResults.innerHTML = `
-            <strong>Ping failed! ✗</strong><br>
-            Error: ${error.message}
-          `;
-        });
-    });
-    
-    // Initialize
-    checkHealth();
-    loadEnvironmentInfo();
   </script>
 </body>
 </html>
+    

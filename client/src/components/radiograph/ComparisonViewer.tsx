@@ -1,7 +1,6 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useComparisonViewer } from "@/hooks/useComparisonViewer";
 import { useLayerControls } from "@/hooks/useLayerControls";
-import { useTutorial } from "@/context/TutorialContext";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -26,24 +25,10 @@ import {
   Clock,
   Calendar,
   Plus as PlusIcon,
-  Minus as MinusIcon,
-  Edit3,
-  Move,
-  Maximize,
-  Minimize,
-  Share2
+  Minus as MinusIcon
 } from "lucide-react";
 import FloatingControlPanel from "./FloatingControlPanel";
-// Type definitions for landmarks using inline types to avoid import issues
-type SimpleLandmark = {
-  id: string;
-  name: string;
-  abbreviation: string;
-  x: number;
-  y: number;
-  description?: string;
-};
-import { ComparisonImageType, LayerOpacityType, ImageControlsType } from "./types";
+import { ComparisonImageType } from "./types";
 
 interface ComparisonViewerProps {
   patientId: string;
@@ -136,33 +121,9 @@ const ComparisonViewer: React.FC<ComparisonViewerProps> = ({
     }
   ];
 
-  // State for edit mode and landmarks
+  // State for edit mode (not used for landmarks, just to enable the FloatingControlPanel)
   const [isEditMode, setIsEditMode] = useState(false);
-  const toggleEditMode = () => {
-    setIsEditMode(prev => !prev);
-    // Record this interaction in the tutorial system if available
-    recordInteraction?.('landmark_editor');
-  };
-  
-  // Mock landmarks data for before/after comparisons
-  const [beforeLandmarks, setBeforeLandmarks] = useState([
-    { id: 'nasion-before', name: 'Nasion', abbreviation: 'N', x: 400, y: 300, description: 'The intersection of the internasal and frontonasal sutures' },
-    { id: 'sella-before', name: 'Sella', abbreviation: 'S', x: 370, y: 280, description: 'The center of the sella turcica' }, 
-    { id: 'a-point-before', name: 'A Point', abbreviation: 'A', x: 420, y: 380, description: 'The deepest point on the anterior surface of the maxilla' },
-    { id: 'b-point-before', name: 'B Point', abbreviation: 'B', x: 410, y: 430, description: 'The deepest point on the anterior surface of the mandibular symphysis' },
-    { id: 'pogonion-before', name: 'Pogonion', abbreviation: 'Pog', x: 400, y: 470, description: 'The most anterior point of the mandibular symphysis' }
-  ]);
-  
-  const [afterLandmarks, setAfterLandmarks] = useState([
-    { id: 'nasion-after', name: 'Nasion', abbreviation: 'N', x: 400, y: 300, description: 'The intersection of the internasal and frontonasal sutures' },
-    { id: 'sella-after', name: 'Sella', abbreviation: 'S', x: 370, y: 280, description: 'The center of the sella turcica' }, 
-    { id: 'a-point-after', name: 'A Point', abbreviation: 'A', x: 425, y: 375, description: 'The deepest point on the anterior surface of the maxilla' }, // Slight changes to simulate treatment changes
-    { id: 'b-point-after', name: 'B Point', abbreviation: 'B', x: 415, y: 428, description: 'The deepest point on the anterior surface of the mandibular symphysis' }, 
-    { id: 'pogonion-after', name: 'Pogonion', abbreviation: 'Pog', x: 408, y: 468, description: 'The most anterior point of the mandibular symphysis' }
-  ]);
-  
-  // Tutorial integration
-  const { recordInteraction } = useTutorial();
+  const toggleEditMode = () => setIsEditMode(prev => !prev);
 
   // Zoom and pan handlers
   const handleZoomIn = () => setScale(prev => Math.min(prev + 0.1, 2.5));
@@ -429,128 +390,6 @@ const ComparisonViewer: React.FC<ComparisonViewerProps> = ({
                       }}
                     />
                   ))}
-                  
-                {/* Tracing layer for "before" image */}
-                {layerOpacity.tracing > 0 && comparisonImages.find(img => img.id.includes('before') && img.visible) && (
-                  <svg
-                    className="absolute top-0 left-0 w-full h-full pointer-events-none"
-                    style={{
-                      opacity: layerOpacity.tracing / 100,
-                      transform: `scale(${scale}) translate(${position.x}px, ${position.y}px)`,
-                      transition: isDragging ? 'none' : 'transform 0.2s ease-out',
-                      zIndex: 19
-                    }}
-                  >
-                    {/* Facial Profile Tracing */}
-                    <path
-                      d={`
-                        M ${beforeLandmarks[0].x},${beforeLandmarks[0].y} 
-                        L ${beforeLandmarks[2].x},${beforeLandmarks[2].y} 
-                        L ${beforeLandmarks[3].x},${beforeLandmarks[3].y} 
-                        L ${beforeLandmarks[4].x},${beforeLandmarks[4].y}
-                      `}
-                      stroke="#0EA5E9"
-                      strokeWidth="2"
-                      fill="none"
-                    />
-                  </svg>
-                )}
-                
-                {/* Tracing layer for "after" image */}
-                {layerOpacity.tracing > 0 && comparisonImages.find(img => img.id.includes('after') && img.visible) && (
-                  <svg
-                    className="absolute top-0 left-0 w-full h-full pointer-events-none"
-                    style={{
-                      opacity: layerOpacity.tracing / 100,
-                      transform: `scale(${scale}) translate(${position.x}px, ${position.y}px)`,
-                      transition: isDragging ? 'none' : 'transform 0.2s ease-out',
-                      zIndex: 19
-                    }}
-                  >
-                    {/* Facial Profile Tracing */}
-                    <path
-                      d={`
-                        M ${afterLandmarks[0].x},${afterLandmarks[0].y} 
-                        L ${afterLandmarks[2].x},${afterLandmarks[2].y} 
-                        L ${afterLandmarks[3].x},${afterLandmarks[3].y} 
-                        L ${afterLandmarks[4].x},${afterLandmarks[4].y}
-                      `}
-                      stroke="#EC4899"
-                      strokeWidth="2"
-                      fill="none"
-                    />
-                  </svg>
-                )}
-                
-                {/* Render landmarks for "before" image */}
-                {layerOpacity.landmarks > 0 && comparisonImages.find(img => img.id.includes('before') && img.visible) && (
-                  <svg
-                    className="absolute top-0 left-0 w-full h-full pointer-events-none"
-                    style={{
-                      opacity: layerOpacity.landmarks / 100,
-                      transform: `scale(${scale}) translate(${position.x}px, ${position.y}px)`,
-                      transition: isDragging ? 'none' : 'transform 0.2s ease-out',
-                      zIndex: 20
-                    }}
-                  >
-                    {beforeLandmarks.map(landmark => (
-                      <g key={landmark.id}>
-                        <circle
-                          cx={landmark.x}
-                          cy={landmark.y}
-                          r={6}
-                          fill="#0EA5E9"
-                          strokeWidth={2}
-                          stroke="#0369A1"
-                        />
-                        <text
-                          x={landmark.x + 8}
-                          y={landmark.y}
-                          fontSize="12px"
-                          fill="#0EA5E9"
-                          fontWeight="bold"
-                        >
-                          {landmark.abbreviation}
-                        </text>
-                      </g>
-                    ))}
-                  </svg>
-                )}
-                
-                {/* Render landmarks for "after" image if visible */}
-                {layerOpacity.landmarks > 0 && comparisonImages.find(img => img.id.includes('after') && img.visible) && (
-                  <svg
-                    className="absolute top-0 left-0 w-full h-full pointer-events-none"
-                    style={{
-                      opacity: layerOpacity.landmarks / 100,
-                      transform: `scale(${scale}) translate(${position.x}px, ${position.y}px)`,
-                      transition: isDragging ? 'none' : 'transform 0.2s ease-out',
-                      zIndex: 21
-                    }}
-                  >
-                    {afterLandmarks.map(landmark => (
-                      <g key={landmark.id}>
-                        <circle
-                          cx={landmark.x}
-                          cy={landmark.y}
-                          r={6}
-                          fill="#EC4899"
-                          strokeWidth={2}
-                          stroke="#BE185D"
-                        />
-                        <text
-                          x={landmark.x + 8}
-                          y={landmark.y}
-                          fontSize="12px"
-                          fill="#EC4899"
-                          fontWeight="bold"
-                        >
-                          {landmark.abbreviation}
-                        </text>
-                      </g>
-                    ))}
-                  </svg>
-                )}
               </div>
             ) : (
               // Side by side mode
@@ -583,70 +422,6 @@ const ComparisonViewer: React.FC<ComparisonViewerProps> = ({
                       <div className="absolute top-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
                         {image.description || image.imageType}
                       </div>
-                      
-                      {/* Show tracing in side-by-side mode */}
-                      {layerOpacity.tracing > 0 && (
-                        <svg
-                          className="absolute top-0 left-0 w-full h-full pointer-events-none"
-                          style={{
-                            opacity: layerOpacity.tracing / 100,
-                            transform: `scale(${scale}) translate(${position.x}px, ${position.y}px)`,
-                            transition: isDragging ? 'none' : 'transform 0.2s ease-out',
-                          }}
-                        >
-                          {/* Facial Profile Tracing */}
-                          <path
-                            d={`
-                              M ${image.id.includes('before') ? beforeLandmarks[0].x : afterLandmarks[0].x},
-                                ${image.id.includes('before') ? beforeLandmarks[0].y : afterLandmarks[0].y} 
-                              L ${image.id.includes('before') ? beforeLandmarks[2].x : afterLandmarks[2].x},
-                                ${image.id.includes('before') ? beforeLandmarks[2].y : afterLandmarks[2].y} 
-                              L ${image.id.includes('before') ? beforeLandmarks[3].x : afterLandmarks[3].x},
-                                ${image.id.includes('before') ? beforeLandmarks[3].y : afterLandmarks[3].y} 
-                              L ${image.id.includes('before') ? beforeLandmarks[4].x : afterLandmarks[4].x},
-                                ${image.id.includes('before') ? beforeLandmarks[4].y : afterLandmarks[4].y}
-                            `}
-                            stroke={image.id.includes('before') ? "#0EA5E9" : "#EC4899"}
-                            strokeWidth="2"
-                            fill="none"
-                          />
-                        </svg>
-                      )}
-                      
-                      {/* Show landmarks in side-by-side mode */}
-                      {layerOpacity.landmarks > 0 && (
-                        <svg
-                          className="absolute top-0 left-0 w-full h-full pointer-events-none"
-                          style={{
-                            opacity: layerOpacity.landmarks / 100,
-                            transform: `scale(${scale}) translate(${position.x}px, ${position.y}px)`,
-                            transition: isDragging ? 'none' : 'transform 0.2s ease-out',
-                          }}
-                        >
-                          {/* Choose which landmarks to display based on the image id */}
-                          {(image.id.includes('before') ? beforeLandmarks : afterLandmarks).map(landmark => (
-                            <g key={landmark.id}>
-                              <circle
-                                cx={landmark.x}
-                                cy={landmark.y}
-                                r={6}
-                                fill={image.id.includes('before') ? "#0EA5E9" : "#EC4899"}
-                                strokeWidth={2}
-                                stroke={image.id.includes('before') ? "#0369A1" : "#BE185D"}
-                              />
-                              <text
-                                x={landmark.x + 8}
-                                y={landmark.y}
-                                fontSize="12px"
-                                fill={image.id.includes('before') ? "#0EA5E9" : "#EC4899"}
-                                fontWeight="bold"
-                              >
-                                {landmark.abbreviation}
-                              </text>
-                            </g>
-                          ))}
-                        </svg>
-                      )}
                     </div>
                   ))}
               </div>
