@@ -6,8 +6,7 @@ export function useLayerControls() {
     landmarks: 60,
     measurements: 70,
     tracing: 80,
-    analysis: 75,
-    profile: 100
+    analysisLine: 100 // Changed from profile to analysisLine
   });
 
   const [imageControls, setImageControls] = useState<ImageControlsType>({
@@ -51,8 +50,7 @@ export function useLayerControls() {
       landmarks: 60,
       measurements: 70,
       tracing: 80,
-      analysis: 75,
-      profile: 100
+      analysisLine: 75// Changed from profile to analysisLine
     });
   }, []);
 
