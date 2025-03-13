@@ -12,3 +12,4 @@ export interface ImageControlsType {
 
 export * from './tracingLine';
 export * from './analysisLine';
+export * from './landmark';
