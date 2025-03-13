@@ -38,8 +38,49 @@ const extractResourceInfo = (queryKey: unknown[]): {
 };
 
 // Mock query function that uses clientStorage instead of fetch
-export const mockQueryFn: QueryFunction = async ({ queryKey }) => {
-  const { resourceType, id, patientId } = extractResourceInfo(queryKey);
+export const mockQueryFn: QueryFunction = async (context) => {
+  const { queryKey } = context;
+  
+  // Handle direct 'landmarksCollection' queries used by the collaborative editing hooks
+  if (Array.isArray(queryKey) && queryKey.length === 2 && queryKey[0] === 'landmarksCollection') {
+    const collectionId = queryKey[1] as string;
+    console.log('Fetching landmarks collection by ID:', collectionId);
+    
+    let collection = await api.getLandmarksCollection(collectionId);
+    
+    // If collection doesn't exist, create a new default one
+    if (!collection) {
+      console.log('Collection not found, creating new collection:', collectionId);
+      
+      // Extract patientId and imageId from the collection ID format (e.g., 'p1-img1')
+      const [patientId, imageId] = collectionId.split('-');
+      
+      // Create a new collection with default values
+      collection = {
+        id: collectionId,
+        patientId: patientId || 'unknown',
+        imageId: imageId || 'unknown',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        createdBy: 'system',
+        lastModifiedBy: 'system',
+        landmarks: [] // Start with no landmarks
+      };
+      
+      // Save the new collection
+      await api.createLandmarksCollection(collection);
+    }
+    
+    return collection;
+  }
+  
+  // Cast queryKey to any to bypass TypeScript readonly constraints
+  // This is needed because the QueryKey type is readonly but our extractResourceInfo needs a mutable array
+  // Note: This is safe because we're not actually modifying the array
+  const queryKeyArray = queryKey as any[];
+  
+  // Handle regular API paths
+  const { resourceType, id, patientId } = extractResourceInfo(queryKeyArray);
   
   try {
     switch (resourceType) {
@@ -75,7 +116,7 @@ export const mockQueryFn: QueryFunction = async ({ queryKey }) => {
         return { status: 'ok', timestamp: new Date().toISOString() };
         
       default:
-        console.warn(`Unhandled resource type in mockQueryFn: ${resourceType}`);
+        console.log('Query key not handled by standard paths:', queryKey);
         return null;
     }
   } catch (error) {
@@ -111,7 +152,13 @@ export async function mockApiRequest(
     // Handle different HTTP methods and resources
     switch (method.toUpperCase()) {
       case 'GET':
-        return { json: async () => mockQueryFn({ queryKey: [url] }) };
+        // Create a mock context with required properties for the queryFn
+        const mockContext = { 
+          queryKey: [url] as const,
+          signal: new AbortController().signal,
+          meta: undefined
+        };
+        return { json: async () => mockQueryFn(mockContext) };
         
       case 'POST':
         if (resourceType === 'landmarks-collections') {

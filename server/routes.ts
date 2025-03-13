@@ -156,6 +156,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
   
+  // Direct test route for static HTML page
+  app.get('/test', (req, res) => {
+    res.sendFile(path.join(process.cwd(), 'public/test.html'));
+  });
+  
   // Root level health check
   app.get('/healthz', (req, res) => {
     res.send('ok');
