@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { X, Eye, EyeOff, ChevronDown, ChevronUp } from "lucide-react";
+import { X, Eye, EyeOff } from "lucide-react";
 import { LayerOpacityType } from "./types";
 import { LandmarkGroupKey } from "./utils/landmarkGroups";
 import { Separator } from "@/components/ui/separator";
@@ -26,8 +26,6 @@ const ObjectVisibilityControl: React.FC<ObjectVisibilityProps> = ({
   visibleLandmarkGroups,
   onToggleLandmarkGroup
 }) => {
-  const [showLandmarkFilters, setShowLandmarkFilters] = useState(false);
-  
   // Helper function to toggle layer visibility
   const toggleLayerVisibility = (layer: keyof LayerOpacityType, currentValue: number) => {
     if (currentValue > 0) {
@@ -59,8 +57,9 @@ const ObjectVisibilityControl: React.FC<ObjectVisibilityProps> = ({
       
       <div className="space-y-4">
         <div className="space-y-3">
+          {/* Landmarks Section - No Slider, Only Toggle and Filter */}
           <div>
-            <div className="flex justify-between items-center mb-1">
+            <div className="flex justify-between items-center">
               <div className="flex items-center">
                 <label className="text-sm text-slate-600 font-medium mr-2">Landmarks</label>
                 <Button 
@@ -72,90 +71,62 @@ const ObjectVisibilityControl: React.FC<ObjectVisibilityProps> = ({
                   {layerOpacity.landmarks > 0 ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                 </Button>
               </div>
-              <span className="text-xs text-slate-500">{layerOpacity.landmarks}%</span>
             </div>
-            <Slider
-              value={[layerOpacity.landmarks]}
-              min={0}
-              max={100}
-              step={1}
-              onValueChange={(value) => onLayerOpacityChange('landmarks', value[0])}
-              className="w-full"
-            />
           </div>
 
-          {/* Landmark Filtering Section */}
+          {/* Landmark Filtering Section - Always visible in one line */}
           {layerOpacity.landmarks > 0 && (
-            <>
-              <div className="pt-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full flex justify-between items-center px-2 py-1 h-8 text-sm text-slate-600"
-                  onClick={() => setShowLandmarkFilters(!showLandmarkFilters)}
-                >
-                  <span>Filter Landmark Types</span>
-                  {showLandmarkFilters ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                </Button>
-              </div>
+            <div className="flex flex-row gap-1 flex-wrap mb-1">
+              {/* All Landmarks */}
+              <Badge 
+                variant={isGroupSelected('all') ? "default" : "outline"} 
+                className={`cursor-pointer ${isGroupSelected('all') ? 'bg-gray-800 hover:bg-gray-900 text-yellow-300' : 'hover:bg-slate-100'}`}
+                onClick={() => onToggleLandmarkGroup('all')}
+              >
+                {isGroupSelected('all') && <CheckIcon className="h-3 w-3 mr-1" />}
+                All
+              </Badge>
               
-              {showLandmarkFilters && (
-                <div className="pl-4 pr-2 py-2 bg-slate-50 rounded-md border border-slate-100">
-                  <div className="text-xs text-slate-500 mb-2">Show landmarks by type:</div>
-                  <div className="flex flex-wrap gap-2">
-                    {/* All Landmarks */}
-                    <Badge 
-                      variant={isGroupSelected('all') ? "default" : "outline"} 
-                      className={`cursor-pointer ${isGroupSelected('all') ? 'bg-gray-800 hover:bg-gray-900 text-yellow-300' : 'hover:bg-slate-100'}`}
-                      onClick={() => onToggleLandmarkGroup('all')}
-                    >
-                      {isGroupSelected('all') && <CheckIcon className="h-3 w-3 mr-1" />}
-                      All
-                    </Badge>
-                    
-                    {/* Skeletal Landmarks */}
-                    <Badge 
-                      variant={isGroupSelected('skeletal') ? "default" : "outline"} 
-                      className={`cursor-pointer ${isGroupSelected('skeletal') ? 'bg-red-600 hover:bg-red-700 text-white' : 'hover:bg-slate-100 text-red-600 border-red-600'}`}
-                      onClick={() => onToggleLandmarkGroup('skeletal')}
-                    >
-                      {isGroupSelected('skeletal') && <CheckIcon className="h-3 w-3 mr-1" />}
-                      Skeletal
-                    </Badge>
-                    
-                    {/* Dental Landmarks */}
-                    <Badge 
-                      variant={isGroupSelected('dental') ? "default" : "outline"} 
-                      className={`cursor-pointer ${isGroupSelected('dental') ? 'bg-red-500 hover:bg-red-600 text-white' : 'hover:bg-slate-100 text-red-500 border-red-500'}`}
-                      onClick={() => onToggleLandmarkGroup('dental')}
-                    >
-                      {isGroupSelected('dental') && <CheckIcon className="h-3 w-3 mr-1" />}
-                      Dental
-                    </Badge>
-                    
-                    {/* Soft Tissue Landmarks */}
-                    <Badge 
-                      variant={isGroupSelected('softTissue') ? "default" : "outline"} 
-                      className={`cursor-pointer ${isGroupSelected('softTissue') ? 'bg-red-400 hover:bg-red-500 text-white' : 'hover:bg-slate-100 text-red-400 border-red-400'}`}
-                      onClick={() => onToggleLandmarkGroup('softTissue')}
-                    >
-                      {isGroupSelected('softTissue') && <CheckIcon className="h-3 w-3 mr-1" />}
-                      Soft Tissue
-                    </Badge>
-                    
-                    {/* Outline Landmarks */}
-                    <Badge 
-                      variant={isGroupSelected('outlines') ? "default" : "outline"} 
-                      className={`cursor-pointer ${isGroupSelected('outlines') ? 'bg-red-700 hover:bg-red-800 text-white' : 'hover:bg-slate-100 text-red-700 border-red-700'}`}
-                      onClick={() => onToggleLandmarkGroup('outlines')}
-                    >
-                      {isGroupSelected('outlines') && <CheckIcon className="h-3 w-3 mr-1" />}
-                      Outlines
-                    </Badge>
-                  </div>
-                </div>
-              )}
-            </>
+              {/* Skeletal Landmarks */}
+              <Badge 
+                variant={isGroupSelected('skeletal') ? "default" : "outline"} 
+                className={`cursor-pointer ${isGroupSelected('skeletal') ? 'bg-red-600 hover:bg-red-700 text-white' : 'hover:bg-slate-100 text-red-600 border-red-600'}`}
+                onClick={() => onToggleLandmarkGroup('skeletal')}
+              >
+                {isGroupSelected('skeletal') && <CheckIcon className="h-3 w-3 mr-1" />}
+                Skeletal
+              </Badge>
+              
+              {/* Dental Landmarks */}
+              <Badge 
+                variant={isGroupSelected('dental') ? "default" : "outline"} 
+                className={`cursor-pointer ${isGroupSelected('dental') ? 'bg-red-500 hover:bg-red-600 text-white' : 'hover:bg-slate-100 text-red-500 border-red-500'}`}
+                onClick={() => onToggleLandmarkGroup('dental')}
+              >
+                {isGroupSelected('dental') && <CheckIcon className="h-3 w-3 mr-1" />}
+                Dental
+              </Badge>
+              
+              {/* Soft Tissue Landmarks */}
+              <Badge 
+                variant={isGroupSelected('softTissue') ? "default" : "outline"} 
+                className={`cursor-pointer ${isGroupSelected('softTissue') ? 'bg-red-400 hover:bg-red-500 text-white' : 'hover:bg-slate-100 text-red-400 border-red-400'}`}
+                onClick={() => onToggleLandmarkGroup('softTissue')}
+              >
+                {isGroupSelected('softTissue') && <CheckIcon className="h-3 w-3 mr-1" />}
+                Soft
+              </Badge>
+              
+              {/* Outline Landmarks */}
+              <Badge 
+                variant={isGroupSelected('outlines') ? "default" : "outline"} 
+                className={`cursor-pointer ${isGroupSelected('outlines') ? 'bg-red-700 hover:bg-red-800 text-white' : 'hover:bg-slate-100 text-red-700 border-red-700'}`}
+                onClick={() => onToggleLandmarkGroup('outlines')}
+              >
+                {isGroupSelected('outlines') && <CheckIcon className="h-3 w-3 mr-1" />}
+                Outlines
+              </Badge>
+            </div>
           )}
           
           <Separator className="my-1" />
