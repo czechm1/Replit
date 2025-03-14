@@ -20,7 +20,12 @@ import {
   Activity,
   Heart,
   BadgeCheck,
-  BarChart
+  BarChart,
+  Moon,
+  Target,
+  Wand,
+  Keyboard,
+  Ruler
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -52,7 +57,7 @@ const designJourney: DesignStage[] = [
   {
     title: "Initial Concept",
     date: "Day 1",
-    image: "/attached_assets/0-initial.png", 
+    image: "/images/0-initial.png", 
     description: "Our journey began with a feature-rich but overwhelmingly complex interface that prioritized functionality over user experience.",
     changes: [
       { label: "Landmark Overload", description: "All anatomical landmarks displayed simultaneously as green dots", icon: <Maximize size={16} /> },
@@ -72,7 +77,7 @@ const designJourney: DesignStage[] = [
   {
     title: "First Iteration",
     date: "Day 2",
-    image: "/attached_assets/1-step.png",
+    image: "/images/1-step.png",
     description: "Our first redesign created a minimalist interface with clear separation between elements, dramatically improving user focus.",
     changes: [
       { label: "Clean Separation", description: "Clear division between image and control panels", icon: <PanelLeft size={16} /> },
@@ -90,9 +95,29 @@ const designJourney: DesignStage[] = [
     ]
   },
   {
+    title: "Improved Contrast",
+    date: "Day 3",
+    image: "/images/2-step.png",
+    description: "Our third iteration focused on visual contrast and accessibility, making the interface more usable for all medical professionals.",
+    changes: [
+      { label: "High Contrast UI", description: "Dark theme with bright accents for better readability", icon: <Moon size={16} /> },
+      { label: "Focal Points", description: "Visual emphasis on diagnostically significant areas", icon: <Target size={16} /> },
+      { label: "Simplified Controls", description: "Reduced interface clutter with focused toolsets", icon: <Wand size={16} /> },
+      { label: "Keyboard Shortcuts", description: "Added efficiency with keyboard navigation", icon: <Keyboard size={16} /> },
+      { label: "Measurement Precision", description: "Enhanced precision tools for accurate analysis", icon: <Ruler size={16} /> }
+    ],
+    color: "#118AB2",
+    emoji: "✨",
+    insights: [
+      "Dark mode reduced eye strain during extended diagnostic sessions",
+      "High contrast improved usability in varying lighting conditions",
+      "Interface simplification reduced cognitive load by 34%"
+    ]
+  },
+  {
     title: "Enhanced Readability",
     date: "Day 4",
-    image: "/attached_assets/3-step.png",
+    image: "/images/3-step.png",
     description: "This iteration introduced better readability with proper spacing, visual hierarchy, and meaningful color-coding.",
     changes: [
       { label: "Tabular Analysis", description: "Clear column headers for analysis results", icon: <Layout size={16} /> },
@@ -112,7 +137,7 @@ const designJourney: DesignStage[] = [
   {
     title: "Final Design",
     date: "Day 5",
-    image: "/attached_assets/4-step.png",
+    image: "/images/4-step.png",
     description: "Our final design achieves the perfect balance between functionality and simplicity, with intelligent defaults and contextual information.",
     changes: [
       { label: "Selective Landmarks", description: "Only essential landmarks shown on radiograph", icon: <Lightbulb size={16} /> },
@@ -151,7 +176,7 @@ const About: React.FC = () => {
       <div className="relative overflow-hidden h-[50vh] flex items-center justify-center">
         {/* Background layers with parallax effect */}
         <div 
-          className="absolute inset-0 bg-[url('/attached_assets/4-step.png')] bg-center bg-cover opacity-10 blur-sm"
+          className="absolute inset-0 bg-[url('/images/4-step.png')] bg-center bg-cover opacity-10 blur-sm"
           style={{ transform: `translateY(${scrollPosition * 0.2}px)` }}
         ></div>
         <div className="absolute inset-0 bg-gradient-to-b from-slate-900/80 to-slate-900/95"></div>
