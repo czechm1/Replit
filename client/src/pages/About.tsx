@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "wouter";
+import { generateAndDownloadVideo } from "../utils/videoGenerator";
 import { 
   ArrowLeft, 
   ChevronRight,
@@ -193,14 +194,27 @@ const About: React.FC = () => {
             Witness our transformation from complex prototype to elegant, intuitive medical application
           </p>
           
-          <div className="flex items-center justify-center gap-4">
-            <Link href="/">
+          <div className="flex items-center justify-center gap-4 flex-wrap">
+            <Link to="/">
               <Button variant="outline" className="gap-1 text-white border-white/20 hover:bg-white/10 hover:text-white">
                 <ArrowLeft className="h-4 w-4" />
                 Back to Home
               </Button>
             </Link>
-            <Link href="/cephalometric">
+            <Button 
+              variant="secondary" 
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 border-0 text-white gap-2"
+              onClick={() => generateAndDownloadVideo(designJourney, {
+                fps: 30,
+                transitionDuration: 1,
+                frameDuration: 2,
+                filename: 'iceph-design-evolution.webm'
+              })}
+            >
+              <Sparkles className="h-4 w-4" />
+              Download Video
+            </Button>
+            <Link to="/cephalometric">
               <Button size="default" className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 border-0 text-white gap-2">
                 Launch App
                 <ChevronRight className="h-4 w-4" />
@@ -567,7 +581,7 @@ const About: React.FC = () => {
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 leading-tight">
                 Experience the Future of 
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-amber-400 ml-2">
-                  Medical Imaging
+                  Cephalometric Analysis
                 </span>
               </h2>
               
