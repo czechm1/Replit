@@ -96,45 +96,50 @@ export function LandmarkComponent({
         filter: isSelected ? 'none' : (isHovered ? 'saturate(95%)' : 'saturate(75%)') // More desaturation in idle state
       }}
     >
-      {/* Smaller abbreviation label that shows on hover or when selected */}
+      {/* Always visible abbreviation label - clean white text */}
       <div 
-        className={`absolute whitespace-nowrap text-[10px] font-medium pointer-events-none select-none px-1 py-0.5 rounded
-                   transition-all duration-200 ease-in-out
-                   ${isSelected || isHovered ? 'opacity-100' : 'opacity-0'}`}
+        className={`absolute whitespace-nowrap text-[10px] font-semibold pointer-events-none select-none
+                   transition-all duration-200 ease-in-out`}
         style={{ 
-          color: '#ffffff',
-          backgroundColor: 'rgba(0,0,0,0.75)',
-          textShadow: '0px 0px 1px rgba(0,0,0,1)',
-          letterSpacing: '0.02em',
-          right: `${-10 + (labelOffsets.x || 0)}px`,
-          bottom: `${-14 + (labelOffsets.y || 0)}px`,
-          minWidth: '16px',
+          color: '#ffffff', // Clean white for best visibility
+          textShadow: '0px 0px 4px rgba(0,0,0,0.9)', // Strong black shadow for contrast
+          letterSpacing: '0.025em',
+          left: `${labelOffsets.x || 0}px`,
+          top: `${labelOffsets.y || 0}px`,
+          minWidth: '12px',
           textAlign: 'center',
-          transform: isSelected ? 'scale(1.05)' : 'scale(1)',
-          zIndex: isSelected ? 30 : 20
+          transform: isSelected ? 'scale(1.15)' : 'scale(1)',
+          zIndex: isSelected ? 30 : 20,
+          // Black outline for maximum visibility
+          WebkitTextStroke: isSelected ? '0.5px black' : '0.4px black'
         }}
         title={`${landmark.name} (${abbreviation})`}
       >
         {abbreviation}
       </div>
 
-      {/* Full name label - only shows after hovering for a while or when selected */}
-      {(showDetailedLabel || isSelected) && (
-        <div 
-          className="absolute left-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 
-                    whitespace-nowrap bg-black/80 text-white text-xs px-2 py-1 rounded pointer-events-none z-40 shadow-md"
-          style={{ 
-            textShadow: '0px 0px 1px rgba(0,0,0,0.5)', 
-            minWidth: `${landmark.name.length * 4}px`,
-            top: `${-32 + (labelOffsets.y ? labelOffsets.y/2 : 0)}px`,
-            left: `${(labelOffsets.x ? labelOffsets.x/2 : 0)}px`,
-            transform: `translateX(-50%)`,
-            opacity: showDetailedLabel || isSelected ? 1 : 0
-          }}
-        >
-          {landmark.name}
-        </div>
-      )}
+      {/* Full name label - minimalistic popup with subtle background, shows on hover or when selected */}
+      <div 
+        className={`absolute whitespace-nowrap text-xs
+                   pointer-events-none z-40 transition-opacity duration-300
+                   ${isSelected || isHovered ? 'opacity-100' : 'opacity-0'}`}
+        style={{ 
+          color: '#ffffff',
+          backgroundColor: 'rgba(0,0,0,0.7)',
+          textShadow: '0px 0px 1px rgba(0,0,0,1)', 
+          minWidth: `${landmark.name.length * 4}px`,
+          top: `${-30}px`,
+          left: `0px`,
+          transform: `translateX(-50%)`,
+          fontWeight: 'medium',
+          padding: '2px 5px',
+          borderRadius: '3px',
+          // Simple clean background
+          border: '1px solid rgba(255,255,255,0.2)'
+        }}
+      >
+        {landmark.name}
+      </div>
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { LandmarkComponent } from './LandmarkComponent';
 import { LoadingSpinner } from '../ui/loading-spinner';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
-import { formatLandmarkAbbreviation } from '../../utils/landmarkUtils';
+import { formatLandmarkAbbreviation, getLandmarkType } from '../../utils/landmarkUtils';
 
 interface LandmarksLayerProps {
   opacity: number;
@@ -12,6 +12,23 @@ interface LandmarksLayerProps {
   className?: string;
   showTooltips?: boolean;
   editMode?: boolean; // Add support for edit mode
+}
+
+interface LandmarkPoint {
+  landmark: string;
+  coordinates: {
+    x: number;
+    y: number;
+  };
+  confidence?: number;
+}
+
+interface OffsetPosition {
+  point: LandmarkPoint;
+  offset: {
+    x: number;
+    y: number;
+  };
 }
 
 /**
@@ -57,9 +74,8 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
     return null;
   }
 
-  // Simplified approach - not using complex clustering to avoid duplicate keys
-  // Just group landmarks by general area to reduce visual crowding
-  const organizeByRegion = () => {
+  // Simple, effective approach for landmark positioning
+  const organizeAndPositionLandmarks = () => {
     // Create a map to store unique landmarks by their identifiers
     const uniqueLandmarks = new Map();
     
@@ -73,27 +89,49 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
       }
     });
     
-    // Convert back to an array of points
-    return Array.from(uniqueLandmarks.values());
+    // Convert to array of points
+    const points = Array.from(uniqueLandmarks.values());
+    
+    // Use a simpler, more predictable offset system
+    const offsetsByPosition: OffsetPosition[] = [];
+    
+    // Predefined offsets for different scenarios
+    const standardOffsets = [
+      { x: 10, y: -15 },  // Above left
+      { x: -10, y: -15 }, // Above right
+      { x: 15, y: 5 },    // Right center
+      { x: -15, y: 5 },   // Left center
+      { x: 10, y: 15 },   // Below left
+      { x: -10, y: 15 }   // Below right
+    ];
+    
+    // Process points and add positioning metadata
+    points.forEach((point: LandmarkPoint, index: number) => {
+      // Simple, predictable pattern - use point index modulo to cycle through offset patterns
+      const offsetIndex = index % standardOffsets.length;
+      const offset = standardOffsets[offsetIndex];
+      
+      // Add the point with standard offset
+      offsetsByPosition.push({
+        point,
+        offset: offset
+      });
+    });
+    
+    return offsetsByPosition;
   };
   
-  const organizedLandmarks = organizeByRegion();
+  const optimizedLandmarks = organizeAndPositionLandmarks();
   
   return (
     <div className={`absolute inset-0 ${className || ''}`} style={{ opacity }}>
-      {organizedLandmarks.map((point, index) => {
-        // Calculate staggered offsets based on index
-        // This creates a pattern of offsets that helps prevent labels from overlapping
-        const row = Math.floor(index / 5); // 5 items per row
-        const col = index % 5;
-        
-        // Calculate offset based on position to create a staggered pattern
-        const offsetX = (col - 2) * 8; // -16, -8, 0, 8, 16 pattern
-        const offsetY = (row - 2) * 6; // Similar vertical pattern
+      {optimizedLandmarks.map((item: OffsetPosition, index: number) => {
+        const point = item.point;
+        const offset = item.offset;
         
         return (
           <LandmarkComponent
-            key={`${point.landmark}-${index}`} // Add index to ensure uniqueness
+            key={`${point.landmark}-${index}`}
             landmark={{
               id: point.landmark,
               name: point.landmark,
@@ -106,7 +144,7 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
             isDragging={false}
             isDragged={false}
             isEditMode={false}
-            labelOffsets={{ x: offsetX, y: offsetY }}
+            labelOffsets={{ x: offset.x, y: offset.y }}
           />
         );
       })}
