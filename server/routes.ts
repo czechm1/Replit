@@ -1,4 +1,9 @@
-import express, { type Express, Request, Response, NextFunction } from "express";
+import express, {
+  type Express,
+  Request,
+  Response,
+  NextFunction,
+} from "express";
 import path from "path";
 import fs from "fs";
 import { createServer, type Server } from "http";
@@ -17,47 +22,50 @@ const apiDocumentation = {
   info: {
     title: "Cephalometric Landmarks API",
     version: "1.0.0",
-    description: "API for managing cephalometric landmarks and analysis"
+    description: "API for managing cephalometric landmarks and analysis",
   },
   servers: [
     {
       url: "http://0.0.0.0:5000",
-      description: "Current server"
-    }
+      description: "Current server",
+    },
   ],
   paths: {
     "/api/landmarks": {
       get: {
         summary: "Get landmarks data",
-        description: "Retrieve the complete set of cephalometric landmarks with their coordinates",
+        description:
+          "Retrieve the complete set of cephalometric landmarks with their coordinates",
         responses: {
           "200": {
-            description: "Successful operation"
-          }
-        }
-      }
+            description: "Successful operation",
+          },
+        },
+      },
     },
     "/api/tracing-lines": {
       get: {
         summary: "Get tracing lines data",
-        description: "Retrieve the complete set of tracing lines with their paths and styling",
+        description:
+          "Retrieve the complete set of tracing lines with their paths and styling",
         responses: {
           "200": {
-            description: "Successful operation"
-          }
-        }
-      }
+            description: "Successful operation",
+          },
+        },
+      },
     },
     "/api/analysis-lines": {
       get: {
         summary: "Get analysis lines data",
-        description: "Retrieve the complete set of analysis lines with their paths and styling",
+        description:
+          "Retrieve the complete set of analysis lines with their paths and styling",
         responses: {
           "200": {
-            description: "Successful operation"
-          }
-        }
-      }
+            description: "Successful operation",
+          },
+        },
+      },
     },
     "/api/landmarks-collections/:id": {
       get: {
@@ -65,13 +73,13 @@ const apiDocumentation = {
         description: "Retrieve a specific landmarks collection by ID",
         responses: {
           "200": {
-            description: "Successful operation"
+            description: "Successful operation",
           },
           "404": {
-            description: "Collection not found"
-          }
-        }
-      }
+            description: "Collection not found",
+          },
+        },
+      },
     },
     "/api/patients/:patientId/landmarks-collections": {
       get: {
@@ -79,12 +87,12 @@ const apiDocumentation = {
         description: "Retrieve all landmark collections for a specific patient",
         responses: {
           "200": {
-            description: "Successful operation"
-          }
-        }
-      }
-    }
-  }
+            description: "Successful operation",
+          },
+        },
+      },
+    },
+  },
 };
 
 // Define analysis data schemas
@@ -106,7 +114,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api-docs", (req, res) => {
     res.json(apiDocumentation);
   });
-  
+
   // Serve HTML API documentation UI
   app.get("/api-docs/ui", (req, res) => {
     const html = `
@@ -178,14 +186,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         <h1>Cephalometric API Documentation</h1>
         <p>Version 1.0.0</p>
       </div>
-      
+
       <div class="server-info">
         <strong>Server URL:</strong> http://0.0.0.0:5000
       </div>
-      
+
       <div id="endpoints">
         <h2>Endpoints</h2>
-        
+
         <div class="endpoint">
           <div><span class="method get">GET</span><span class="path">/api/landmarks</span></div>
           <div class="description">Retrieve the complete set of cephalometric landmarks with their coordinates</div>
@@ -193,7 +201,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             <div class="response"><strong>200:</strong> Successful operation</div>
           </div>
         </div>
-        
+
         <div class="endpoint">
           <div><span class="method get">GET</span><span class="path">/api/tracing-lines</span></div>
           <div class="description">Retrieve the complete set of tracing lines with their paths and styling</div>
@@ -201,7 +209,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             <div class="response"><strong>200:</strong> Successful operation</div>
           </div>
         </div>
-        
+
         <div class="endpoint">
           <div><span class="method get">GET</span><span class="path">/api/analysis-lines</span></div>
           <div class="description">Retrieve the complete set of analysis lines with their paths and styling</div>
@@ -209,7 +217,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             <div class="response"><strong>200:</strong> Successful operation</div>
           </div>
         </div>
-        
+
         <div class="endpoint">
           <div><span class="method get">GET</span><span class="path">/api/landmarks-collections/:id</span></div>
           <div class="description">Retrieve a specific landmarks collection by ID</div>
@@ -218,7 +226,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             <div class="response"><strong>404:</strong> Collection not found</div>
           </div>
         </div>
-        
+
         <div class="endpoint">
           <div><span class="method get">GET</span><span class="path">/api/patients/:patientId/landmarks-collections</span></div>
           <div class="description">Retrieve all landmark collections for a specific patient</div>
@@ -226,7 +234,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             <div class="response"><strong>200:</strong> Successful operation</div>
           </div>
         </div>
-        
+
         <div class="endpoint">
           <div><span class="method post">POST</span><span class="path">/api/landmarks-collections</span></div>
           <div class="description">Create a new landmarks collection</div>
@@ -235,7 +243,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             <div class="response"><strong>400:</strong> Invalid landmarks collection data</div>
           </div>
         </div>
-        
+
         <div class="endpoint">
           <div><span class="method put">PUT</span><span class="path">/api/landmarks-collections/:id</span></div>
           <div class="description">Update a landmarks collection</div>
@@ -245,7 +253,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             <div class="response"><strong>400:</strong> Invalid landmarks collection data</div>
           </div>
         </div>
-        
+
         <div class="endpoint">
           <div><span class="method delete">DELETE</span><span class="path">/api/landmarks-collections/:id</span></div>
           <div class="description">Delete a landmarks collection</div>
@@ -258,7 +266,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     </body>
     </html>
     `;
-    res.setHeader('Content-Type', 'text/html');
+    res.setHeader("Content-Type", "text/html");
     res.send(html);
   });
 
@@ -274,7 +282,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/analyses/:analysisId", (req, res) => {
     const { analysisId } = req.params;
     const analysis = analyses.find(
-      (a) => a.patientId + "-" + a.date === analysisId
+      (a) => a.patientId + "-" + a.date === analysisId,
     );
 
     if (!analysis) {
@@ -299,7 +307,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/analyses/:analysisId", (req, res) => {
     const { analysisId } = req.params;
     const analysisIndex = analyses.findIndex(
-      (a) => a.patientId + "-" + a.date === analysisId
+      (a) => a.patientId + "-" + a.date === analysisId,
     );
 
     if (analysisIndex === -1) {
@@ -333,8 +341,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get tracing lines data
   app.get("/api/tracing-lines", async (req, res) => {
     try {
-      const tracingLinesPath = path.join(__dirname, 'mock', 'tracing-lines.json');
-      const tracingLinesData = await fs.promises.readFile(tracingLinesPath, 'utf-8');
+      const tracingLinesPath = path.join(
+        __dirname,
+        "mock",
+        "tracing-lines.json",
+      );
+      const tracingLinesData = await fs.promises.readFile(
+        tracingLinesPath,
+        "utf-8",
+      );
       // Add a slight delay to simulate network latency
       setTimeout(() => {
         res.json(JSON.parse(tracingLinesData));
@@ -345,33 +360,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-    // Add analysis lines endpoint
-    app.get('/api/analysis-lines', async (req, res) => {
-      try {
-        const analysisLinesPath = path.join(__dirname, 'mock', 'analysis-lines.json');
-        const analysisLinesData = await fs.promises.readFile(analysisLinesPath, 'utf-8');
-        console.log('tracingLinesData:', analysisLinesData);
-        // Add a slight delay to simulate network latency
-        setTimeout(() => {
-          res.json(JSON.parse(analysisLinesData));
-        }, 300);
-      } catch (error) {
-        console.error('Error fetching analysis lines:', error);
-        res.status(500).json({
-          status: 'error',
-          message: 'Failed to retrieve analysis lines',
-          data: []
-        });
-      }
-    });
-  
+  // Add analysis lines endpoint
+  app.get("/api/analysis-lines", async (req, res) => {
+    try {
+      const analysisLinesPath = path.join(
+        __dirname,
+        "mock",
+        "analysis-lines.json",
+      );
+      const analysisLinesData = await fs.promises.readFile(
+        analysisLinesPath,
+        "utf-8",
+      );
+      console.log("tracingLinesData:", analysisLinesData);
+      // Add a slight delay to simulate network latency
+      setTimeout(() => {
+        res.json(JSON.parse(analysisLinesData));
+      }, 300);
+    } catch (error) {
+      console.error("Error fetching analysis lines:", error);
+      res.status(500).json({
+        status: "error",
+        message: "Failed to retrieve analysis lines",
+        data: [],
+      });
+    }
+  });
+
   // Get detected landmarks data - read from the JSON file
   app.get("/api/detected-landmarks", async (req, res) => {
     try {
       const landmarksPath = path.join(
         __dirname,
         "mock",
-        "detected-landmarks.json"
+        "detected-landmarks.json",
       );
       const landmarksData = await fs.promises.readFile(landmarksPath, "utf-8");
 
@@ -419,11 +441,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     "/api/patients/:patientId/landmarks-collections",
     async (req, res) => {
       const { patientId } = req.params;
-      const collections = await storage.getLandmarksCollectionsByPatient(
-        patientId
-      );
+      const collections =
+        await storage.getLandmarksCollectionsByPatient(patientId);
       res.json(collections);
-    }
+    },
   );
 
   app.post("/api/landmarks-collections", async (req, res) => {
@@ -479,12 +500,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       mode: "single-user",
     });
   });
-  
+
   // Debug server info endpoint to help diagnose connection issues
   app.all("/api/debug/server-info", (req, res) => {
     const serverInfo = {
       timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV || 'development',
+      environment: process.env.NODE_ENV || "development",
       port: 5000,
       hostname: req.hostname,
       ip: req.ip,
@@ -496,7 +517,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       cwd: process.cwd(),
       memoryUsage: process.memoryUsage(),
     };
-    
+
     res.json(serverInfo);
   });
 
@@ -531,7 +552,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           {
             landmarks: updatedLandmarks,
             lastModifiedBy: username || "unknown",
-          }
+          },
         );
 
         res.status(201).json({
@@ -546,7 +567,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           error: error instanceof Error ? error.message : String(error),
         });
       }
-    }
+    },
   );
 
   // Update landmark endpoint - simplified
@@ -570,7 +591,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         const updatedLandmarks = collection.landmarks.map((l: Landmark) =>
-          l.id === landmarkId ? landmark : l
+          l.id === landmarkId ? landmark : l,
         );
 
         const updatedCollection = await storage.updateLandmarksCollection(
@@ -578,7 +599,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           {
             landmarks: updatedLandmarks,
             lastModifiedBy: username || "unknown",
-          }
+          },
         );
 
         res.json({
@@ -593,7 +614,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           error: error instanceof Error ? error.message : String(error),
         });
       }
-    }
+    },
   );
 
   // Delete landmark endpoint - simplified
@@ -611,7 +632,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         const updatedLandmarks = collection.landmarks.filter(
-          (l: Landmark) => l.id !== landmarkId
+          (l: Landmark) => l.id !== landmarkId,
         );
 
         const updatedCollection = await storage.updateLandmarksCollection(
@@ -619,7 +640,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           {
             landmarks: updatedLandmarks,
             lastModifiedBy: username || "unknown",
-          }
+          },
         );
 
         res.json({
@@ -633,7 +654,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           error: error instanceof Error ? error.message : String(error),
         });
       }
-    }
+    },
   );
 
   // Debug endpoint to check image paths
@@ -657,7 +678,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         publicFiles.push(
           `Error reading directory: ${
             error instanceof Error ? error.message : String(error)
-          }`
+          }`,
         );
       }
     }
@@ -670,7 +691,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         imageFiles.push(
           `Error reading directory: ${
             error instanceof Error ? error.message : String(error)
-          }`
+          }`,
         );
       }
     }
