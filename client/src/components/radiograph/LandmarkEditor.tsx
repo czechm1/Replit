@@ -289,16 +289,16 @@ export function LandmarkEditor({
         {collection?.landmarks.map((landmark) => (
           <div
             key={landmark.id}
-            className={`absolute w-[10px] h-[10px] -translate-x-[5px] -translate-y-[5px] rounded-full 
+            className={`absolute w-[8px] h-[8px] -translate-x-[4px] -translate-y-[4px] rounded-full 
               cursor-move group
-              transition-all duration-150 ease-in-out
-              hover:w-[15px] hover:h-[15px] hover:-translate-x-[7.5px] hover:-translate-y-[7.5px] hover:shadow-lg hover:border-2 hover:border-yellow-300
+              transition-all duration-150 ease-in-out shadow-sm
+              hover:w-[14px] hover:h-[14px] hover:-translate-x-[7px] hover:-translate-y-[7px] hover:shadow-lg hover:border-2 hover:border-yellow-300
               ${
                 selectedLandmarkId === landmark.id
-                ? 'border-[2px] border-white shadow ring-2 ring-blue-300 ring-opacity-50'
+                ? 'border-[2px] border-white shadow-md ring-2 ring-blue-400 ring-opacity-70 w-[12px] h-[12px] -translate-x-[6px] -translate-y-[6px]'
                 : draggedLandmarkId === landmark.id
                 ? 'border-[2px] border-white shadow-lg'
-                : 'border-[1px] border-white'
+                : 'border-[1px] border-white/80'
               } 
               ${isDragging && draggedLandmarkId === landmark.id ? 'z-50' : 'z-10'}`}
             style={{
@@ -308,7 +308,10 @@ export function LandmarkEditor({
                                 ? getSelectedLandmarkColor(landmark.name)  
                                 : draggedLandmarkId === landmark.id 
                                   ? getSelectedLandmarkColor(landmark.name)
-                                  : getLandmarkColor(landmark.name)
+                                  : getLandmarkColor(landmark.name),
+              boxShadow: selectedLandmarkId === landmark.id ? '0 2px 5px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.2)',
+              opacity: selectedLandmarkId === landmark.id ? 1 : 0.75, // Reduced opacity for non-selected landmarks
+              filter: selectedLandmarkId === landmark.id ? 'none' : 'saturate(85%)' // Slightly desaturate non-selected points
             }}
             onClick={(e) => {
               e.stopPropagation();
@@ -318,14 +321,21 @@ export function LandmarkEditor({
             onMouseMove={(e) => isDragging && handleDrag(e)}
             onMouseUp={handleDragEnd}
           >
-            {/* Display landmark abbreviation with improved visibility - positioned away from the center */}
+            {/* Display landmark abbreviation only when hovered or selected */}
             <div 
-              className="absolute whitespace-nowrap text-xs font-bold text-white pointer-events-none select-none"
+              className={`absolute whitespace-nowrap text-xs font-bold pointer-events-none select-none px-1 py-0.5 rounded
+                         transition-all duration-200 ease-in-out
+                         ${selectedLandmarkId === landmark.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-90'}`}
               style={{ 
-                textShadow: '0px 0px 2px rgba(0,0,0,0.8)',
+                color: '#ffffff',
+                backgroundColor: 'rgba(0,0,0,0.7)',
+                textShadow: '0px 0px 1px rgba(0,0,0,1)',
                 letterSpacing: '0.02em',
-                right: '-10px',  // Position the text to the right of the point
-                top: '-14px'     // Position the text slightly above the point
+                right: '-16px',   // Position the text further to the right of the point
+                bottom: '-18px',  // Position the text below the point
+                minWidth: '16px',
+                textAlign: 'center',
+                transform: selectedLandmarkId === landmark.id ? 'scale(1.05)' : 'scale(1)'
               }}
               title={`${landmark.name} (${landmark.abbreviation || formatLandmarkAbbreviation(landmark.name)})`}
             >
@@ -334,11 +344,13 @@ export function LandmarkEditor({
             
             {/* Landmark label positioned ABOVE the landmark point to prevent overlap */}
             <div 
-              className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 
+              className="absolute left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 
                          whitespace-nowrap bg-black/80 text-white text-xs px-2 py-1 rounded pointer-events-none z-20 shadow-md"
               style={{ 
                 textShadow: '0px 0px 1px rgba(0,0,0,0.5)', 
-                minWidth: `${landmark.name.length * 4}px` 
+                minWidth: `${landmark.name.length * 4}px`,
+                top: `-32px`, // Position above the landmark
+                transform: `translateX(-50%)`
               }}
             >
               {landmark.name}

@@ -57,25 +57,59 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
     return null;
   }
 
+  // Simplified approach - not using complex clustering to avoid duplicate keys
+  // Just group landmarks by general area to reduce visual crowding
+  const organizeByRegion = () => {
+    // Create a map to store unique landmarks by their identifiers
+    const uniqueLandmarks = new Map();
+    
+    // Store each landmark by its unique name
+    landmarkData.points.forEach((point) => {
+      const key = point.landmark; // Use the landmark name as the unique key
+      
+      // Only add if we don't already have this landmark
+      if (!uniqueLandmarks.has(key)) {
+        uniqueLandmarks.set(key, point);
+      }
+    });
+    
+    // Convert back to an array of points
+    return Array.from(uniqueLandmarks.values());
+  };
+  
+  const organizedLandmarks = organizeByRegion();
+  
   return (
     <div className={`absolute inset-0 ${className || ''}`} style={{ opacity }}>
-      {landmarkData.points.map((point) => (
-        <LandmarkComponent
-          key={point.landmark}
-          landmark={{
-            id: point.landmark,
-            name: point.landmark,
-            abbreviation: formatLandmarkAbbreviation(point.landmark),
-            x: point.coordinates.x,
-            y: point.coordinates.y,
-            confidence: point.confidence
-          }}
-          isSelected={false}
-          isDragging={false}
-          isDragged={false}
-          isEditMode={false}
-        />
-      ))}
+      {organizedLandmarks.map((point, index) => {
+        // Calculate staggered offsets based on index
+        // This creates a pattern of offsets that helps prevent labels from overlapping
+        const row = Math.floor(index / 5); // 5 items per row
+        const col = index % 5;
+        
+        // Calculate offset based on position to create a staggered pattern
+        const offsetX = (col - 2) * 8; // -16, -8, 0, 8, 16 pattern
+        const offsetY = (row - 2) * 6; // Similar vertical pattern
+        
+        return (
+          <LandmarkComponent
+            key={`${point.landmark}-${index}`} // Add index to ensure uniqueness
+            landmark={{
+              id: point.landmark,
+              name: point.landmark,
+              abbreviation: formatLandmarkAbbreviation(point.landmark),
+              x: point.coordinates.x,
+              y: point.coordinates.y,
+              confidence: point.confidence
+            }}
+            isSelected={false}
+            isDragging={false}
+            isDragged={false}
+            isEditMode={false}
+            labelOffsets={{ x: offsetX, y: offsetY }}
+          />
+        );
+      })}
     </div>
   );
 };
