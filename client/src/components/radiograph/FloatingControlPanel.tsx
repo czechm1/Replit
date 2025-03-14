@@ -177,7 +177,7 @@ const FloatingControlPanel: React.FC<FloatingControlPanelProps> = ({
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Landmark Filters</p>
+              <p>Object Visibility</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
