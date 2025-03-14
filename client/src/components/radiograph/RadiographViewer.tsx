@@ -7,7 +7,6 @@ import FloatingControlPanel from "./FloatingControlPanel";
 import { LandmarkEditor } from "./LandmarkEditor";
 import TracingLinesLayer from './TracingLinesLayer';
 import AnalysisLinesLayer from './AnalysisLinesLayer';
-import LandmarksLayer from "./LandmarksLayer";
 
 interface RadiographViewerProps {
   highContrastMode: boolean;
@@ -178,14 +177,6 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
             opacity={layerOpacity.analysisLine} // Changed from profile to analysisLine
           />
         </svg>
-
-        {/* Landmark layer - positioned directly over the image */}
-        <div className="absolute top-0 right-0 w-full h-full pointer-events-none">
-          <LandmarksLayer
-            opacity={layerOpacity.landmarks}
-            visibleLandmarkGroups={['skeletal', 'dental']}
-          />
-        </div>
 
         {/* Landmark Editor component */}
         <div className="absolute inset-0">
