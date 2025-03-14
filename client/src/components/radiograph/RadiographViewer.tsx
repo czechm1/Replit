@@ -180,7 +180,7 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
         </svg>
 
         {/* Landmark layer - positioned directly over the image */}
-        <div className="absolute top-0 right-0 w-full h-full pointer-events-none">
+        <div className="absolute top-0 right-0 w-full h-full">
           <LandmarksLayer
             opacity={layerOpacity.landmarks}
             visibleLandmarkGroups={['skeletal', 'dental']}

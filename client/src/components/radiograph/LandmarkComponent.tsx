@@ -94,7 +94,7 @@ const LandmarkComponent: React.FC<LandmarkComponentProps> = ({
   if (!landmarkData) return null;
 
   return (
-    <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+    <div className="absolute top-0 left-0 w-full h-full">
       <svg
         className="absolute top-[55px] left-[145px] w-full h-full"
         viewBox={`${landmarkData.box.left} ${landmarkData.box.top} ${
@@ -115,7 +115,7 @@ const LandmarkComponent: React.FC<LandmarkComponentProps> = ({
                 landmark={landmarkData}
                 side={isMobile ? "bottom" : "right"}
               >
-                <g className="pointer-events-auto cursor-pointer hover:opacity-80 transition-opacity">
+                <g className="cursor-pointer hover:opacity-80 transition-opacity">
                   <circle
                     cx={point.coordinates.x}
                     cy={point.coordinates.y}

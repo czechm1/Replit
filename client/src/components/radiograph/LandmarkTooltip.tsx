@@ -40,16 +40,17 @@ export function LandmarkTooltip({
 
   return (
     <TooltipProvider>
-      <Tooltip delayDuration={300}>
+      <Tooltip>
         <TooltipTrigger asChild>
           {children}
         </TooltipTrigger>
         <TooltipContent 
           side={side} 
           align={align}
-          className="max-w-[300px] bg-white/95 backdrop-blur-sm border-primary/20 shadow-lg"
+          className="max-w-[300px] z-50 bg-background/95 backdrop-blur-sm border-2 border-primary/20 shadow-lg"
+          sideOffset={5}
         >
-          <div className="space-y-2 p-1">
+          <div className="space-y-2 p-2">
             <div className="flex items-center justify-between">
               <h4 className="font-semibold text-sm">{landmark.name}</h4>
               <Badge variant="outline" className="ml-1 text-xs">
@@ -68,7 +69,7 @@ export function LandmarkTooltip({
             )}
             
             {landmark.clinicalSignificance && (
-              <div className="text-xs text-muted-foreground">
+              <div className="text-xs text-muted-foreground mt-1">
                 <span className="font-medium">Clinical Significance:</span> {landmark.clinicalSignificance}
               </div>
             )}
