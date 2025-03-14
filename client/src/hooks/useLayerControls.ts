@@ -2,12 +2,13 @@ import { useState, useCallback } from "react";
 import { LayerOpacityType, ImageControlsType } from "@/components/radiograph/types";
 
 export function useLayerControls() {
-  const [layerOpacity, setLayerOpacity] = useState<LayerOpacityType>({
+  const defaultLayerOpacity = {
     landmarks: 60,
     measurements: 70,
     tracing: 80,
     analysisLine: 100 // Changed from profile to analysisLine
-  });
+  }
+  const [layerOpacity, setLayerOpacity] = useState<LayerOpacityType>(defaultLayerOpacity);
 
   const [imageControls, setImageControls] = useState<ImageControlsType>({
     brightness: 0,
@@ -69,6 +70,7 @@ export function useLayerControls() {
   }, [resetLayerOpacity, resetOnlyImageControls]);
 
   return {
+    defaultLayerOpacity,
     layerOpacity,
     imageControls,
     showLayerControls,
@@ -81,6 +83,7 @@ export function useLayerControls() {
     updateImageControl,
     resetLayerOpacity,
     resetOnlyImageControls,
-    resetAllControls
+    resetAllControls,
+    setLayerOpacity
   };
 }

@@ -36,6 +36,7 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
     setShowLayerControls,
     setShowImageSettings,
     setShowObjectVisibility,
+    defaultLayerOpacity,
   } = useLayerControls();
 
   // Image transformation state
@@ -48,6 +49,8 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
 
   // Edit landmarks mode
   const [isEditMode, setIsEditMode] = useState(false);
+
+  // const [layerOpacity, setLayerOpacity] = useState(defaultLayerOpacity);
 
   // Image dimensions for landmark positioning
   const [imageDimensions, setImageDimensions] = useState({
@@ -161,6 +164,11 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
     setShowMeasurementLegend((prev) => !prev);
   };
 
+  // Debug useEffect to log layer opacity changes
+  useEffect(() => {
+    // console.log('RadiographViewer - layerOpacity updated:', layerOpacity);
+  }, [layerOpacity]);
+
   return (
     <div className="relative w-full h-full overflow-hidden bg-slate-900 flex justify-center items-center">
       {/* Radiograph with all layers in a single transformed container */}
@@ -194,6 +202,7 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
         />
 
         {/* Tracing lines layer - positioned directly over the image */}
+        {layerOpacity.tracing > 0 && (
         <svg
           className="relative top-0 left-0 w-full h-full pointer-events-none"
           style={{
@@ -203,8 +212,9 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
         >
           <TracingLinesLayer opacity={layerOpacity.tracing} />
         </svg>
-
+        )}
         {/* Analysis lines layer - positioned over the image */}
+        {layerOpacity.analysisLine > 0 && (
         <svg
           className="absolute top-0 left-0 w-full h-full pointer-events-none"
           style={{
@@ -216,16 +226,21 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
             opacity={layerOpacity.analysisLine} // Changed from profile to analysisLine
           />
         </svg>
+        )}
+
 
         {/* Landmark layer - positioned directly over the image */}
+        {layerOpacity.landmarks > 0 && (
         <div className="absolute top-0 right-0 w-full h-full pointer-events-none">
           <LandmarksLayer
             opacity={layerOpacity.landmarks}
             visibleLandmarkGroups={["skeletal", "dental"]}
           />
         </div>
+        )}
 
         {/* Measurements layer - positioned over the landmarks */}
+        {layerOpacity.measurements > 0 && (
         <div className="absolute top-0 right-0 w-full h-full pointer-events-none">
           <MeasurementsLayer
             opacity={layerOpacity.measurements}
@@ -233,8 +248,10 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
             showLegend={showMeasurementLegend}
           />
         </div>
+        )}
 
         {/* Landmark Editor component */}
+        {layerOpacity.landmarks > 0 && (
         <div className="absolute inset-0">
           <LandmarkEditor
             collectionId={`${patientId}-${imageId}`}
@@ -245,6 +262,7 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
             imageDimensions={imageDimensions}
           />
         </div>
+        )}
       </div>
 
       {/* Unified Floating Control Panel */}
@@ -264,6 +282,7 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
         onMeasurementGroupToggle={handleMeasurementGroupToggle}
         showMeasurementLegend={showMeasurementLegend}
         onLegendToggle={handleLegendToggle}
+        defaultLayerOpacity={defaultLayerOpacity}
       />
     </div>
   );

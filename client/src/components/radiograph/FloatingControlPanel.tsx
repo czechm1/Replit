@@ -1,9 +1,9 @@
-
 import { Button } from "@/components/ui/button";
 import React, { useState, useRef, useEffect } from "react";
 import { Sliders, Layers, ZoomIn, ZoomOut, RefreshCw, Edit2, X, RotateCcw, Eye, EyeOff, GripHorizontal } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { LayerOpacityType, ImageControlsType } from "./types";
+import { useLayerControls } from "@/hooks/useLayerControls";
 
 // Import component styles using JSS pattern
 const useStyles = () => {
@@ -66,6 +66,8 @@ interface FloatingControlPanelProps {
   onLayerVisibilityChange?: (layer: keyof LayerOpacityType, isVisible: boolean) => void;
   // Optional initial position
   initialPosition?: { x: number, y: number };
+  // Default layer opacity values for reset
+  defaultLayerOpacity?: LayerOpacityType;
 }
 
 const FloatingControlPanel: React.FC<FloatingControlPanelProps> = ({
@@ -92,6 +94,12 @@ const FloatingControlPanel: React.FC<FloatingControlPanelProps> = ({
   },
   onLayerVisibilityChange = () => {},
   initialPosition,
+  defaultLayerOpacity = {
+    landmarks: 60,
+    measurements: 70,
+    tracing: 80,
+    analysisLine: 100
+  },
 }) => {
   const [activeControl, setActiveControl] = useState<'none' | 'image' | 'layers'>('none');
   const [layerVisible, setLayerVisible] = useState<{[key in keyof LayerOpacityType]: boolean}>(layerVisibility);
@@ -173,6 +181,13 @@ const FloatingControlPanel: React.FC<FloatingControlPanelProps> = ({
       [layer]: !layerVisible[layer]
     };
     setLayerVisible(newVisibility);
+    if(!newVisibility[layer]){
+      onLayerOpacityChange(layer, 0);
+    }
+    else{
+      onLayerOpacityChange(layer, defaultLayerOpacity[layer]);
+    }
+
     onLayerVisibilityChange(layer, !layerVisible[layer]);
   };
   
