@@ -1,116 +1,68 @@
 import React from 'react';
-import { LandmarkPoint } from './types/index';
-import { displayLandmarkGroups } from './utils/landmarkGroups';
-import { LandmarkTooltip, LandmarkData } from './LandmarkTooltip';
-import { getLandmarkDescription } from '../../data/landmarkDescriptions';
-import { useIsMobile } from '../../hooks/use-mobile';
-import { getLandmarkColor, getAnatomicalRegion } from '../../utils/landmarkUtils';
+import { Landmark } from '../../../shared/schema';
+import { getSelectedLandmarkColor } from './utils/colors';
 
 interface LandmarkComponentProps {
-  landmarkData: {
-    points: LandmarkPoint[];
-    box: {
-      left: number;
-      right: number;
-      top: number;
-      bottom: number;
-    };
-  } | null;
-  opacity: number;
-  visibleLandmarkGroups: string[];
+  landmark: Landmark;
+  isSelected: boolean;
+  isDragging: boolean;
+  isDragged: boolean;
+  isEditMode: boolean;
+  onClick?: (id: string) => void;
 }
 
-const LandmarkComponent: React.FC<LandmarkComponentProps> = ({
-  landmarkData,
-  opacity,
-  visibleLandmarkGroups,
-}) => {
-  const isMobile = useIsMobile();
-
-  // Create a landmark data object from a landmark point
-  const createLandmarkData = (point: LandmarkPoint): LandmarkData => {
-    // Try to get detailed description from our database
-    const description = getLandmarkDescription(point.landmark);
-    
-    if (description) {
-      return {
-        name: description.name,
-        abbreviation: description.abbreviation,
-        description: description.description,
-        anatomicalRegion: description.anatomicalRegion,
-        clinicalSignificance: description.clinicalSignificance,
-        confidence: 0.9, // Default to high confidence since our data doesn't include this yet
-      };
+export function LandmarkComponent({
+  landmark,
+  isSelected,
+  isDragging,
+  isDragged,
+  isEditMode,
+  onClick
+}: LandmarkComponentProps) {
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onClick) {
+      onClick(landmark.id);
     }
-    
-    // Fallback if description not found
-    return {
-      name: point.landmark,
-      abbreviation: point.landmark.substring(0, 2),
-      anatomicalRegion: getAnatomicalRegion(point.landmark),
-      confidence: 0.9,
-    };
   };
 
-  if (!landmarkData) return null;
-
+  // Always use the enhanced styling from edit mode
   return (
-    <div className="absolute top-0 left-0 w-full h-full">
-      <svg
-        className="absolute top-[55px] left-[145px] w-full h-full"
-        viewBox={`${landmarkData.box.left} ${landmarkData.box.top} ${
-          landmarkData.box.right - landmarkData.box.left
-        } ${landmarkData.box.bottom - landmarkData.box.top}`}
-        preserveAspectRatio="xMidYMid meet"
-        style={{ opacity: opacity / 100 }}
-      >
-        {/* Draw landmark points */}
-        {displayLandmarkGroups(landmarkData.points, {
-          selectedGroups: visibleLandmarkGroups as ['skeletal', 'dental'],
-        }).map((point) => {
-          const landmarkData = createLandmarkData(point);
-          
-          return (
-            <g key={point.landmark} className="landmark-point">
-              <LandmarkTooltip 
-                landmark={landmarkData}
-                side={isMobile ? "bottom" : "right"}
-              >
-                <g className="cursor-pointer hover:opacity-80 transition-opacity">
-                  <circle
-                    cx={point.coordinates.x}
-                    cy={point.coordinates.y}
-                    r="5"
-                    fill={getLandmarkColor(point.landmark)}
-                    stroke="#ffffff"
-                    strokeWidth="1"
-                  />
-                  <text
-                    x={point.coordinates.x + 10}
-                    y={point.coordinates.y}
-                    fontSize="14"
-                    fontWeight="bold"
-                    fill="#ECE156"
-                    className="select-none"
-                  >
-                    {point.landmark}
-                  </text>
-                  {/* Larger invisible circle for easier hover */}
-                  <circle
-                    cx={point.coordinates.x}
-                    cy={point.coordinates.y}
-                    r="15"
-                    fill="transparent"
-                    className="landmark-hover-area"
-                  />
-                </g>
-              </LandmarkTooltip>
-            </g>
-          );
-        })}
-      </svg>
+    <div
+      onClick={handleClick}
+      className={`absolute w-[10px] h-[10px] -translate-x-[5px] -translate-y-[5px] rounded-full 
+        ${isEditMode ? 'cursor-move' : 'cursor-pointer'} group
+        transition-all duration-150 ease-in-out
+        hover:w-[15px] hover:h-[15px] hover:-translate-x-[7.5px] hover:-translate-y-[7.5px] hover:shadow-lg hover:border-2 hover:border-yellow-300
+        ${
+          isSelected
+          ? 'border-[2px] border-white shadow ring-2 ring-blue-300 ring-opacity-50'
+          : isDragged
+          ? 'border-[2px] border-white shadow-lg'
+          : 'border-[1px] border-white'
+        } 
+        ${isDragging && isDragged ? 'z-50' : 'z-10'}`}
+      style={{
+        left: landmark.x,
+        top: landmark.y,
+        backgroundColor: isSelected 
+                          ? getSelectedLandmarkColor(landmark.name)
+                          : isDragged 
+                            ? getSelectedLandmarkColor(landmark.name)
+                            : landmark.color || '#3b82f6',
+      }}
+    >
+      {/* Display landmark abbreviation for better visibility */}
+      {landmark.abbreviation && (
+        <div className="absolute whitespace-nowrap text-xs font-bold text-white -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2 pointer-events-none select-none">
+          {landmark.abbreviation}
+        </div>
+      )}
+
+      {/* Landmark label */}
+      <div className="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap bg-black/75 text-white text-xs px-2 py-0.5 rounded pointer-events-none">
+        {landmark.name}
+      </div>
     </div>
   );
-};
-
-export default LandmarkComponent; 
+}

@@ -8,6 +8,7 @@ import { LandmarkEditor } from "./LandmarkEditor";
 import TracingLinesLayer from './TracingLinesLayer';
 import AnalysisLinesLayer from './AnalysisLinesLayer';
 import LandmarksLayer from "./LandmarksLayer";
+import { LandmarkComponent } from './LandmarkComponent'; // Added import
 
 interface RadiographViewerProps {
   highContrastMode: boolean;
@@ -18,9 +19,9 @@ interface RadiographViewerProps {
 
 const RadiographViewer: React.FC<RadiographViewerProps> = ({ 
   highContrastMode,
-  patientId = "demo-patient-1", // Default for demonstration purposes
-  imageId = "demo-image-1",      // Default for demonstration purposes
-  imageUrl = "/images/cephalometric.png" // Default image path
+  patientId = "demo-patient-1", 
+  imageId = "demo-image-1",      
+  imageUrl = "/images/cephalometric.png" 
 }) => {
   const { 
     layerOpacity, 
@@ -36,18 +37,18 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
   const [scale, setScale] = useState(1.0);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [rotation, setRotation] = useState(0);
-  
+
   // Only Invalid toggle state
   const [onlyInvalidMode, setOnlyInvalidMode] = useState(false);
-  
+
   // Edit landmarks mode
   const [isEditMode, setIsEditMode] = useState(false);
-  
+
   // Image dimensions for landmark positioning
   const [imageDimensions, setImageDimensions] = useState({ width: 800, height: 1000 });
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
-  
+
   // Update image dimensions when the container is resized or image loads
   useEffect(() => {
     const updateDimensions = () => {
@@ -58,15 +59,15 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
         });
       }
     };
-    
+
     // Initial update
     updateDimensions();
-    
+
     // Update on resize
     window.addEventListener('resize', updateDimensions);
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
-  
+
   // Handle image load to get natural dimensions
   const handleImageLoad = () => {
     if (imageRef.current) {
@@ -80,7 +81,7 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
       }));
     }
   };
-  
+
   // Simplified handlers
   const handleZoomIn = () => setScale(prev => Math.min(prev + 0.1, 2));
   const handleZoomOut = () => setScale(prev => Math.max(prev - 0.1, 0.5));
@@ -116,7 +117,7 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
     const { brightness, contrast } = imageControls;
     const brightnessValue = 1 + brightness / 100;
     const contrastValue = 1 + contrast / 100;
-    
+
     return {
       filter: `brightness(${brightnessValue}) contrast(${contrastValue})`,
     };
@@ -152,7 +153,7 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
           }}
           onLoad={handleImageLoad}
         />
-        
+
         {/* Tracing lines layer - positioned directly over the image */}
         <svg 
           className="relative top-0 left-0 w-full h-full pointer-events-none"
@@ -175,7 +176,7 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
           }}
         >
           <AnalysisLinesLayer
-            opacity={layerOpacity.analysisLine} // Changed from profile to analysisLine
+            opacity={layerOpacity.analysisLine} 
           />
         </svg>
 
@@ -184,7 +185,7 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
           <LandmarksLayer
             opacity={layerOpacity.landmarks}
             visibleLandmarkGroups={['skeletal', 'dental']}
-            editMode={isEditMode} // Pass editMode to control visibility
+            editMode={isEditMode} 
           />
         </div>
 
@@ -200,7 +201,7 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
           />
         </div>
       </div>
-      
+
       {/* Unified Floating Control Panel */}
       <FloatingControlPanel
         layerOpacity={layerOpacity}

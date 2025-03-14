@@ -10,6 +10,8 @@ import { useCollaborativeAnnotation } from '@/hooks/useCollaborativeAnnotation';
 import { Landmark } from '@shared/schema';
 import { useLandmarks } from '@/hooks/useLandmarks';
 import { LandmarkPoint } from './types/landmark';
+import { LandmarkComponent } from './LandmarkComponent';
+
 
 interface LandmarkEditorProps {
   collectionId: string;
@@ -33,12 +35,12 @@ export function LandmarkEditor({
   const [newLandmarkMode, setNewLandmarkMode] = useState(false);
   const [newLandmarkName, setNewLandmarkName] = useState('');
   const [newLandmarkAbbr, setNewLandmarkAbbr] = useState('');
-  
+
   // Dragging state
   const [isDragging, setIsDragging] = useState(false);
   const [draggedLandmarkId, setDraggedLandmarkId] = useState<string | null>(null);
   const dragStartPos = useRef({ x: 0, y: 0 });
-  
+
   // Get initial landmarks from the API
   const { landmarkData, refetch: refetchLandmarks } = useLandmarks();
 
@@ -54,14 +56,14 @@ export function LandmarkEditor({
         y: point.coordinates.y,
         confidence: point.confidence || 1.0
       }));
-      
+
       // Add to collection
       initialLandmarks.forEach(landmark => {
         addLandmark(landmark);
       });
     }
   }, [landmarkData]);
-  
+
   const {
     collection,
     updateLandmark,
@@ -82,27 +84,27 @@ export function LandmarkEditor({
   // Handle moving a landmark
   const handleLandmarkMove = useCallback((id: string, x: number, y: number) => {
     if (!collection) return;
-    
+
     const landmark = collection.landmarks.find(l => l.id === id);
     if (!landmark) return;
-    
+
     // Ensure coordinates are within bounds
     const boundedX = Math.max(0, Math.min(x, imageDimensions.width));
     const boundedY = Math.max(0, Math.min(y, imageDimensions.height));
-    
+
     const updatedLandmark: Landmark = {
       ...landmark,
       x: boundedX,
       y: boundedY
     };
-    
+
     updateLandmark(updatedLandmark);
   }, [collection, updateLandmark, imageDimensions]);
 
   // Handle creating a new landmark
   const handleAddLandmark = useCallback((x: number, y: number) => {
     if (!newLandmarkMode || !newLandmarkName || !newLandmarkAbbr) return;
-    
+
     const newLandmark: Landmark = {
       id: nanoid(),
       name: newLandmarkName,
@@ -111,14 +113,14 @@ export function LandmarkEditor({
       y,
       confidence: 1.0
     };
-    
+
     addLandmark(newLandmark);
-    
+
     // Reset new landmark form
     setNewLandmarkMode(false);
     setNewLandmarkName('');
     setNewLandmarkAbbr('');
-    
+
     toast({
       title: 'Landmark Added',
       description: `Added new landmark ${newLandmarkName}`,
@@ -129,10 +131,10 @@ export function LandmarkEditor({
   // Handle removing a landmark
   const handleRemoveLandmark = useCallback(() => {
     if (!selectedLandmarkId) return;
-    
+
     removeLandmark(selectedLandmarkId);
     setSelectedLandmarkId(null);
-    
+
     toast({
       title: 'Landmark Removed',
       description: 'Landmark has been removed',
@@ -143,11 +145,11 @@ export function LandmarkEditor({
   // Handle drag start on a landmark
   const handleDragStart = useCallback((e: React.MouseEvent<HTMLDivElement>, landmarkId: string) => {
     if (!isEditMode) return;
-    
+
     e.stopPropagation();
     setIsDragging(true);
     setDraggedLandmarkId(landmarkId);
-    
+
     // Store the initial position of the cursor when the drag starts
     const rect = e.currentTarget.parentElement?.getBoundingClientRect();
     if (rect) {
@@ -156,35 +158,35 @@ export function LandmarkEditor({
         y: e.clientY - rect.top
       };
     }
-    
+
     // Prevent any default browser drag behavior
     e.preventDefault();
   }, [isEditMode]);
-  
+
   // Handle dragging a landmark
   const handleDrag = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!isEditMode || !isDragging || !draggedLandmarkId || !collection) return;
-    
+
     // Get the current position
     const rect = e.currentTarget.getBoundingClientRect();
     const currentX = e.clientX - rect.left;
     const currentY = e.clientY - rect.top;
-    
+
     // Update the landmark position
     handleLandmarkMove(draggedLandmarkId, currentX, currentY);
-    
+
     // Prevent default to avoid text selection and other browser actions
     e.preventDefault();
   }, [isEditMode, isDragging, draggedLandmarkId, collection, handleLandmarkMove]);
-  
+
   // Handle drag end
   const handleDragEnd = useCallback(() => {
     if (!isEditMode) return;
-    
+
     setIsDragging(false);
     setDraggedLandmarkId(null);
   }, [isEditMode]);
-  
+
   // Setup document-wide event listeners for drag
   React.useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -194,42 +196,46 @@ export function LandmarkEditor({
           const rect = canvas.getBoundingClientRect();
           const currentX = e.clientX - rect.left;
           const currentY = e.clientY - rect.top;
-          
+
           handleLandmarkMove(draggedLandmarkId, currentX, currentY);
         }
       }
     };
-    
+
     const handleMouseUp = () => {
       if (isDragging) {
         setIsDragging(false);
         setDraggedLandmarkId(null);
       }
     };
-    
+
     if (isEditMode) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
     }
-    
+
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
   }, [isEditMode, isDragging, draggedLandmarkId, collection, handleLandmarkMove]);
-  
+
   // Handle canvas click in edit mode
   const handleCanvasClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!isEditMode) return;
-    
+
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    
+
     if (newLandmarkMode) {
       handleAddLandmark(x, y);
     }
   }, [isEditMode, newLandmarkMode, handleAddLandmark]);
+
+  const handleSelectLandmark = useCallback((landmark: Landmark) => {
+    handleLandmarkSelect(landmark)
+  }, [handleLandmarkSelect])
 
   if (!isEditMode) {
     return (
@@ -265,33 +271,15 @@ export function LandmarkEditor({
       >
         {/* Render landmarks */}
         {collection?.landmarks.map((landmark) => (
-          <div
+          <LandmarkComponent
             key={landmark.id}
-            className={`absolute w-5 h-5 -translate-x-2 -translate-y-2 rounded-full border-2 border-white cursor-move ${
-              selectedLandmarkId === landmark.id
-                ? 'bg-blue-500 shadow-lg'
-                : draggedLandmarkId === landmark.id
-                ? 'bg-green-500 shadow-lg'
-                : 'bg-red-500'
-            } ${isDragging && draggedLandmarkId === landmark.id ? 'z-50' : 'z-40'}`}
-            style={{
-              left: landmark.x,
-              top: landmark.y,
-            }}
-            onClick={(e) => {
-              if (!isDragging) {
-                e.stopPropagation();
-                handleLandmarkSelect(landmark);
-              }
-            }}
-            onMouseDown={(e) => handleDragStart(e, landmark.id)}
-            onMouseMove={(e) => isDragging && handleDrag(e)}
-            onMouseUp={handleDragEnd}
-          >
-            <div className="absolute text-xs font-bold text-white -top-5 left-1/2 -translate-x-1/2">
-              {landmark.abbreviation}
-            </div>
-          </div>
+            landmark={landmark}
+            isSelected={selectedLandmarkId === landmark.id}
+            isDragging={isDragging}
+            isDragged={draggedLandmarkId === landmark.id}
+            isEditMode={true}
+            onClick={handleSelectLandmark}
+          />
         ))}
       </div>
 
@@ -310,7 +298,7 @@ export function LandmarkEditor({
               <X className="h-4 w-4" />
             </Button>
           </div>
-          
+
           <div className="flex flex-col gap-2">
             {selectedLandmarkId ? (
               <>
