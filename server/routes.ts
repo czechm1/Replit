@@ -479,6 +479,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       mode: "single-user",
     });
   });
+  
+  // Debug server info endpoint to help diagnose connection issues
+  app.all("/api/debug/server-info", (req, res) => {
+    const serverInfo = {
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+      port: 5000,
+      hostname: req.hostname,
+      ip: req.ip,
+      protocol: req.protocol,
+      originalUrl: req.originalUrl,
+      method: req.method,
+      headers: req.headers,
+      nodeVersion: process.version,
+      cwd: process.cwd(),
+      memoryUsage: process.memoryUsage(),
+    };
+    
+    res.json(serverInfo);
+  });
 
   // Root level health check
   app.get("/healthz", (req, res) => {

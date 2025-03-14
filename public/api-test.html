@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebCeph API Test</title>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      color: #333;
+    }
+    h1 {
+      color: #1a365d;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 10px;
+    }
+    .endpoint {
+      background-color: #f7fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    .endpoint h3 {
+      margin-top: 0;
+      color: #2c5282;
+    }
+    .btn {
+      background-color: #4a5568;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .btn:hover {
+      background-color: #2d3748;
+    }
+    .results {
+      background-color: #edf2f7;
+      border-left: 4px solid #4a5568;
+      padding: 15px;
+      margin-top: 10px;
+      white-space: pre-wrap;
+      max-height: 300px;
+      overflow: auto;
+    }
+    .error {
+      border-left-color: #e53e3e;
+    }
+    .success {
+      border-left-color: #38a169;
+    }
+  </style>
+</head>
+<body>
+  <h1>WebCeph API Test</h1>
+  <p>This page tests the WebCeph API endpoints to verify proper functionality.</p>
+  
+  <div class="endpoint">
+    <h3>Health Check</h3>
+    <button class="btn" onclick="testEndpoint('/api/health')">Test Health Endpoint</button>
+    <div id="health-results" class="results"></div>
+  </div>
+
+  <div class="endpoint">
+    <h3>Landmarks</h3>
+    <button class="btn" onclick="testEndpoint('/api/landmarks')">Test Landmarks Endpoint</button>
+    <div id="landmarks-results" class="results"></div>
+  </div>
+
+  <div class="endpoint">
+    <h3>Tracing Lines</h3>
+    <button class="btn" onclick="testEndpoint('/api/tracing-lines')">Test Tracing Lines Endpoint</button>
+    <div id="tracing-lines-results" class="results"></div>
+  </div>
+
+  <div class="endpoint">
+    <h3>Analysis Lines</h3>
+    <button class="btn" onclick="testEndpoint('/api/analysis-lines')">Test Analysis Lines Endpoint</button>
+    <div id="analysis-lines-results" class="results"></div>
+  </div>
+
+  <div class="endpoint">
+    <h3>Debug Routes</h3>
+    <button class="btn" onclick="testEndpoint('/api/debug/routes')">Test Debug Routes Endpoint</button>
+    <div id="debug-routes-results" class="results"></div>
+  </div>
+
+  <div class="endpoint">
+    <h3>Debug Server Info</h3>
+    <button class="btn" onclick="testEndpoint('/api/debug/server-info')">Test Server Info Endpoint</button>
+    <div id="debug-server-info-results" class="results"></div>
+  </div>
+
+  <script>
+    async function testEndpoint(endpoint) {
+      const resultsId = endpoint.replace(/\//g, '-').replace(/^-/, '') + '-results';
+      const resultsElement = document.getElementById(resultsId);
+      
+      if (!resultsElement) {
+        console.error(`Results element not found for ${endpoint}`);
+        return;
+      }
+      
+      resultsElement.textContent = 'Testing...';
+      resultsElement.className = 'results';
+      
+      try {
+        const response = await fetch(endpoint);
+        const contentType = response.headers.get('content-type');
+        
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          resultsElement.textContent = `Status: ${response.status} ${response.statusText}\n\nResponse:\n${JSON.stringify(data, null, 2)}`;
+        } else {
+          const text = await response.text();
+          resultsElement.textContent = `Status: ${response.status} ${response.statusText}\n\nResponse:\n${text.substring(0, 500)}${text.length > 500 ? '...' : ''}`;
+        }
+        
+        resultsElement.classList.add(response.ok ? 'success' : 'error');
+      } catch (error) {
+        resultsElement.textContent = `Error: ${error.message}`;
+        resultsElement.classList.add('error');
+      }
+    }
+  </script>
+</body>
+</html>
