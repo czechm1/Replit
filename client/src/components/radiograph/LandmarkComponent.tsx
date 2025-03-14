@@ -66,10 +66,8 @@ export function LandmarkComponent({
   const pointSize = isSelected ? 10 : (isHovered ? 12 : 6); // Even smaller default size (6px)
   const pointOffset = pointSize / 2;
   
-  // Calculate border based on confidence
-  const confidenceValue = landmark.confidence !== undefined ? landmark.confidence : 1;
+  // Border styling
   const borderWidth = isSelected ? 1.5 : 1;
-  const borderOpacity = confidenceValue * 100; // Scale to percentage
   
   // Always use the enhanced styling from edit mode
   return (
@@ -99,63 +97,51 @@ export function LandmarkComponent({
                             ? getSelectedLandmarkColor(landmark.name)
                             : getLandmarkColor(landmark.name),
         boxShadow: isSelected ? '0 1px 3px rgba(0,0,0,0.3)' : '0 1px 2px rgba(0,0,0,0.2)',
-        opacity: isSelected ? 1 : (isHovered ? 0.9 : Math.max(0.4, confidenceValue * 0.8)), // Opacity based on confidence
+        opacity: isSelected ? 1 : (isHovered ? 0.9 : 0.6), // Standard opacity with no confidence scaling
         filter: isSelected ? 'none' : (isHovered ? 'saturate(95%)' : 'saturate(75%)'), // More desaturation in idle state
         borderColor: 'white',
         borderWidth: `${borderWidth}px`,
-        borderStyle: hideLabel ? 
-          (confidenceValue > 0.8 ? 'solid' : confidenceValue > 0.5 ? 'dashed' : 'dotted') : 
-          'solid'  // Visual indicator for confidence
+        borderStyle: 'solid' // Simple border style with no confidence indicators
       }}
     >
-      {/* Abbreviation label with high contrast black background - conditionally displayed based on confidence */}
+      {/* Abbreviation label with ultra high contrast yellow - no background */}
       {!hideLabel && (
         <div 
-          className={`absolute whitespace-nowrap text-[10px] font-bold pointer-events-none select-none
-                     bg-black py-0.5 px-1 rounded-sm border border-white/30 transition-all duration-200 ease-in-out`}
+          className={`absolute whitespace-nowrap text-[11px] font-black pointer-events-none select-none
+                     transition-all duration-200 ease-in-out`}
           style={{ 
-            color: '#ffffff', // Bright white text
-            letterSpacing: '0.03em',
+            color: '#FFFF00', // Ultra high contrast yellow
+            // No text shadow as requested
+            letterSpacing: '0.05em',
             left: `${labelOffsets.x || 0}px`,
             top: `${labelOffsets.y || 0}px`,
             minWidth: '14px',
             textAlign: 'center',
-            transform: isSelected ? 'scale(1.15)' : 'scale(1)',
+            transform: isSelected ? 'scale(1.25)' : 'scale(1)',
             zIndex: isSelected ? 30 : 20,
           }}
           title={`${landmark.name} (${abbreviation})`}
         >
           {abbreviation}
-          {landmark.confidence !== undefined && (
-            <span className="ml-1 opacity-60 text-[8px]">
-              {Math.round(landmark.confidence * 100)}%
-            </span>
-          )}
         </div>
       )}
 
-      {/* Full name label with strong contrast background - show only when hovered regardless of confidence */}
+      {/* Full name label with no background - show only when hovered */}
       {(isSelected || isHovered) && (
         <div 
-          className={`absolute whitespace-nowrap text-xs font-medium
-                    pointer-events-none z-40 transition-opacity duration-300 bg-black border border-white/50
-                    px-2 py-1 rounded-md shadow-md opacity-100`}
+          className={`absolute whitespace-nowrap text-xs font-black
+                    pointer-events-none z-40 transition-opacity duration-300 opacity-100`}
           style={{ 
-            color: '#ffffff',
+            color: '#FFFF00', // Ultra high contrast yellow
+            // No text shadow as requested
             minWidth: `${landmark.name.length * 4}px`,
-            top: `${-40}px`,
+            top: `${-35}px`,
             left: `0px`,
             transform: `translateX(-50%)`,
+            letterSpacing: '0.03em',
           }}
         >
-          <div className="flex flex-col">
-            <span>{landmark.name}</span>
-            {landmark.confidence !== undefined && (
-              <span className="text-[9px] text-white/70">
-                Confidence: {Math.round(landmark.confidence * 100)}%
-              </span>
-            )}
-          </div>
+          {landmark.name}
         </div>
       )}
     </div>

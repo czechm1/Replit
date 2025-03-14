@@ -120,12 +120,12 @@ export function getLandmarkColor(landmarkName: string): string {
   
   switch (type) {
     case 'dental':
-      return '#22c55e'; // green for dental
+      return '#FF2200'; // Bright red for dental
     case 'soft':
-      return '#3b82f6'; // blue for soft tissue
+      return '#FF4400'; // Coral red for soft tissue
     case 'skeletal':
     default:
-      return '#ef4444'; // red for skeletal
+      return '#FF0000'; // Pure red for skeletal
   }
 }
 
@@ -139,12 +139,12 @@ export function getSelectedLandmarkColor(landmarkName: string): string {
   
   switch (type) {
     case 'dental':
-      return '#16a34a'; // darker green for dental
+      return '#FF3300'; // Brighter red for dental when selected
     case 'soft':
-      return '#2563eb'; // darker blue for soft tissue
+      return '#FF5500'; // Brighter coral for soft tissue when selected
     case 'skeletal':
     default:
-      return '#dc2626'; // darker red for skeletal
+      return '#FF1100'; // Brighter pure red for skeletal when selected
   }
 }
 

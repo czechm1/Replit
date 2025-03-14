@@ -5,6 +5,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import ImageSettingsControl from "./ImageSettingsControl";
 import ObjectVisibilityControl from "./ObjectVisibilityControl";
 import { LayerOpacityType, ImageControlsType } from "./types";
+import { LandmarkGroupKey } from "./utils/landmarkGroups";
 
 interface FloatingControlPanelProps {
   layerOpacity: LayerOpacityType;
@@ -20,6 +21,9 @@ interface FloatingControlPanelProps {
   // Edit mode controls
   isEditMode: boolean;
   onToggleEditMode: () => void;
+  // Landmark filtering props
+  visibleLandmarkGroups?: LandmarkGroupKey[];
+  onToggleLandmarkGroup?: (group: LandmarkGroupKey) => void;
 }
 
 const FloatingControlPanel: React.FC<FloatingControlPanelProps> = ({
@@ -33,7 +37,9 @@ const FloatingControlPanel: React.FC<FloatingControlPanelProps> = ({
   onZoomOut,
   onResetView,
   isEditMode,
-  onToggleEditMode
+  onToggleEditMode,
+  visibleLandmarkGroups = ['all'],
+  onToggleLandmarkGroup = () => {}
 }) => {
   const [activeControl, setActiveControl] = useState<'none' | 'image' | 'layers'>('none');
   
@@ -196,6 +202,8 @@ const FloatingControlPanel: React.FC<FloatingControlPanelProps> = ({
             onLayerOpacityChange={onLayerOpacityChange}
             onClose={closeControls}
             onReset={onResetLayers}
+            visibleLandmarkGroups={visibleLandmarkGroups}
+            onToggleLandmarkGroup={onToggleLandmarkGroup}
           />
         </div>
       )}

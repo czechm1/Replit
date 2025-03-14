@@ -8,7 +8,9 @@ import { LandmarkEditor } from "./LandmarkEditor";
 import TracingLinesLayer from './TracingLinesLayer';
 import AnalysisLinesLayer from './AnalysisLinesLayer';
 import LandmarksLayer from "./LandmarksLayer";
-import { LandmarkComponent } from './LandmarkComponent'; // Added import
+import { LandmarkComponent } from './LandmarkComponent';
+import { LandmarkGroupKey } from './utils/landmarkGroups';
+import ObjectVisibilityControl from "./ObjectVisibilityControl";
 
 interface RadiographViewerProps {
   highContrastMode: boolean;
@@ -28,9 +30,12 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
     imageControls, 
     updateLayerOpacity, 
     updateImageControl,
+    showObjectVisibility,
     setShowLayerControls,
     setShowImageSettings,
-    setShowObjectVisibility
+    setShowObjectVisibility,
+    resetLayerOpacity,
+    resetOnlyImageControls
   } = useLayerControls();
 
   // Image transformation state
@@ -38,8 +43,8 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [rotation, setRotation] = useState(0);
 
-  // Only Invalid toggle state
-  const [onlyInvalidMode, setOnlyInvalidMode] = useState(false);
+  // Landmark filtering state
+  const [visibleLandmarkGroups, setVisibleLandmarkGroups] = useState<LandmarkGroupKey[]>(['all']);
 
   // Edit landmarks mode
   const [isEditMode, setIsEditMode] = useState(false);
@@ -94,6 +99,41 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
   // Toggle edit mode
   const toggleEditMode = () => {
     setIsEditMode(prev => !prev);
+  };
+
+  // Handle landmark group toggling
+  const handleToggleLandmarkGroup = (group: LandmarkGroupKey) => {
+    setVisibleLandmarkGroups(prev => {
+      // If clicking "all", either select only "all" or remove it
+      if (group === 'all') {
+        // If "all" is already selected, unselect everything
+        if (prev.includes('all')) {
+          return [];
+        }
+        // Otherwise select only "all"
+        return ['all'];
+      }
+      
+      // If "all" is currently selected and clicking another group,
+      // remove "all" and select only the clicked group
+      if (prev.includes('all')) {
+        return [group];
+      }
+      
+      // Toggle the specific group (add if not present, remove if present)
+      const isGroupSelected = prev.includes(group);
+      if (isGroupSelected) {
+        // Remove this group if it's the only one selected, don't leave an empty array
+        if (prev.length === 1) {
+          return ['all']; // Default back to "all" if removing the last group
+        }
+        // Otherwise just remove this group
+        return prev.filter(g => g !== group);
+      } else {
+        // Add this group
+        return [...prev, group];
+      }
+    });
   };
 
   // Keyboard event listeners
@@ -184,7 +224,7 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
         <div className="absolute top-0 right-0 w-full h-full">
           <LandmarksLayer
             opacity={layerOpacity.landmarks}
-            visibleLandmarkGroups={['skeletal', 'dental']}
+            visibleLandmarkGroups={visibleLandmarkGroups}
             editMode={isEditMode} 
           />
         </div>
@@ -208,13 +248,15 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
         imageControls={imageControls}
         onLayerOpacityChange={updateLayerOpacity}
         onImageControlChange={updateImageControl}
-        onResetLayers={resetControls}
-        onResetImageControls={resetControls}
+        onResetLayers={resetLayerOpacity}
+        onResetImageControls={resetOnlyImageControls}
         onZoomIn={handleZoomIn}
         onZoomOut={handleZoomOut}
         onResetView={handleResetView}
         isEditMode={isEditMode}
         onToggleEditMode={toggleEditMode}
+        visibleLandmarkGroups={visibleLandmarkGroups}
+        onToggleLandmarkGroup={handleToggleLandmarkGroup}
       />
     </div>
   );
