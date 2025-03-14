@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { nanoid } from 'nanoid';
 import { Edit2, Plus, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -31,6 +31,11 @@ export function LandmarkEditor({
   const [newLandmarkMode, setNewLandmarkMode] = useState(false);
   const [newLandmarkName, setNewLandmarkName] = useState('');
   const [newLandmarkAbbr, setNewLandmarkAbbr] = useState('');
+  
+  // Dragging state
+  const [isDragging, setIsDragging] = useState(false);
+  const [draggedLandmarkId, setDraggedLandmarkId] = useState<string | null>(null);
+  const dragStartPos = useRef({ x: 0, y: 0 });
   
   const {
     collection,
@@ -110,6 +115,84 @@ export function LandmarkEditor({
     });
   }, [selectedLandmarkId, removeLandmark, toast]);
 
+  // Handle drag start on a landmark
+  const handleDragStart = useCallback((e: React.MouseEvent<HTMLDivElement>, landmarkId: string) => {
+    if (!isEditMode) return;
+    
+    e.stopPropagation();
+    setIsDragging(true);
+    setDraggedLandmarkId(landmarkId);
+    
+    // Store the initial position of the cursor when the drag starts
+    const rect = e.currentTarget.parentElement?.getBoundingClientRect();
+    if (rect) {
+      dragStartPos.current = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
+    }
+    
+    // Prevent any default browser drag behavior
+    e.preventDefault();
+  }, [isEditMode]);
+  
+  // Handle dragging a landmark
+  const handleDrag = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isEditMode || !isDragging || !draggedLandmarkId || !collection) return;
+    
+    // Get the current position
+    const rect = e.currentTarget.getBoundingClientRect();
+    const currentX = e.clientX - rect.left;
+    const currentY = e.clientY - rect.top;
+    
+    // Update the landmark position
+    handleLandmarkMove(draggedLandmarkId, currentX, currentY);
+    
+    // Prevent default to avoid text selection and other browser actions
+    e.preventDefault();
+  }, [isEditMode, isDragging, draggedLandmarkId, collection, handleLandmarkMove]);
+  
+  // Handle drag end
+  const handleDragEnd = useCallback(() => {
+    if (!isEditMode) return;
+    
+    setIsDragging(false);
+    setDraggedLandmarkId(null);
+  }, [isEditMode]);
+  
+  // Setup document-wide event listeners for drag
+  React.useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging && draggedLandmarkId && collection) {
+        const canvas = document.querySelector('.absolute.inset-0');
+        if (canvas) {
+          const rect = canvas.getBoundingClientRect();
+          const currentX = e.clientX - rect.left;
+          const currentY = e.clientY - rect.top;
+          
+          handleLandmarkMove(draggedLandmarkId, currentX, currentY);
+        }
+      }
+    };
+    
+    const handleMouseUp = () => {
+      if (isDragging) {
+        setIsDragging(false);
+        setDraggedLandmarkId(null);
+      }
+    };
+    
+    if (isEditMode) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+    
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isEditMode, isDragging, draggedLandmarkId, collection, handleLandmarkMove]);
+  
   // Handle canvas click in edit mode
   const handleCanvasClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!isEditMode) return;
@@ -162,17 +245,23 @@ export function LandmarkEditor({
             className={`absolute w-4 h-4 -translate-x-2 -translate-y-2 rounded-full border-2 border-white cursor-move ${
               selectedLandmarkId === landmark.id
                 ? 'bg-blue-500 shadow-lg'
+                : draggedLandmarkId === landmark.id
+                ? 'bg-green-500 shadow-lg'
                 : 'bg-red-500'
-            }`}
+            } ${isDragging && draggedLandmarkId === landmark.id ? 'z-50' : 'z-10'}`}
             style={{
               left: landmark.x,
               top: landmark.y,
             }}
             onClick={(e) => {
-              e.stopPropagation();
-              handleLandmarkSelect(landmark);
+              if (!isDragging) {
+                e.stopPropagation();
+                handleLandmarkSelect(landmark);
+              }
             }}
-            // Add draggable functionality in a real implementation
+            onMouseDown={(e) => handleDragStart(e, landmark.id)}
+            onMouseMove={(e) => isDragging && handleDrag(e)}
+            onMouseUp={handleDragEnd}
           >
             <div className="absolute text-xs font-bold text-white -top-5 left-1/2 -translate-x-1/2">
               {landmark.abbreviation}

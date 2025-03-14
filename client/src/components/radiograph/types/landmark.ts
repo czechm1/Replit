@@ -6,6 +6,7 @@ export interface Point {
 export interface LandmarkPoint {
   landmark: string;
   coordinates: Point;
+  confidence?: number;
 }
 
 export interface Line {
