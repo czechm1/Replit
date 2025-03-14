@@ -153,13 +153,10 @@ export async function generateAndDownloadVideo(
       ctx.globalAlpha = 1;
       ctx.drawImage(currentImage, drawX, drawY, drawWidth, drawHeight);
       
-      // If transitioning, blend with the next image
+      // If transitioning, blend with the next image with more sophisticated effects
       if (isTransitioning) {
         const nextImage = images[nextStageIndex];
         const transitionProgress = (stageProgress - (frameDuration / stageDuration)) / (transitionDuration / stageDuration);
-        
-        // Draw the next image with transparency for transition
-        ctx.globalAlpha = transitionProgress;
         
         // Calculate position for next image
         let nextDrawWidth, nextDrawHeight, nextDrawX, nextDrawY;
@@ -177,7 +174,53 @@ export async function generateAndDownloadVideo(
           nextDrawY = (canvas.height - nextDrawHeight) / 2;
         }
         
-        ctx.drawImage(nextImage, nextDrawX, nextDrawY, nextDrawWidth, nextDrawHeight);
+        // Apply different transition effects based on stage index for variety
+        const transitionType = currentStageIndex % 3;
+        
+        switch(transitionType) {
+          case 0: // Fade transition
+            // Draw the next image with transparency for simple fade
+            ctx.globalAlpha = transitionProgress;
+            ctx.drawImage(nextImage, nextDrawX, nextDrawY, nextDrawWidth, nextDrawHeight);
+            break;
+            
+          case 1: // Slide transition
+            // Draw current image sliding out
+            ctx.globalAlpha = 1;
+            ctx.drawImage(
+              currentImage, 
+              drawX - (transitionProgress * drawWidth), 
+              drawY, 
+              drawWidth, 
+              drawHeight
+            );
+            
+            // Draw next image sliding in
+            ctx.drawImage(
+              nextImage, 
+              nextDrawX + (drawWidth * (1 - transitionProgress)), 
+              nextDrawY, 
+              nextDrawWidth, 
+              nextDrawHeight
+            );
+            break;
+            
+          case 2: // Zoom and fade transition
+            // Current image zooms out and fades
+            ctx.globalAlpha = 1 - transitionProgress;
+            const zoomScale = 1 + (transitionProgress * 0.1);
+            const zoomedWidth = drawWidth * zoomScale;
+            const zoomedHeight = drawHeight * zoomScale;
+            const zoomedX = drawX - ((zoomedWidth - drawWidth) / 2);
+            const zoomedY = drawY - ((zoomedHeight - drawHeight) / 2);
+            
+            ctx.drawImage(currentImage, zoomedX, zoomedY, zoomedWidth, zoomedHeight);
+            
+            // Next image fades in
+            ctx.globalAlpha = transitionProgress;
+            ctx.drawImage(nextImage, nextDrawX, nextDrawY, nextDrawWidth, nextDrawHeight);
+            break;
+        }
       }
       
       // Draw stage info
@@ -198,26 +241,97 @@ export async function generateAndDownloadVideo(
       ctx.fillText(currentStage.date, 80, 35);
       
       // Draw title banner at bottom
+      // Draw larger bottom panel
       ctx.fillStyle = 'rgba(15, 23, 42, 0.85)'; // slate-900/85
-      ctx.fillRect(0, canvas.height - 100, canvas.width, 100);
+      ctx.fillRect(0, canvas.height - 180, canvas.width, 180);
       
-      // Title
+      // Title with emoji
       ctx.fillStyle = '#ffffff';
       ctx.font = 'bold 24px sans-serif';
       ctx.textAlign = 'left';
       ctx.textBaseline = 'top';
-      ctx.fillText(currentStage.title, 20, canvas.height - 90);
+      ctx.fillText(`${currentStage.emoji || '✨'} ${currentStage.title}`, 20, canvas.height - 170);
       
       // Description
       ctx.fillStyle = '#cbd5e1'; // slate-300
       ctx.font = '16px sans-serif';
-      ctx.fillText(
-        currentStage.description.length > 100 
-          ? currentStage.description.substring(0, 100) + '...' 
-          : currentStage.description, 
-        20, 
-        canvas.height - 55
-      );
+      
+      // Split description into multiple lines if needed
+      const maxWidth = canvas.width - 40;
+      const words = currentStage.description.split(' ');
+      let line = '';
+      let y = canvas.height - 135;
+      
+      for (let i = 0; i < words.length; i++) {
+        const testLine = line + words[i] + ' ';
+        const metrics = ctx.measureText(testLine);
+        
+        if (metrics.width > maxWidth && i > 0) {
+          ctx.fillText(line, 20, y);
+          line = words[i] + ' ';
+          y += 25;
+          
+          // Don't draw more than 2 lines
+          if (y > canvas.height - 85) {
+            line += '...';
+            break;
+          }
+        } else {
+          line = testLine;
+        }
+      }
+      ctx.fillText(line, 20, y);
+      
+      // Key changes/highlights section
+      if (currentStage.changes && currentStage.changes.length > 0) {
+        // Draw a separating line
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.beginPath();
+        ctx.moveTo(20, canvas.height - 75);
+        ctx.lineTo(canvas.width - 20, canvas.height - 75);
+        ctx.stroke();
+        
+        // Draw key changes label
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 14px sans-serif';
+        ctx.fillText('Key Changes:', 20, canvas.height - 60);
+        
+        // Display up to 2 changes
+        const changesLimit = Math.min(2, currentStage.changes.length);
+        for (let i = 0; i < changesLimit; i++) {
+          ctx.fillStyle = '#94a3b8'; // slate-400
+          ctx.font = '12px sans-serif';
+          ctx.fillText(`• ${currentStage.changes[i].label}`, 20, canvas.height - 40 + (i * 18));
+        }
+      }
+      
+      // User feedback badge (if insights available)
+      if (currentStage.insights && currentStage.insights.length > 0) {
+        const firstInsight = currentStage.insights[0];
+        if (firstInsight) {
+          // Draw pill-shaped badge
+          const badgeWidth = Math.min(ctx.measureText(firstInsight).width + 50, canvas.width / 3);
+          const badgeHeight = 28;
+          const badgeX = canvas.width - badgeWidth - 20;
+          const badgeY = canvas.height - 50;
+          
+          // Badge background
+          ctx.fillStyle = 'rgba(99, 102, 241, 0.2)'; // indigo-500/20
+          ctx.beginPath();
+          ctx.roundRect(badgeX, badgeY, badgeWidth, badgeHeight, 14);
+          ctx.fill();
+          
+          // Badge text
+          ctx.fillStyle = '#a5b4fc'; // indigo-300
+          ctx.font = '12px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('💬 ' + (firstInsight.length > 40 ? firstInsight.substring(0, 40) + '...' : firstInsight), 
+            badgeX + badgeWidth/2, badgeY + badgeHeight/2 + 4);
+          
+          // Reset text alignment
+          ctx.textAlign = 'left';
+        }
+      }
       
       // Progress bar at bottom
       ctx.fillStyle = 'rgba(30, 41, 59, 0.9)'; // slate-800/90
