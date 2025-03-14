@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { 
   ArrowLeft, 
-  ChevronRight 
+  ChevronRight, 
+  PlusCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -21,6 +22,12 @@ import {
   CardHeader, 
   CardTitle 
 } from "@/components/ui/card";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const About: React.FC = () => {
   const [api, setApi] = useState<CarouselApi>();
@@ -40,24 +47,49 @@ const About: React.FC = () => {
     });
   }, [api]);
 
-  // Define our design journey milestones
+  // Define our design journey milestones with hotspots
   const designJourney = [
     {
       title: "Initial Concept",
       date: "Day 1",
       image: "/images/0-initial.png", 
       description: "Our journey began with a feature-rich but overwhelmingly complex interface. As seen in the image, the initial design displayed all cephalometric landmarks and measurements simultaneously — green landmarks, blue tracing outlines, and red measurement lines all competed for attention. Direct numerical values were scattered across the radiograph itself, making it difficult to focus on specific areas of interest. While technically impressive, the interface posed significant cognitive challenges for clinical users.",
-      uiChanges: [
-        "All landmarks displayed simultaneously (green dots)",
-        "Measurement lines overlaid directly on image (red lines)",
-        "Anatomical outline tracings shown at all times (blue lines)",
-        "Numerical values scattered across radiograph image",
-        "High information density with no visual hierarchy"
-      ],
-      contributions: [
-        { role: "AI", action: "Generated landmark detection algorithms achieving 94% accuracy on test radiographs" },
-        { role: "Designer", action: "Conducted heuristic evaluation identifying 12 critical usability issues including text contrast and visual hierarchy" },
-        { role: "Developer", action: "Built prototype with complete landmark visualization capabilities despite challenging UI requirements" }
+      hotspots: [
+        { 
+          id: 1, 
+          x: 25, 
+          y: 30, 
+          label: "Landmark Overload", 
+          description: "All landmarks displayed simultaneously (green dots)" 
+        },
+        { 
+          id: 2, 
+          x: 45, 
+          y: 60, 
+          label: "Measurement Lines", 
+          description: "Red measurement lines overlaid directly on image" 
+        },
+        { 
+          id: 3, 
+          x: 75, 
+          y: 40, 
+          label: "Anatomical Tracings", 
+          description: "Blue tracing outlines shown at all times" 
+        },
+        { 
+          id: 4, 
+          x: 60, 
+          y: 25, 
+          label: "Scattered Values", 
+          description: "Numerical values scattered across radiograph" 
+        },
+        { 
+          id: 5, 
+          x: 80, 
+          y: 75, 
+          label: "High Density", 
+          description: "Information overload with no visual hierarchy" 
+        }
       ]
     },
     {
@@ -65,17 +97,42 @@ const About: React.FC = () => {
       date: "Day 2",
       image: "/images/1-step.png",
       description: "Our first major redesign, as shown in this screenshot, focused on establishing a clean slate by temporarily removing all visual noise. We created a minimalist interface with a clear separation between the radiograph view and control panels. The sidebar was redesigned to provide structured access to tools without overwhelming users with options. Notice how the interface now features substantial negative space, providing visual breathing room lacking in our initial version. This foundation allowed us to thoughtfully reintroduce only the most essential elements in subsequent iterations.",
-      uiChanges: [
-        "Clean separation between image and control panels",
-        "Simplified sidebar with structured tool access",
-        "Radiograph image shown without overlays initially",
-        "Analysis type selection moved to dropdown menu",
-        "Toggle controls for specific feature visibility"
-      ],
-      contributions: [
-        { role: "AI", action: "Recommended information architecture patterns from analysis of 200+ medical interfaces" },
-        { role: "Designer", action: "Implemented a new information architecture reducing UI density by 73% in this foundational phase" },
-        { role: "Developer", action: "Created first version of our API documentation using AI-generated Swagger specs from our schema" }
+      hotspots: [
+        { 
+          id: 1, 
+          x: 30, 
+          y: 50, 
+          label: "Clean Separation", 
+          description: "Clear division between image and control panels" 
+        },
+        { 
+          id: 2, 
+          x: 15, 
+          y: 40, 
+          label: "Simplified Sidebar", 
+          description: "Structured tool access without overwhelming options" 
+        },
+        { 
+          id: 3, 
+          x: 50, 
+          y: 30, 
+          label: "Clean Radiograph", 
+          description: "Image shown without overlays initially" 
+        },
+        { 
+          id: 4, 
+          x: 85, 
+          y: 20, 
+          label: "Analysis Selection", 
+          description: "Analysis type moved to dropdown menu" 
+        },
+        { 
+          id: 5, 
+          x: 80, 
+          y: 60, 
+          label: "Toggle Controls", 
+          description: "Visibility toggles for specific features" 
+        }
       ]
     },
     {
@@ -83,17 +140,42 @@ const About: React.FC = () => {
       date: "Day 3",
       image: "/images/2-step.png",
       description: "In this iteration, we began thoughtfully reintroducing essential functionality within our simplified framework. As shown in the screenshot, we implemented a tabbed interface with clear visual distinction between different measurement types (skeletal vs. dental). The right panel now features a structured, data-oriented presentation of cephalometric measurements with clear indication of normal ranges. Note how spacing, alignment, and data presentation all work together to create a clean reading experience without the visual overload of the original design.",
-      uiChanges: [
-        "Tabbed navigation system for different analysis types",
-        "Structured data presentation in the right panel",
-        "Clear labeling of standard values and patient measurements",
-        "Visual distinction between reference and patient values",
-        "Improved contrast with dark background for image viewing"
-      ],
-      contributions: [
-        { role: "AI", action: "Optimized measurement calculations for 40% faster analysis processing time" },
-        { role: "Designer", action: "Created the tabbed measurement interface with color-coding for different anatomical categories" },
-        { role: "Developer", action: "Implemented the responsive measurement panel with dynamic value highlighting" }
+      hotspots: [
+        { 
+          id: 1, 
+          x: 22, 
+          y: 15, 
+          label: "Tabbed Navigation", 
+          description: "Clear tabs for different analysis types" 
+        },
+        { 
+          id: 2, 
+          x: 80, 
+          y: 35, 
+          label: "Structured Data", 
+          description: "Organized data presentation in right panel" 
+        },
+        { 
+          id: 3, 
+          x: 75, 
+          y: 55, 
+          label: "Clear Labeling", 
+          description: "Standard values and patient measurements clearly labeled" 
+        },
+        { 
+          id: 4, 
+          x: 85, 
+          y: 70, 
+          label: "Visual Distinction", 
+          description: "Clear separation between reference and patient values" 
+        },
+        { 
+          id: 5, 
+          x: 40, 
+          y: 50, 
+          label: "Improved Contrast", 
+          description: "Dark background enhances image viewing" 
+        }
       ]
     },
     {
@@ -101,17 +183,42 @@ const About: React.FC = () => {
       date: "Day 4",
       image: "/images/3-step.png",
       description: "This iteration introduced our breakthrough readability enhancements, visible in the screenshot through the clear tabular analysis results with proper spacing and visual hierarchy. The critical improvement was our high-contrast color system with carefully calibrated values for different measurement types. We used green for measurements within normal range and red for outliers, with precise numerical display of standard deviations. The interface now included an expandable analysis panel and clear organization of Ricketts Analysis metrics into logical measurement groupings.",
-      uiChanges: [
-        "Tabular presentation of analysis results with clear column headers",
-        "Color-coded measurement values (green for normal, red for outliers)",
-        "Standard deviation values displayed for clinical context",
-        "Prominent analysis results panel with expandable sections",
-        "Improved spacing and alignment of measurement data"
-      ],
-      contributions: [
-        { role: "AI", action: "Developed deviation detection algorithm identifying clinically significant outliers with 97% accuracy" },
-        { role: "Designer", action: "Implemented high-contrast color system for immediate visual understanding of clinical significance" },
-        { role: "Developer", action: "Built responsive table with dynamically highlighted values based on deviation ranges" }
+      hotspots: [
+        { 
+          id: 1, 
+          x: 75, 
+          y: 25, 
+          label: "Tabular Analysis", 
+          description: "Clear column headers for analysis results" 
+        },
+        { 
+          id: 2, 
+          x: 80, 
+          y: 45, 
+          label: "Color-Coding", 
+          description: "Green for normal, red for outliers" 
+        },
+        { 
+          id: 3, 
+          x: 85, 
+          y: 60, 
+          label: "Standard Deviations", 
+          description: "Numerical deviation values for clinical context" 
+        },
+        { 
+          id: 4, 
+          x: 70, 
+          y: 15, 
+          label: "Expandable Panels", 
+          description: "Analysis results in collapsible sections" 
+        },
+        { 
+          id: 5, 
+          x: 78, 
+          y: 75, 
+          label: "Improved Spacing", 
+          description: "Better alignment of measurement data" 
+        }
       ]
     },
     {
@@ -119,17 +226,42 @@ const About: React.FC = () => {
       date: "Day 5",
       image: "/images/4-step.png",
       description: "Our final design, visible in this screenshot, achieves the perfect balance between powerful functionality and intuitive simplicity. The interface now showcases a comprehensive yet clean analysis view with intuitive landmarks on the radiograph image. The right panel organizes all measurements with clinical context and normal ranges, using visual emphasis to immediately highlight areas of concern. The key achievement is our visual prioritization system that immediately draws the clinician's attention to the most significant deviations while maintaining access to comprehensive data. The Swagger API documentation created through our AI-assisted process was fully integrated, enabling third-party extensions.",
-      uiChanges: [
-        "Radiograph with selective landmark visualization",
-        "Anatomical tracing lines (blue) and measurement lines (red) shown together",
-        "Refined analysis panel with clear visual hierarchy",
-        "Precise measurement values with color-coded deviation indicators",
-        "Simplified top navigation with essential controls only"
-      ],
-      contributions: [
-        { role: "AI", action: "Optimized landmark positioning with smart overlap prevention reducing visual clutter by 65%" },
-        { role: "Designer", action: "Finalized the information hierarchy allowing immediate focus on clinically significant deviations" },
-        { role: "Developer", action: "Integrated the radiograph visualization system with our measurement API and Swagger documentation" }
+      hotspots: [
+        { 
+          id: 1, 
+          x: 25, 
+          y: 35, 
+          label: "Selective Landmarks", 
+          description: "Only essential landmarks shown on radiograph" 
+        },
+        { 
+          id: 2, 
+          x: 35, 
+          y: 50, 
+          label: "Combined Visualization", 
+          description: "Blue tracing lines and red measurement lines together" 
+        },
+        { 
+          id: 3, 
+          x: 75, 
+          y: 40, 
+          label: "Refined Analysis", 
+          description: "Clear visual hierarchy in measurement panel" 
+        },
+        { 
+          id: 4, 
+          x: 80, 
+          y: 60, 
+          label: "Deviation Indicators", 
+          description: "Color-coded indicators for measurement values" 
+        },
+        { 
+          id: 5, 
+          x: 30, 
+          y: 15, 
+          label: "Essential Controls", 
+          description: "Simplified navigation with only necessary options" 
+        }
       ]
     }
   ];
@@ -201,32 +333,45 @@ const About: React.FC = () => {
                             alt={`${item.title} screenshot`} 
                             className="object-cover w-full h-full hover:scale-105 transition-transform duration-700"
                           />
+                          
+                          {/* Hotspots */}
+                          <TooltipProvider>
+                            {item.hotspots.map((hotspot) => (
+                              <Tooltip key={hotspot.id}>
+                                <TooltipTrigger asChild>
+                                  <div
+                                    className="absolute w-8 h-8 cursor-pointer transform -translate-x-1/2 -translate-y-1/2 transition-all duration-200 hover:scale-110"
+                                    style={{ 
+                                      left: `${hotspot.x}%`, 
+                                      top: `${hotspot.y}%` 
+                                    }}
+                                  >
+                                    <PlusCircle className="w-8 h-8 text-yellow-500 drop-shadow-md bg-white bg-opacity-80 rounded-full" />
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent 
+                                  side="right"
+                                  className="max-w-xs bg-slate-900 text-white p-3 rounded-lg border-0"
+                                >
+                                  <div>
+                                    <h4 className="font-semibold text-yellow-400">{hotspot.label}</h4>
+                                    <p className="text-sm text-slate-200">{hotspot.description}</p>
+                                  </div>
+                                </TooltipContent>
+                              </Tooltip>
+                            ))}
+                          </TooltipProvider>
                         </div>
                       </CardContent>
-                      <CardFooter className="bg-slate-50 p-6">
-                        <div className="w-full space-y-6">
-                          {/* UI Changes */}
-                          <div>
-                            <h3 className="text-slate-800 font-semibold mb-3">Key UI Changes:</h3>
-                            <ul className="list-disc pl-5 text-sm text-slate-600 space-y-1">
-                              {item.uiChanges.map((change, i) => (
-                                <li key={i}>{change}</li>
-                              ))}
-                            </ul>
-                          </div>
-                          
-                          {/* Team Contributions */}
-                          <div>
-                            <h3 className="text-slate-800 font-semibold mb-3">Team Contributions:</h3>
-                            <ul className="list-none text-sm text-slate-600 space-y-3 grid grid-cols-1 md:grid-cols-3 gap-4">
-                              {item.contributions.map((contribution, i) => (
-                                <li key={i} className="flex flex-col gap-1 bg-white p-4 rounded-lg shadow-sm">
-                                  <span className="font-semibold text-blue-700">{contribution.role}</span> 
-                                  <span>{contribution.action}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
+                      <CardFooter className="bg-slate-50 p-6 flex justify-between items-center">
+                        <div className="text-sm text-slate-600">
+                          <span className="font-semibold text-slate-800">Key UI Changes:</span>{' '}
+                          <span className="italic">Hover over the markers on the image to see detailed explanations</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="inline-flex items-center rounded-full bg-yellow-100 text-yellow-800 px-2.5 py-0.5 text-xs font-medium">
+                            <PlusCircle className="w-3 h-3 mr-1" /> {item.hotspots.length} key changes
+                          </span>
                         </div>
                       </CardFooter>
                     </Card>
