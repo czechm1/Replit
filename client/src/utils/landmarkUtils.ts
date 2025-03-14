@@ -2,6 +2,51 @@ import { landmarkDescriptions, getLandmarkDescription } from '../data/landmarkDe
 import { groupLandmarks } from '../components/radiograph/utils/landmarkGroups';
 
 /**
+ * Format landmark name to a standardized abbreviation
+ * @param landmarkName The landmark name to format into an abbreviation
+ * @returns Standardized abbreviation string
+ */
+export function formatLandmarkAbbreviation(landmarkName: string): string {
+  // First check if it already has a defined abbreviation in the descriptions
+  const description = getLandmarkDescription(landmarkName);
+  if (description && description.abbreviation) {
+    return description.abbreviation;
+  }
+  
+  // For multi-word landmarks, use first letter of each word
+  if (landmarkName.includes(' ')) {
+    return landmarkName
+      .split(' ')
+      .map(word => word.charAt(0))
+      .join('')
+      .toUpperCase();
+  }
+  
+  // For single letter landmarks like A, B, use as is
+  if (landmarkName.length === 1) {
+    return landmarkName.toUpperCase();
+  }
+  
+  // For landmarks with hyphen or underscore
+  if (landmarkName.includes('-') || landmarkName.includes('_')) {
+    const separator = landmarkName.includes('-') ? '-' : '_';
+    return landmarkName
+      .split(separator)
+      .map(part => part.charAt(0))
+      .join('')
+      .toUpperCase();
+  }
+  
+  // For long names, use first 3 characters
+  if (landmarkName.length > 3) {
+    return landmarkName.substring(0, 3);
+  }
+  
+  // Default: return as is
+  return landmarkName;
+}
+
+/**
  * Get landmark type (dental, soft tissue, or skeletal) based on landmark identifier
  * @param landmarkName The landmark name or abbreviation 
  * @returns 'dental' | 'soft' | 'skeletal' landmark type

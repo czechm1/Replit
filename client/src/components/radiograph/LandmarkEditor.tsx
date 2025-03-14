@@ -7,10 +7,20 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useCollaborativeAnnotation } from '@/hooks/useCollaborativeAnnotation';
-import { Landmark } from '@shared/schema';
 import { useLandmarks } from '@/hooks/useLandmarks';
 import { LandmarkPoint } from './types/landmark';
-import { LandmarkComponent } from './LandmarkComponent';
+import { getLandmarkColor, getSelectedLandmarkColor, formatLandmarkAbbreviation } from '../../utils/landmarkUtils';
+
+// Define the interface for landmarks to avoid schema import issues
+interface Landmark {
+  id: string;
+  name: string;
+  abbreviation: string;
+  x: number;
+  y: number;
+  description?: string;
+  confidence?: number;
+}
 
 
 interface LandmarkEditorProps {
@@ -51,7 +61,7 @@ export function LandmarkEditor({
       const initialLandmarks = landmarkData.points.map(point => ({
         id: nanoid(),
         name: point.landmark,
-        abbreviation: point.landmark,
+        abbreviation: formatLandmarkAbbreviation(point.landmark),
         x: point.coordinates.x,
         y: point.coordinates.y,
         confidence: point.confidence || 1.0
@@ -103,12 +113,15 @@ export function LandmarkEditor({
 
   // Handle creating a new landmark
   const handleAddLandmark = useCallback((x: number, y: number) => {
-    if (!newLandmarkMode || !newLandmarkName || !newLandmarkAbbr) return;
+    if (!newLandmarkMode || !newLandmarkName) return; // Only name is required
 
+    // Use provided abbreviation or generate one using our utility
+    const abbr = newLandmarkAbbr || formatLandmarkAbbreviation(newLandmarkName);
+    
     const newLandmark: Landmark = {
       id: nanoid(),
       name: newLandmarkName,
-      abbreviation: newLandmarkAbbr,
+      abbreviation: abbr,
       x,
       y,
       confidence: 1.0
@@ -233,9 +246,12 @@ export function LandmarkEditor({
     }
   }, [isEditMode, newLandmarkMode, handleAddLandmark]);
 
-  const handleSelectLandmark = useCallback((landmark: Landmark) => {
-    handleLandmarkSelect(landmark)
-  }, [handleLandmarkSelect])
+  const handleSelectLandmark = useCallback((id: string) => {
+    const landmark = collection?.landmarks.find(l => l.id === id);
+    if (landmark) {
+      handleLandmarkSelect(landmark);
+    }
+  }, [handleLandmarkSelect, collection])
 
   if (!isEditMode) {
     return (
@@ -271,15 +287,63 @@ export function LandmarkEditor({
       >
         {/* Render landmarks */}
         {collection?.landmarks.map((landmark) => (
-          <LandmarkComponent
+          <div
             key={landmark.id}
-            landmark={landmark}
-            isSelected={selectedLandmarkId === landmark.id}
-            isDragging={isDragging}
-            isDragged={draggedLandmarkId === landmark.id}
-            isEditMode={true}
-            onClick={handleSelectLandmark}
-          />
+            className={`absolute w-[10px] h-[10px] -translate-x-[5px] -translate-y-[5px] rounded-full 
+              cursor-move group
+              transition-all duration-150 ease-in-out
+              hover:w-[15px] hover:h-[15px] hover:-translate-x-[7.5px] hover:-translate-y-[7.5px] hover:shadow-lg hover:border-2 hover:border-yellow-300
+              ${
+                selectedLandmarkId === landmark.id
+                ? 'border-[2px] border-white shadow ring-2 ring-blue-300 ring-opacity-50'
+                : draggedLandmarkId === landmark.id
+                ? 'border-[2px] border-white shadow-lg'
+                : 'border-[1px] border-white'
+              } 
+              ${isDragging && draggedLandmarkId === landmark.id ? 'z-50' : 'z-10'}`}
+            style={{
+              left: landmark.x,
+              top: landmark.y,
+              backgroundColor: selectedLandmarkId === landmark.id 
+                                ? getSelectedLandmarkColor(landmark.name)  
+                                : draggedLandmarkId === landmark.id 
+                                  ? getSelectedLandmarkColor(landmark.name)
+                                  : getLandmarkColor(landmark.name)
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleSelectLandmark(landmark.id);
+            }}
+            onMouseDown={(e) => handleDragStart(e, landmark.id)}
+            onMouseMove={(e) => isDragging && handleDrag(e)}
+            onMouseUp={handleDragEnd}
+          >
+            {/* Display landmark abbreviation with improved visibility - positioned away from the center */}
+            <div 
+              className="absolute whitespace-nowrap text-xs font-bold text-white pointer-events-none select-none"
+              style={{ 
+                textShadow: '0px 0px 2px rgba(0,0,0,0.8)',
+                letterSpacing: '0.02em',
+                right: '-10px',  // Position the text to the right of the point
+                top: '-14px'     // Position the text slightly above the point
+              }}
+              title={`${landmark.name} (${landmark.abbreviation || formatLandmarkAbbreviation(landmark.name)})`}
+            >
+              {landmark.abbreviation || formatLandmarkAbbreviation(landmark.name)}
+            </div>
+            
+            {/* Landmark label positioned ABOVE the landmark point to prevent overlap */}
+            <div 
+              className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 
+                         whitespace-nowrap bg-black/80 text-white text-xs px-2 py-1 rounded pointer-events-none z-20 shadow-md"
+              style={{ 
+                textShadow: '0px 0px 1px rgba(0,0,0,0.5)', 
+                minWidth: `${landmark.name.length * 4}px` 
+              }}
+            >
+              {landmark.name}
+            </div>
+          </div>
         ))}
       </div>
 
@@ -334,14 +398,19 @@ export function LandmarkEditor({
                     onChange={(e) => setNewLandmarkName(e.target.value)}
                     className="h-8 text-sm"
                   />
-                  <Input 
-                    type="text" 
-                    placeholder="Abbreviation (e.g., 'A')" 
-                    value={newLandmarkAbbr}
-                    onChange={(e) => setNewLandmarkAbbr(e.target.value)}
-                    className="h-8 text-sm"
-                    maxLength={3}
-                  />
+                  <div className="relative">
+                    <Input 
+                      type="text" 
+                      placeholder="Abbreviation (optional)" 
+                      value={newLandmarkAbbr}
+                      onChange={(e) => setNewLandmarkAbbr(e.target.value)}
+                      className="h-8 text-sm pr-16"
+                      maxLength={3}
+                    />
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+                      Optional
+                    </div>
+                  </div>
                 </div>
                 <div className="text-xs text-gray-500 mt-1">
                   Click on the image to place the landmark

@@ -1,9 +1,10 @@
 import React from 'react';
 import { useLandmarks } from '../../hooks/useLandmarks';
-import LandmarkComponent from './LandmarkComponent';
+import { LandmarkComponent } from './LandmarkComponent';
 import { LoadingSpinner } from '../ui/loading-spinner';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
+import { formatLandmarkAbbreviation } from '../../utils/landmarkUtils';
 
 interface LandmarksLayerProps {
   opacity: number;
@@ -57,11 +58,25 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
   }
 
   return (
-    <LandmarkComponent
-      landmarkData={landmarkData}
-      opacity={opacity}
-      visibleLandmarkGroups={visibleLandmarkGroups}
-    />
+    <div className={`absolute inset-0 ${className || ''}`} style={{ opacity }}>
+      {landmarkData.points.map((point) => (
+        <LandmarkComponent
+          key={point.landmark}
+          landmark={{
+            id: point.landmark,
+            name: point.landmark,
+            abbreviation: formatLandmarkAbbreviation(point.landmark),
+            x: point.coordinates.x,
+            y: point.coordinates.y,
+            confidence: point.confidence
+          }}
+          isSelected={false}
+          isDragging={false}
+          isDragged={false}
+          isEditMode={false}
+        />
+      ))}
+    </div>
   );
 };
 

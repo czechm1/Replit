@@ -244,19 +244,49 @@ export function LandmarkEditor({
       >
         {/* Render landmarks */}
         {collection?.landmarks.map((landmark) => (
-          <LandmarkComponent
+          <div
             key={landmark.id}
-            landmark={landmark}
-            selectedLandmarkId={selectedLandmarkId}
-            draggedLandmarkId={draggedLandmarkId}
-            isDragging={isDragging}
-            handleLandmarkSelect={handleLandmarkSelect}
-            handleDragStart={handleDragStart}
-            handleDrag={handleDrag}
-            handleDragEnd={handleDragEnd}
-            imageDimensions={imageDimensions}
-            handleLandmarkMove={handleLandmarkMove}
-          />
+            className={`absolute w-[10px] h-[10px] -translate-x-[5px] -translate-y-[5px] rounded-full 
+              cursor-move group
+              transition-all duration-150 ease-in-out
+              hover:w-[15px] hover:h-[15px] hover:-translate-x-[7.5px] hover:-translate-y-[7.5px] hover:shadow-lg hover:border-2 hover:border-yellow-300
+              ${
+                selectedLandmarkId === landmark.id
+                ? 'border-[2px] border-white shadow ring-2 ring-blue-300 ring-opacity-50'
+                : draggedLandmarkId === landmark.id
+                ? 'border-[2px] border-white shadow-lg'
+                : 'border-[1px] border-white'
+              } 
+              ${isDragging && draggedLandmarkId === landmark.id ? 'z-50' : 'z-10'}`}
+            style={{
+              left: landmark.x,
+              top: landmark.y,
+              backgroundColor: selectedLandmarkId === landmark.id 
+                                ? getSelectedLandmarkColor(landmark.name)  // Selected state 
+                                : draggedLandmarkId === landmark.id 
+                                  ? getSelectedLandmarkColor(landmark.name) // Dragged state uses selected color for emphasis
+                                  : getLandmarkColor(landmark.name)         // Normal state
+            }}
+            onClick={(e) => {
+              if (!isDragging) {
+                e.stopPropagation();
+                handleLandmarkSelect(landmark);
+              }
+            }}
+            onMouseDown={(e) => handleDragStart(e, landmark.id)}
+            onMouseMove={(e) => isDragging && handleDrag(e)}
+            onMouseUp={handleDragEnd}
+          >
+            <div 
+              className="absolute text-xs font-bold text-[#ECE156] top-1 left-2 whitespace-nowrap transition-all duration-150 ease-in-out group-hover:bg-black/30 group-hover:px-1 group-hover:rounded group-hover:text-white"
+              style={{
+                textShadow: '0px 0px 2px rgba(0,0,0,0.8)',
+                willChange: 'transform'
+              }}
+            >
+              {landmark.abbreviation}
+            </div>
+          </div>
         ))}
       </div>
 

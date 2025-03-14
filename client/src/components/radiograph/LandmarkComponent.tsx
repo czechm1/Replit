@@ -1,6 +1,16 @@
 import React from 'react';
-import { Landmark } from '../../../shared/schema';
-import { getSelectedLandmarkColor } from './utils/colors';
+import { getSelectedLandmarkColor, getLandmarkColor, formatLandmarkAbbreviation } from '../../utils/landmarkUtils';
+
+// Define the interface for landmarks
+interface Landmark {
+  id: string;
+  name: string;
+  abbreviation: string;
+  x: number;
+  y: number;
+  description?: string;
+  confidence?: number;
+}
 
 interface LandmarkComponentProps {
   landmark: Landmark;
@@ -26,6 +36,9 @@ export function LandmarkComponent({
     }
   };
 
+  // Get abbreviated name with consistent formatting
+  const abbreviation = landmark.abbreviation || formatLandmarkAbbreviation(landmark.name);
+  
   // Always use the enhanced styling from edit mode
   return (
     <div
@@ -49,18 +62,32 @@ export function LandmarkComponent({
                           ? getSelectedLandmarkColor(landmark.name)
                           : isDragged 
                             ? getSelectedLandmarkColor(landmark.name)
-                            : landmark.color || '#3b82f6',
+                            : getLandmarkColor(landmark.name),
       }}
     >
-      {/* Display landmark abbreviation for better visibility */}
-      {landmark.abbreviation && (
-        <div className="absolute whitespace-nowrap text-xs font-bold text-white -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2 pointer-events-none select-none">
-          {landmark.abbreviation}
-        </div>
-      )}
+      {/* Display landmark abbreviation with improved visibility - positioned right of the center */}
+      <div 
+        className="absolute whitespace-nowrap text-xs font-bold text-white pointer-events-none select-none"
+        style={{ 
+          textShadow: '0px 0px 2px rgba(0,0,0,0.8)',
+          letterSpacing: '0.02em',
+          right: '-10px',  // Position the text to the right of the point
+          top: '-14px'     // Position the text slightly above the point
+        }}
+        title={`${landmark.name} (${abbreviation})`} // Add tooltip showing full name and abbreviation
+      >
+        {abbreviation}
+      </div>
 
-      {/* Landmark label */}
-      <div className="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap bg-black/75 text-white text-xs px-2 py-0.5 rounded pointer-events-none">
+      {/* Landmark label with improved positioning and alignment - positioned ABOVE the landmark point */}
+      <div 
+        className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 
+                   whitespace-nowrap bg-black/80 text-white text-xs px-2 py-1 rounded pointer-events-none z-20 shadow-md"
+        style={{ 
+          textShadow: '0px 0px 1px rgba(0,0,0,0.5)', 
+          minWidth: `${landmark.name.length * 4}px` 
+        }}
+      >
         {landmark.name}
       </div>
     </div>
