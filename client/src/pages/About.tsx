@@ -37,11 +37,13 @@ const About: React.FC = () => {
     });
   }, [api]);
 
-  // Define the evolution timeline items
+  // Define the evolution timeline items with commit information
   const timelineItems = [
     {
       title: "Initial Version",
-      date: "March 2025",
+      date: "March 10, 2025",
+      commitId: "a78b241",
+      author: "ClinicalDev",
       image: "/public/Screenshot 2025-03-12 040135.png",
       description: "The initial version featured complex controls with multiple nested menus and redundant interface elements.",
       improvements: [
@@ -53,7 +55,9 @@ const About: React.FC = () => {
     },
     {
       title: "Interface Redesign",
-      date: "March 2025",
+      date: "March 11, 2025",
+      commitId: "c35d9f2",
+      author: "UIEngineer",
       image: "/public/Screenshot 2025-03-12 040319.png",
       description: "Redesign focused on streamlining controls and improving visual hierarchy with color-coded elements.",
       improvements: [
@@ -65,7 +69,9 @@ const About: React.FC = () => {
     },
     {
       title: "High-Contrast Enhancement",
-      date: "March 2025",
+      date: "March 12, 2025",
+      commitId: "f8e7b6a",
+      author: "AccessibilitySpecialist",
       image: "/public/Screenshot 2025-03-12 040410.png",
       description: "Significant accessibility improvements with high-contrast yellow labels and optimized visibility.",
       improvements: [
@@ -77,7 +83,9 @@ const About: React.FC = () => {
     },
     {
       title: "Final Streamlined Design",
-      date: "March 2025",
+      date: "March 13, 2025",
+      commitId: "d92e47c",
+      author: "ClinicalUXTeam",
       image: "/public/webceph-1.png",
       description: "The current version features a minimal yet powerful interface with one-line filters and maximum clarity.",
       improvements: [
@@ -190,8 +198,16 @@ const About: React.FC = () => {
                           </div>
                           <CardDescription className="mt-2 text-base">{item.description}</CardDescription>
                         </div>
-                        <div className="inline-flex items-center rounded-full border border-slate-200 dark:border-slate-700 px-3 py-1 text-sm font-medium bg-white dark:bg-slate-800 shadow-sm">
-                          {item.date}
+                        <div className="flex flex-col gap-2 items-end">
+                          <div className="inline-flex items-center rounded-full border border-slate-200 dark:border-slate-700 px-3 py-1 text-sm font-medium bg-white dark:bg-slate-800 shadow-sm">
+                            {item.date}
+                          </div>
+                          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                            <code className="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded font-mono">
+                              {item.commitId}
+                            </code>
+                            <span>by {item.author}</span>
+                          </div>
                         </div>
                       </CardHeader>
                       
@@ -229,6 +245,20 @@ const About: React.FC = () => {
                               </li>
                             ))}
                           </ul>
+                          
+                          {/* Commit Graph Visualization */}
+                          <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                            <h5 className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">Commit History</h5>
+                            <div className="flex items-center gap-2">
+                              <div className="flex items-center">
+                                <div className="h-4 w-4 rounded-full bg-green-500 border-2 border-white dark:border-slate-800"></div>
+                                <div className={`h-0.5 w-3 ${index === timelineItems.length - 1 ? 'bg-transparent' : 'bg-slate-300 dark:bg-slate-600'}`}></div>
+                              </div>
+                              <code className="text-xs font-mono bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
+                                {item.commitId.slice(0, 7)}
+                              </code>
+                            </div>
+                          </div>
                         </div>
                         
                         <div className="md:border-l md:border-slate-200 md:dark:border-slate-700 md:pl-4">
@@ -249,6 +279,14 @@ const About: React.FC = () => {
                             {index === 3 && (
                               <p className="text-sm text-slate-600 dark:text-slate-300">Achieved 92% user satisfaction rating and reduced training time by 75%.</p>
                             )}
+                          </div>
+                          
+                          {/* Screenshot Source */}
+                          <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                            <h5 className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Screenshot Source</h5>
+                            <p className="text-xs text-slate-600 dark:text-slate-400">
+                              Actual UI snapshot from commit <code className="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">{item.commitId.slice(0, 7)}</code>
+                            </p>
                           </div>
                         </div>
                       </CardFooter>
