@@ -38,6 +38,8 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
     setShowImageSettings,
     setShowObjectVisibility,
     defaultLayerOpacity,
+    resetLayerOpacity,
+    resetOnlyImageControls,
   } = useLayerControls();
 
   // Image transformation state
