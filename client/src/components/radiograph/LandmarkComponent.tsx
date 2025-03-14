@@ -104,18 +104,19 @@ export function LandmarkComponent({
         borderStyle: 'solid' // Simple border style with no confidence indicators
       }}
     >
-      {/* Abbreviation label with ultra high contrast yellow - no background */}
+      {/* Abbreviation label with ultra high contrast green/red styling - no background */}
       {!hideLabel && (
         <div 
-          className={`absolute whitespace-nowrap text-[11px] font-black pointer-events-none select-none
+          className={`absolute whitespace-nowrap text-[12px] font-bold pointer-events-none select-none
                      transition-all duration-200 ease-in-out`}
           style={{ 
-            color: '#FFFF00', // Ultra high contrast yellow
+            color: getLandmarkColor(landmark.name) === '#ff0000' ? '#ff0000' : 
+                  getLandmarkColor(landmark.name) === '#0000ff' ? '#00ff00' : '#00ff00', // Match the green/red scheme from screenshot
             // No text shadow as requested
             letterSpacing: '0.05em',
             left: `${labelOffsets.x || 0}px`,
             top: `${labelOffsets.y || 0}px`,
-            minWidth: '14px',
+            minWidth: '18px',
             textAlign: 'center',
             transform: isSelected ? 'scale(1.25)' : 'scale(1)',
             zIndex: isSelected ? 30 : 20,
@@ -129,10 +130,11 @@ export function LandmarkComponent({
       {/* Full name label with no background - show only when hovered */}
       {(isSelected || isHovered) && (
         <div 
-          className={`absolute whitespace-nowrap text-xs font-black
+          className={`absolute whitespace-nowrap text-xs font-bold
                     pointer-events-none z-40 transition-opacity duration-300 opacity-100`}
           style={{ 
-            color: '#FFFF00', // Ultra high contrast yellow
+            color: getLandmarkColor(landmark.name) === '#ff0000' ? '#ff0000' : 
+                  getLandmarkColor(landmark.name) === '#0000ff' ? '#00ff00' : '#00ff00',
             // No text shadow as requested
             minWidth: `${landmark.name.length * 4}px`,
             top: `${-35}px`,
