@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { nanoid } from 'nanoid';
 import { Edit2, Plus, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useCollaborativeAnnotation } from '@/hooks/useCollaborativeAnnotation';
 import { Landmark } from '@shared/schema';
+import { useLandmarks } from '@/hooks/useLandmarks';
+import { LandmarkPoint } from './types/landmark';
 
 interface LandmarkEditorProps {
   collectionId: string;
@@ -36,6 +38,29 @@ export function LandmarkEditor({
   const [isDragging, setIsDragging] = useState(false);
   const [draggedLandmarkId, setDraggedLandmarkId] = useState<string | null>(null);
   const dragStartPos = useRef({ x: 0, y: 0 });
+  
+  // Get initial landmarks from the API
+  const { landmarkData, refetch: refetchLandmarks } = useLandmarks();
+
+  // Initialize collection with landmarks from API
+  useEffect(() => {
+    if (landmarkData && landmarkData.points.length > 0 && !collection?.landmarks.length) {
+      // Initialize with landmarks from API
+      const initialLandmarks = landmarkData.points.map(point => ({
+        id: nanoid(),
+        name: point.landmark,
+        abbreviation: point.landmark,
+        x: point.coordinates.x,
+        y: point.coordinates.y,
+        confidence: point.confidence || 1.0
+      }));
+      
+      // Add to collection
+      initialLandmarks.forEach(landmark => {
+        addLandmark(landmark);
+      });
+    }
+  }, [landmarkData]);
   
   const {
     collection,
@@ -207,29 +232,48 @@ export function LandmarkEditor({
   }, [isEditMode, newLandmarkMode, handleAddLandmark]);
 
   if (!isEditMode) {
-    // Return empty fragment when not in edit mode
-    // This removes the floating edit button
-    return <></>;
+    return (
+      <div className="absolute top-4 right-4 flex flex-col gap-2">
+        {/* Edit mode toggle */}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={onToggleEditMode}
+                className="h-10 w-10 rounded-full bg-white/90 backdrop-blur-sm shadow-md text-primary hover:bg-white"
+              >
+                <Edit2 className="h-5 w-5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="left">
+              <p>Edit Landmarks</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+    );
   }
 
   return (
     <>
       {/* Landmarks editing overlay for clicking and dragging */}
       <div 
-        className="absolute inset-0 cursor-crosshair" 
+        className="absolute inset-0 cursor-crosshair z-30" 
         onClick={handleCanvasClick}
       >
         {/* Render landmarks */}
         {collection?.landmarks.map((landmark) => (
           <div
             key={landmark.id}
-            className={`absolute w-4 h-4 -translate-x-2 -translate-y-2 rounded-full border-2 border-white cursor-move ${
+            className={`absolute w-5 h-5 -translate-x-2 -translate-y-2 rounded-full border-2 border-white cursor-move ${
               selectedLandmarkId === landmark.id
                 ? 'bg-blue-500 shadow-lg'
                 : draggedLandmarkId === landmark.id
                 ? 'bg-green-500 shadow-lg'
                 : 'bg-red-500'
-            } ${isDragging && draggedLandmarkId === landmark.id ? 'z-50' : 'z-10'}`}
+            } ${isDragging && draggedLandmarkId === landmark.id ? 'z-50' : 'z-40'}`}
             style={{
               left: landmark.x,
               top: landmark.y,
@@ -252,7 +296,7 @@ export function LandmarkEditor({
       </div>
 
       {/* Controls Panel */}
-      <div className="absolute top-4 right-4 flex flex-col gap-2">        
+      <div className="absolute top-4 right-4 flex flex-col gap-2 z-50">        
         {/* Edit controls */}
         <div className="bg-white/90 backdrop-blur-sm rounded-md shadow-md p-3">
           <div className="flex justify-between items-center mb-2">

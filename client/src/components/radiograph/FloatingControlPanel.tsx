@@ -121,11 +121,11 @@ const FloatingControlPanel: React.FC<FloatingControlPanelProps> = ({
               <Button 
                 variant={isEditMode ? "default" : "ghost"}
                 size="sm" 
-                className="h-9 w-9 rounded-full"
+                className={`h-9 rounded-full ${isEditMode ? 'bg-blue-500 text-white hover:bg-blue-600' : ''}`}
                 onClick={onToggleEditMode}
               >
-                <Edit2 className="h-4 w-4" />
-                <span className="sr-only">Edit Landmarks</span>
+                <Edit2 className="h-4 w-4 mr-1" />
+                {isEditMode ? "Editing" : "Edit"}
               </Button>
             </TooltipTrigger>
             <TooltipContent>

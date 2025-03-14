@@ -10,6 +10,7 @@ interface LandmarksLayerProps {
   visibleLandmarkGroups: string[];
   className?: string;
   showTooltips?: boolean;
+  editMode?: boolean; // Add support for edit mode
 }
 
 /**
@@ -20,6 +21,7 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
   visibleLandmarkGroups,
   className,
   showTooltips = true,
+  editMode = false, // Default to false
 }) => {
   const { landmarkData, loading, error } = useLandmarks();
 
@@ -48,6 +50,12 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
     return null;
   }
 
+  // If in edit mode, don't render the visualization layer
+  // This prevents conflicts with the editor's interactive landmarks
+  if (editMode) {
+    return null;
+  }
+
   return (
     <LandmarkComponent
       landmarkData={landmarkData}
@@ -57,4 +65,4 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
   );
 };
 
-export default LandmarksLayer; 
+export default LandmarksLayer;

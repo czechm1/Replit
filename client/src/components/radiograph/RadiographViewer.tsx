@@ -184,6 +184,7 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
           <LandmarksLayer
             opacity={layerOpacity.landmarks}
             visibleLandmarkGroups={['skeletal', 'dental']}
+            editMode={isEditMode} // Pass editMode to control visibility
           />
         </div>
 
