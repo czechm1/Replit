@@ -32,6 +32,27 @@ export function LandmarkEditor({
   const [newLandmarkName, setNewLandmarkName] = useState('');
   const [newLandmarkAbbr, setNewLandmarkAbbr] = useState('');
   
+  // Get landmark color based on name or type
+  const getLandmarkColor = (landmark: string): string => {
+    if (
+      landmark.toLowerCase().includes('dental') ||
+      landmark.includes('1') ||
+      landmark.includes('6')
+    ) {
+      return '#22c55e'; // green for dental
+    } else if (
+      landmark.toLowerCase().includes('soft') ||
+      landmark === 'G' ||
+      landmark === 'Prn' ||
+      landmark === 'Subnasale' ||
+      landmark === 'Columella' ||
+      landmark.includes('Lip')
+    ) {
+      return '#3b82f6'; // blue for soft tissue
+    }
+    return '#ef4444'; // red for skeletal
+  };
+  
   // Dragging state
   const [isDragging, setIsDragging] = useState(false);
   const [draggedLandmarkId, setDraggedLandmarkId] = useState<string | null>(null);
@@ -242,16 +263,24 @@ export function LandmarkEditor({
         {collection?.landmarks.map((landmark) => (
           <div
             key={landmark.id}
-            className={`absolute w-4 h-4 -translate-x-2 -translate-y-2 rounded-full border-2 border-white cursor-move ${
-              selectedLandmarkId === landmark.id
-                ? 'bg-blue-500 shadow-lg'
+            className={`absolute w-[10px] h-[10px] -translate-x-[5px] -translate-y-[5px] rounded-full 
+              cursor-move group
+              transition-all duration-150 ease-in-out
+              hover:w-[15px] hover:h-[15px] hover:-translate-x-[7.5px] hover:-translate-y-[7.5px] hover:shadow-lg hover:border-2 hover:border-yellow-300
+              ${
+                selectedLandmarkId === landmark.id
+                ? 'bg-blue-500 border-[2px] border-white shadow ring-2 ring-blue-300 ring-opacity-50'
                 : draggedLandmarkId === landmark.id
-                ? 'bg-green-500 shadow-lg'
-                : 'bg-red-500'
-            } ${isDragging && draggedLandmarkId === landmark.id ? 'z-50' : 'z-10'}`}
+                ? 'bg-green-500 border-[2px] border-white shadow-lg'
+                : 'border-[1px] border-white'
+              } 
+              ${isDragging && draggedLandmarkId === landmark.id ? 'z-50' : 'z-10'}`}
             style={{
               left: landmark.x,
               top: landmark.y,
+              backgroundColor: selectedLandmarkId === landmark.id ? '#3b82f6' : 
+                              draggedLandmarkId === landmark.id ? '#22c55e' : 
+                              '#ef4444'
             }}
             onClick={(e) => {
               if (!isDragging) {
@@ -263,7 +292,7 @@ export function LandmarkEditor({
             onMouseMove={(e) => isDragging && handleDrag(e)}
             onMouseUp={handleDragEnd}
           >
-            <div className="absolute text-xs font-bold text-white -top-5 left-1/2 -translate-x-1/2">
+            <div className="absolute text-xs font-bold text-[#ECE156] top-1 left-2 whitespace-nowrap transition-all duration-150 ease-in-out group-hover:bg-black/30 group-hover:px-1 group-hover:rounded group-hover:text-white">
               {landmark.abbreviation}
             </div>
           </div>
