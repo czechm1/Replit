@@ -77,20 +77,10 @@ const ObjectVisibilityControl: React.FC<ObjectVisibilityProps> = ({
           {/* Landmark Filtering Section - Always visible in one line */}
           {layerOpacity.landmarks > 0 && (
             <div className="flex flex-row gap-1 flex-wrap mb-1">
-              {/* All Landmarks */}
-              <Badge 
-                variant={isGroupSelected('all') ? "default" : "outline"} 
-                className={`cursor-pointer ${isGroupSelected('all') ? 'bg-gray-800 hover:bg-gray-900 text-yellow-300' : 'hover:bg-slate-100'}`}
-                onClick={() => onToggleLandmarkGroup('all')}
-              >
-                {isGroupSelected('all') && <CheckIcon className="h-3 w-3 mr-1" />}
-                All
-              </Badge>
-              
               {/* Skeletal Landmarks */}
               <Badge 
                 variant={isGroupSelected('skeletal') ? "default" : "outline"} 
-                className={`cursor-pointer ${isGroupSelected('skeletal') ? 'bg-red-600 hover:bg-red-700 text-white' : 'hover:bg-slate-100 text-red-600 border-red-600'}`}
+                className={`cursor-pointer ${isGroupSelected('skeletal') ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'hover:bg-slate-100 text-blue-600 border-blue-600'}`}
                 onClick={() => onToggleLandmarkGroup('skeletal')}
               >
                 {isGroupSelected('skeletal') && <CheckIcon className="h-3 w-3 mr-1" />}
@@ -100,7 +90,7 @@ const ObjectVisibilityControl: React.FC<ObjectVisibilityProps> = ({
               {/* Dental Landmarks */}
               <Badge 
                 variant={isGroupSelected('dental') ? "default" : "outline"} 
-                className={`cursor-pointer ${isGroupSelected('dental') ? 'bg-red-500 hover:bg-red-600 text-white' : 'hover:bg-slate-100 text-red-500 border-red-500'}`}
+                className={`cursor-pointer ${isGroupSelected('dental') ? 'bg-green-600 hover:bg-green-700 text-white' : 'hover:bg-slate-100 text-green-600 border-green-600'}`}
                 onClick={() => onToggleLandmarkGroup('dental')}
               >
                 {isGroupSelected('dental') && <CheckIcon className="h-3 w-3 mr-1" />}
@@ -110,7 +100,7 @@ const ObjectVisibilityControl: React.FC<ObjectVisibilityProps> = ({
               {/* Soft Tissue Landmarks */}
               <Badge 
                 variant={isGroupSelected('softTissue') ? "default" : "outline"} 
-                className={`cursor-pointer ${isGroupSelected('softTissue') ? 'bg-red-400 hover:bg-red-500 text-white' : 'hover:bg-slate-100 text-red-400 border-red-400'}`}
+                className={`cursor-pointer ${isGroupSelected('softTissue') ? 'bg-amber-500 hover:bg-amber-600 text-white' : 'hover:bg-slate-100 text-amber-500 border-amber-500'}`}
                 onClick={() => onToggleLandmarkGroup('softTissue')}
               >
                 {isGroupSelected('softTissue') && <CheckIcon className="h-3 w-3 mr-1" />}
@@ -120,7 +110,7 @@ const ObjectVisibilityControl: React.FC<ObjectVisibilityProps> = ({
               {/* Outline Landmarks */}
               <Badge 
                 variant={isGroupSelected('outlines') ? "default" : "outline"} 
-                className={`cursor-pointer ${isGroupSelected('outlines') ? 'bg-red-700 hover:bg-red-800 text-white' : 'hover:bg-slate-100 text-red-700 border-red-700'}`}
+                className={`cursor-pointer ${isGroupSelected('outlines') ? 'bg-purple-600 hover:bg-purple-700 text-white' : 'hover:bg-slate-100 text-purple-600 border-purple-600'}`}
                 onClick={() => onToggleLandmarkGroup('outlines')}
               >
                 {isGroupSelected('outlines') && <CheckIcon className="h-3 w-3 mr-1" />}

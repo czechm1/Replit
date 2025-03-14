@@ -1,4 +1,4 @@
-import { LandmarkPoint } from '../types';
+import { LandmarkPoint } from '../types/landmark';
 
 export interface LandmarkGroups {
   skeletal: string[];
@@ -72,7 +72,7 @@ export function groupLandmarks(): LandmarkGroups {
   };
 }
 
-export type LandmarkGroupKey = keyof LandmarkGroups | 'all';
+export type LandmarkGroupKey = keyof LandmarkGroups;
 export type OutlineGroupKey = keyof LandmarkGroups['outlines'];
 
 export interface DisplayLandmarkGroupsOptions {
@@ -89,11 +89,6 @@ export function displayLandmarkGroups(
   const selectedPoints = new Set<LandmarkPoint>();
 
   options.selectedGroups.forEach((group) => {
-    if (group === 'all') {
-      points.forEach((point) => selectedPoints.add(point));
-      return;
-    }
-
     if (group === 'outlines' && options.includeOutlines) {
       const outlineGroups =
         options.specificOutlines ||
@@ -121,15 +116,6 @@ export function displayLandmarkGroups(
 export function getLandmarksByGroup(group: LandmarkGroupKey): string[] {
   const groups = groupLandmarks();
 
-  if (group === 'all') {
-    return [
-      ...groups.skeletal,
-      ...groups.dental,
-      ...groups.softTissue,
-      ...Object.values(groups.outlines).flat(),
-    ];
-  }
-
   if (group === 'outlines') {
     return Object.values(groups.outlines).flat();
   }
@@ -153,8 +139,9 @@ const profileView = displayLandmarkGroups(allPoints, {
   specificOutlines: ['mandible', 'maxilla']
 });
 
-// Display all landmarks
+// Display all landmark types together
 const completeView = displayLandmarkGroups(allPoints, {
-  selectedGroups: ['all']
+  selectedGroups: ['skeletal', 'dental', 'softTissue', 'outlines'],
+  includeOutlines: true
 });
 */

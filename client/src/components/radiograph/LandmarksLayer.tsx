@@ -76,12 +76,10 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
   }
 
   // Filter landmarks by selected groups
-  const filteredPoints = visibleLandmarkGroups.length > 0
-    ? displayLandmarkGroups(landmarkData.points, {
-        selectedGroups: visibleLandmarkGroups,
-        includeOutlines: visibleLandmarkGroups.includes('outlines'),
-      })
-    : landmarkData.points; // Show all if nothing selected
+  const filteredPoints = displayLandmarkGroups(landmarkData.points, {
+    selectedGroups: visibleLandmarkGroups,
+    includeOutlines: visibleLandmarkGroups.includes('outlines'),
+  });
   
   // Simple, effective approach for landmark positioning
   const organizeAndPositionLandmarks = () => {

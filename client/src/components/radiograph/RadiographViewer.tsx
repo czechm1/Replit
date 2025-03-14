@@ -43,8 +43,8 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [rotation, setRotation] = useState(0);
 
-  // Landmark filtering state
-  const [visibleLandmarkGroups, setVisibleLandmarkGroups] = useState<LandmarkGroupKey[]>(['all']);
+  // Landmark filtering state - default to showing all landmark types
+  const [visibleLandmarkGroups, setVisibleLandmarkGroups] = useState<LandmarkGroupKey[]>(['skeletal', 'dental', 'softTissue', 'outlines']);
 
   // Edit landmarks mode
   const [isEditMode, setIsEditMode] = useState(false);
@@ -104,28 +104,13 @@ const RadiographViewer: React.FC<RadiographViewerProps> = ({
   // Handle landmark group toggling
   const handleToggleLandmarkGroup = (group: LandmarkGroupKey) => {
     setVisibleLandmarkGroups(prev => {
-      // If clicking "all", either select only "all" or remove it
-      if (group === 'all') {
-        // If "all" is already selected, unselect everything
-        if (prev.includes('all')) {
-          return [];
-        }
-        // Otherwise select only "all"
-        return ['all'];
-      }
-      
-      // If "all" is currently selected and clicking another group,
-      // remove "all" and select only the clicked group
-      if (prev.includes('all')) {
-        return [group];
-      }
-      
       // Toggle the specific group (add if not present, remove if present)
       const isGroupSelected = prev.includes(group);
+      
       if (isGroupSelected) {
-        // Remove this group if it's the only one selected, don't leave an empty array
+        // Don't allow removing the last group - need at least one selected
         if (prev.length === 1) {
-          return ['all']; // Default back to "all" if removing the last group
+          return prev; // Keep at least one group selected
         }
         // Otherwise just remove this group
         return prev.filter(g => g !== group);
