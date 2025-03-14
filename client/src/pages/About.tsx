@@ -45,7 +45,7 @@ const About: React.FC = () => {
     {
       title: "Initial Concept",
       date: "Day 1",
-      image: "./attached_assets/0-initial.jpg", 
+      image: "/0-initial.jpg", 
       description: "Our journey began with a highly functional but visually complex interface. The initial design included numerous controls, measurements, and data points visible simultaneously, showcasing the technical capabilities but creating a steep learning curve for users.",
       contributions: [
         { role: "AI", action: "Generated comprehensive feature set for clinical analysis" },
@@ -56,7 +56,7 @@ const About: React.FC = () => {
     {
       title: "First Iteration",
       date: "Day 2",
-      image: "./attached_assets/1-step.jpg",
+      image: "/1-step.jpg",
       description: "The first major redesign focused on organizing controls into logical sections. We introduced tabs for different functionalities and created a clearer separation between the radiograph view and analysis tools.",
       contributions: [
         { role: "AI", action: "Suggested improved navigation patterns" },
@@ -67,7 +67,7 @@ const About: React.FC = () => {
     {
       title: "Visual Simplification",
       date: "Day 3",
-      image: "./attached_assets/2-step.jpg",
+      image: "/2-step.jpg",
       description: "In this iteration, we drastically reduced visual elements to focus attention on what matters most. The cleaner interface introduced color-coding for different measurement types and improved the contrast for better readability.",
       contributions: [
         { role: "Designer", action: "Applied minimalist design principles" },
@@ -78,7 +78,7 @@ const About: React.FC = () => {
     {
       title: "Enhanced Readability",
       date: "Day 4",
-      image: "./attached_assets/3-step.jpg",
+      image: "/3-step.jpg",
       description: "The critical breakthrough came when we realized high-contrast colors significantly improved reading measurements against radiographic backgrounds. This version introduced clearer typography and streamlined measurement display.",
       contributions: [
         { role: "Designer", action: "Implemented high-contrast measurement display" },
@@ -89,7 +89,7 @@ const About: React.FC = () => {
     {
       title: "Final Design",
       date: "Day 5",
-      image: "./attached_assets/4-step.jpg",
+      image: "/4-step.jpg",
       description: "Our final design achieved the perfect balance of power and simplicity. The focused interface puts the radiograph at center stage while providing immediate access to critical measurements and analysis features. The result: a 75% reduction in time required to complete a cephalometric analysis.",
       contributions: [
         { role: "Team", action: "Conducted clinical testing with practicing orthodontists" },
@@ -119,7 +119,7 @@ const About: React.FC = () => {
       {/* Hero section with animated elements */}
       <div className="relative overflow-hidden bg-gradient-to-br from-blue-900 via-slate-900 to-gray-900 text-white">
         <div className="absolute inset-0 opacity-20">
-          <div className="absolute inset-0 bg-[url('./attached_assets/4-step.jpg')] bg-center bg-cover bg-no-repeat opacity-10 blur-sm"></div>
+          <div className="absolute inset-0 bg-[url('/4-step.jpg')] bg-center bg-cover bg-no-repeat opacity-10 blur-sm"></div>
         </div>
         <div className="max-w-6xl mx-auto px-4 py-20 relative z-10">
           <div className="flex items-center mb-6">
