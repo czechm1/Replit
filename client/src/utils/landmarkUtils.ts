@@ -172,3 +172,23 @@ export function getAnatomicalRegion(landmarkName: string): string {
       return 'Skeletal';
   }
 }
+
+/**
+ * Get label position offset based on landmark type
+ * @param landmarkName The landmark name or abbreviation
+ * @returns Position offset object {x, y} 
+ */
+export function getLabelOffset(landmarkName: string): {x: number, y: number} {
+  const type = getLandmarkType(landmarkName);
+  
+  switch (type) {
+    case 'dental':
+      return { x: 24, y: 0 }; // Dental landmarks labels to the right
+    case 'soft':
+      return { x: -24, y: 0 }; // Soft tissue landmarks labels to the left
+    case 'skeletal':
+      return { x: 0, y: -24 }; // Skeletal landmarks labels above
+    default:
+      return { x: 0, y: 24 }; // Default labels below
+  }
+}
