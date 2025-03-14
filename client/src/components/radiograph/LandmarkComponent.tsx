@@ -4,6 +4,7 @@ import { displayLandmarkGroups } from './utils/landmarkGroups';
 import { LandmarkTooltip, LandmarkData } from './LandmarkTooltip';
 import { getLandmarkDescription } from '../../data/landmarkDescriptions';
 import { useIsMobile } from '../../hooks/use-mobile';
+import { getLandmarkColor, getAnatomicalRegion } from '../../utils/landmarkUtils';
 
 interface LandmarkComponentProps {
   landmarkData: {
@@ -25,46 +26,6 @@ const LandmarkComponent: React.FC<LandmarkComponentProps> = ({
   visibleLandmarkGroups,
 }) => {
   const isMobile = useIsMobile();
-
-  const getLandmarkColor = (landmark: string): string => {
-    if (
-      landmark.toLowerCase().includes('dental') ||
-      landmark.includes('1') ||
-      landmark.includes('6')
-    ) {
-      return '#22c55e'; // green for dental
-    } else if (
-      landmark.toLowerCase().includes('soft') ||
-      landmark === 'G' ||
-      landmark === 'Prn' ||
-      landmark === 'Subnasale' ||
-      landmark === 'Columella' ||
-      landmark.includes('Lip')
-    ) {
-      return '#3b82f6'; // blue for soft tissue
-    }
-    return '#ef4444'; // red for skeletal
-  };
-
-  const getAnatomicalRegion = (landmark: string): string => {
-    if (
-      landmark.toLowerCase().includes('dental') ||
-      landmark.includes('1') ||
-      landmark.includes('6')
-    ) {
-      return 'Dental';
-    } else if (
-      landmark.toLowerCase().includes('soft') ||
-      landmark === 'G' ||
-      landmark === 'Prn' ||
-      landmark === 'Subnasale' ||
-      landmark === 'Columella' ||
-      landmark.includes('Lip')
-    ) {
-      return 'Soft Tissue';
-    }
-    return 'Skeletal';
-  };
 
   // Create a landmark data object from a landmark point
   const createLandmarkData = (point: LandmarkPoint): LandmarkData => {
